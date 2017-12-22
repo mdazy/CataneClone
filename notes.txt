@@ -1,0 +1,21 @@
+Tuiles
+4 blés
+4 moutons
+4 forêts
+3 pierres
+3 argiles
+1 désert
+4 ports 3:1
+1 port 2:1 par matière
+
+95 cartes matière première, 19 de chaque
+
+25 cartes développement
+5 PV
+2 monopole
+2 construction de routes
+2 invention
+14 chevaliers
+
+Ordre des jetons
+5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11
