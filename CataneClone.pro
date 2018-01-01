@@ -1,4 +1,6 @@
 TEMPLATE= app
+DESTDIR = bin
+OBJECTS_DIR = obj
 
 QT += widgets
 
