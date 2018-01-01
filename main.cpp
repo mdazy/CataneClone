@@ -16,8 +16,10 @@ int main( int argc, char** argv ) {
     QApplication app( argc, argv );
     QMainWindow mainWindow;
 
+    srand( time( 0 ) );
+
     auto view = new View();
-    Board board( 7, 7 );
+    Board board;
     view->board_ = &board;
     
     auto mainW = new QWidget();

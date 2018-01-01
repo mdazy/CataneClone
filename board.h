@@ -19,7 +19,7 @@ public:
 
 class Board : public std::vector<std::vector<Hex>> {
 public:
-	Board( int height, int width );
+	Board();
 
 	int height() const;
 	int width() const;
