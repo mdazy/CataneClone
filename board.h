@@ -6,7 +6,7 @@
 
 class Hex {
 public:
-	enum Type { Invalid = -1, Water, Brick, Wood, Wheat, Sheep, Rock, nbTypes };
+	enum Type { Invalid = -1, Water, Brick, Wood, Wheat, Sheep, Rock, Desert, nbTypes };
    
 	Hex( Type type = Invalid );
 

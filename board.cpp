@@ -9,7 +9,7 @@ Hex::Hex( Type type ) : type_( type ), number_( -1 ) {
 
 
 const QColor& Hex::color() const {
-    static const QColor colors[ nbTypes ] = { Qt::blue, Qt::red, Qt::darkRed, Qt::yellow, Qt::green, Qt::gray };
+    static const QColor colors[ nbTypes ] = { Qt::blue, Qt::red, Qt::darkRed, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow };
     if( type_ < 0 ) {
     	return QColor();
     }
