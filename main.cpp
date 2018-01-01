@@ -1,4 +1,5 @@
 #include <QtWidgets/QApplication>
+#include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QPushButton>
 #include <QtWidgets/QVBoxLayout>
@@ -29,6 +30,9 @@ int main( int argc, char** argv ) {
     exitB->connect( exitB, SIGNAL( clicked() ), &app, SLOT( quit() ) );
     mainL->addWidget( exitB );
     
+    mainWindow.resize( 500, 500 );
+    auto desktop = app.desktop();
+    mainWindow.move( ( desktop->width() - 500 ) / 2, ( desktop->height() - 500 ) / 2 );
     mainWindow.show();
     return app.exec();
 }
