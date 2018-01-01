@@ -4,6 +4,6 @@ OBJECTS_DIR = obj
 
 QT += widgets
 
-SOURCES += main.cpp view.cpp
+SOURCES += main.cpp view.cpp board.cpp
 
-HEADERS += view.h
+HEADERS += view.h board.h
