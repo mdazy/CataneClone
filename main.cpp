@@ -16,13 +16,8 @@ int main( int argc, char** argv ) {
     QMainWindow mainWindow;
 
     auto view = new View();
-    vector<vector<int>> grid( 7, vector<int>( 7 ) );
-    for( int x = 0; x < 7; x++ ) {
-    	for( int y = 0; y < 7; y++ ) {
-    		grid[ y ][ x ] = 0; // invalid
-    	}
-    }
-    view->grid_ = &grid;
+    Board board( 7, 7 );
+    view->board_ = &board;
     
     auto mainW = new QWidget();
     mainWindow.setCentralWidget( mainW );

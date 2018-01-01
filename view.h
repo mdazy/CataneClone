@@ -2,7 +2,7 @@
 
 #include <QtWidgets/QWidget>
 
-#include <vector>
+#include "board.h"
 
 class QPaintEvent;
 
@@ -13,5 +13,5 @@ public:
 	void paintEvent( QPaintEvent* event ) override;
 
 public:
-	std::vector<std::vector<int>>* grid_;
+	Board* board_;
 };

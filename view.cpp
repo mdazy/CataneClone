@@ -11,15 +11,19 @@ using namespace std;
 const float degToRad = 3.1415926 / 180.0;
 
 
-View::View( QWidget* parent ) : QWidget( parent ) {
+View::View( QWidget* parent ) : QWidget( parent ), board_( 0 ) {
 }
 
 
-void View::paintEvent( QPaintEvent* ) {
+void View::paintEvent( QPaintEvent* event ) {
     QPainter p( this );
+    if( board_ == 0 ) {
+        QWidget::paintEvent( event );
+        return;
+    }
 
-    int gridWidth = (*grid_)[ 0 ].size();
-    int gridHeight = grid_->size();
+    int gridWidth = board_->width();
+    int gridHeight = board_->height();
 
     // determine best radius so that circle within grid is fully visible
     float hexHeight = height() / gridHeight;
@@ -36,15 +40,13 @@ void View::paintEvent( QPaintEvent* ) {
         hex << QPointF( radius * cos( i * 60 * degToRad ), radius * sin( i * 60 * degToRad ) );
     }
 
-    QBrush brushes[ 6 ] = { Qt::blue, Qt::red, Qt::yellow, Qt::green, Qt::darkRed, Qt::white };
-    
     for( int x = 0; x < gridWidth; x++ ) {
     	for( int y = 0; y < gridHeight; y++ ) {
-    		if( (*grid_)[ y ][ x ] < 0 ) {
+    		if( (*board_)[ y ][ x ].type_ == Hex::Invalid ) {
     			continue;
     		}
 
-    		p.setBrush( brushes[ (*grid_)[ y ][ x ] ] );
+    		p.setBrush( (*board_)[ y ][ x ].color() );
 
 
     		float tx = x - gridWidth / 2;
@@ -56,5 +58,6 @@ void View::paintEvent( QPaintEvent* ) {
 		    p.drawPolygon( hex.translated( QPointF( width() / 2 + ox * radius, height() / 2 + oy * hexHeight ) ) );
     	}
     }
-    
+
+    QWidget::paintEvent( event );
 }
