@@ -1,7 +1,5 @@
 #include "board.h"
 
-#include <tuple>
-
 using namespace std;
 
 
@@ -13,7 +11,7 @@ Hex::Hex( Type type ) : type_( type ), number_( -1 ) {
 
 
 const QColor& Hex::color() const {
-  static const QColor colors[ nbTypes ] = { Qt::blue, Qt::red, Qt::darkRed, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow };
+  static const QColor colors[ nbTypes ] = { Qt::blue, Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow };
   if( type_ < 0 ) {
   	return QColor();
   }
@@ -49,18 +47,27 @@ Board::Board() {
 	}
 	types.push_back( Hex::Water );
 
+	// standard numbering of land hexes
+	vector<int> numbers = { 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11 };
+
 	// map setup
-	vector<tuple<int, int, int>> setup = {
-		make_tuple( 0, 3, 19 ),make_tuple( 0, 4, 19 ),make_tuple( 0, 5, 19 ),make_tuple( 0, 6, 19 ),
-		make_tuple( 1, 2, 19 ), make_tuple( 1, 3, 0 ), make_tuple( 1, 4, 1 ), make_tuple( 1, 5, 2 ),make_tuple( 1, 6, 19 ),
-		make_tuple( 2, 1, 19 ), make_tuple( 2, 2, 3 ), make_tuple( 2, 3, 4 ), make_tuple( 2, 4, 5 ), make_tuple( 2, 5, 6 ),make_tuple( 2, 6, 19 ),
-		make_tuple( 3, 0, 19 ), make_tuple( 3, 1, 7 ), make_tuple( 3, 2, 8 ), make_tuple( 3, 3, 9 ), make_tuple( 3, 4, 10 ), make_tuple( 3, 5, 11 ),make_tuple( 3, 6, 19 ),
-		make_tuple( 4, 0, 19 ), make_tuple( 4, 1, 12 ), make_tuple( 4, 2, 13 ), make_tuple( 4, 3, 14 ), make_tuple( 4, 4, 15 ),make_tuple( 4, 5, 19 ),
-		make_tuple( 5, 0, 19 ), make_tuple( 5, 1, 16 ), make_tuple( 5, 2, 17 ), make_tuple( 5, 3, 18 ),make_tuple( 5, 4, 19 ),
-		make_tuple( 6, 0, 19 ),make_tuple( 6, 1, 19 ),make_tuple( 6, 2, 19 ),make_tuple( 6, 3, 19 )
+	vector<pair<int, int>> setup = {
+		// lan hexes, inward spiral (start at top, then counter clockwise) for
+		// placement of numbers
+		{ 3, 1 }, { 2, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 2, 5 },
+		{ 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 2 }, { 5, 1 }, { 4, 1 },
+		{ 3, 2 }, { 2, 3 }, { 2, 4 }, { 3, 4 }, { 4, 3 }, { 4, 2 }, { 3, 3 },
+		// water hexes
+		{ 0, 3 }, { 0, 4 }, { 0, 5 }, { 0, 6 }, { 1, 2 }, { 1, 6 },
+		{ 2, 1 }, { 2, 6 }, { 3, 0 }, { 3, 6 }, { 4, 0 }, { 4, 5 },
+		{ 5, 0 }, { 5, 4 }, { 6, 0 }, { 6, 1 }, { 6, 2 }, { 6, 3 }
 	};
+	int iType = 0;
+	int iNumber = 0;
 	for( const auto& s : setup ) {
-		at( get<1>( s ) )[ get<0>( s ) ].type_ = types[ get<2>( s ) ];
+		auto& hex = at( s.second )[ s.first ];
+		hex.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
+		hex.number_ = hex.type_ != Hex::Desert && hex.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
 	}
 
 }

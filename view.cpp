@@ -25,6 +25,7 @@ void View::paintEvent( QPaintEvent* event ) {
     int gridWidth = board_->width();
     int gridHeight = board_->height();
 
+    // TODO: use painter transformation instead
     // determine best radius so that circle within grid is fully visible
     float hexHeight = height() / gridHeight;
     float radiusFromHeight = hexHeight / 2 / sin( 60 * degToRad );
@@ -42,20 +43,34 @@ void View::paintEvent( QPaintEvent* event ) {
 
     for( int x = 0; x < gridWidth; x++ ) {
     	for( int y = 0; y < gridHeight; y++ ) {
-    		if( (*board_)[ y ][ x ].type_ == Hex::Invalid ) {
+            const auto& h = (*board_)[ y ][ x ];
+
+    		if( h.type_ == Hex::Invalid ) {
     			continue;
     		}
 
-    		p.setBrush( (*board_)[ y ][ x ].color() );
+    		p.setBrush( h.color() );
 
-
+            // shift coordinates so that 0,0 is the center of the map
     		float tx = x - gridWidth / 2;
     		float ty = y - gridHeight / 2;
+            // center of the hex
+            float ox = tx * 1.5; // 1 + cos(60°)
+            float oy = ty + tx / 2.0;
+            QPointF center( width() / 2 + ox * radius, height() / 2 + oy * hexHeight );
 
-    		float ox = tx * ( 1 + cos( 60 * degToRad ) );
-    		float oy = ty + tx / 2.0;
+		    p.drawPolygon( hex.translated( center ) );
 
-		    p.drawPolygon( hex.translated( QPointF( width() / 2 + ox * radius, height() / 2 + oy * hexHeight ) ) );
+            // draw number on land tiles
+            if( h.number_ < 0 ) {
+                continue;
+            }
+            auto prevPen = p.pen();
+            p.setPen( Qt::NoPen );
+            p.setBrush( Qt::white );
+            p.drawEllipse( center, radius / 2.5, radius / 2.5 );
+            p.setPen( prevPen );
+            p.drawText( center, QString::number( h.number_ ) );
     	}
     }
 
