@@ -36,7 +36,6 @@ void View::paintEvent( QPaintEvent* event ) {
 
     hexHeight = radius * 2 * sin( 60 * degToRad );
 
-
     QPolygonF hex;
     for( int i = 0; i < 6; i++ ) {
         hex << QPointF( radius * cos( i * 60 * degToRad ), radius * sin( i * 60 * degToRad ) );
@@ -57,7 +56,7 @@ void View::paintEvent( QPaintEvent* event ) {
     		float ty = y - gridHeight / 2;
             // center of the hex
             float ox = tx * 1.5; // 1 + cos(60°)
-            float oy = ty + tx / 2.0;
+            float oy = ty + tx / 2;
             QPointF center( width() / 2 + ox * radius, height() / 2 + oy * hexHeight );
 
 		    p.drawPolygon( hex.translated( center ) );
@@ -75,6 +74,9 @@ void View::paintEvent( QPaintEvent* event ) {
             // number centered in disc
             float half = radius * cos( 45 * degToRad );
             QRectF textBox( center.x() - half, center.y() - half, half * 2, half * 2 );
+            auto f = p.font();
+            f.setPixelSize( max( 6.0, textBox.height() / 2.5 ) );
+            p.setFont( f );
             p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
     	}
     }
