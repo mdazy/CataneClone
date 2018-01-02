@@ -41,6 +41,11 @@ void View::paintEvent( QPaintEvent* event ) {
         hex << QPointF( radius * cos( i * 60 * degToRad ), radius * sin( i * 60 * degToRad ) );
     }
 
+    float textSize = 2 * radius * cos( 45 * degToRad );
+    auto f = p.font();
+    f.setPixelSize( max( 6.0, textSize / 2.5 ) );
+    p.setFont( f );
+
     for( int x = 0; x < gridWidth; x++ ) {
     	for( int y = 0; y < gridHeight; y++ ) {
             const auto& h = (*board_)[ y ][ x ];
@@ -72,11 +77,7 @@ void View::paintEvent( QPaintEvent* event ) {
             p.drawEllipse( center, radius / 2.5, radius / 2.5 );
             p.setPen( prevPen );
             // number centered in disc
-            float half = radius * cos( 45 * degToRad );
-            QRectF textBox( center.x() - half, center.y() - half, half * 2, half * 2 );
-            auto f = p.font();
-            f.setPixelSize( max( 6.0, textBox.height() / 2.5 ) );
-            p.setFont( f );
+            QRectF textBox( center.x() - textSize / 2, center.y() - textSize / 2, textSize, textSize );
             p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
     	}
     }
