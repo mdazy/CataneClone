@@ -65,12 +65,16 @@ void View::paintEvent( QPaintEvent* event ) {
             if( h.number_ < 0 ) {
                 continue;
             }
+            // white disc centered inside hex
             auto prevPen = p.pen();
             p.setPen( Qt::NoPen );
             p.setBrush( Qt::white );
             p.drawEllipse( center, radius / 2.5, radius / 2.5 );
             p.setPen( prevPen );
-            p.drawText( center, QString::number( h.number_ ) );
+            // number centered in disc
+            float half = radius * cos( 45 * degToRad );
+            QRectF textBox( center.x() - half, center.y() - half, half * 2, half * 2 );
+            p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
     	}
     }
 
