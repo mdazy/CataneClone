@@ -12,6 +12,7 @@ const float degToRad = 3.1415926 / 180.0;
 
 
 View::View( QWidget* parent ) : QWidget( parent ), board_( 0 ) {
+    setMinimumSize( 500, 500 );
 }
 
 

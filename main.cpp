@@ -27,7 +27,6 @@ int main( int argc, char** argv ) {
     auto mainL = new QVBoxLayout( mainW );
     mainL->addWidget( view );
     
-    mainWindow.resize( 500, 500 );
     auto desktop = app.desktop();
     mainWindow.move( ( desktop->width() - 500 ) / 2, ( desktop->height() - 500 ) / 2 );
     mainWindow.show();
