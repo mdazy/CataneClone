@@ -37,6 +37,7 @@ Board::Board() {
 	};
 
 	// randomize
+	// TODO: factorize
 	int nbHexes = types.size();
 	for( int i = 0; i < 100; i++ ) {
 		int a = rand() % nbHexes;
@@ -45,15 +46,14 @@ Board::Board() {
 		types[ a ] = types[ b ];
 		types[ b ] = t;
 	}
-	types.push_back( Hex::Water );
 
 	// standard numbering of land hexes
 	vector<int> numbers = { 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11 };
 
 	// map setup
 	vector<pair<int, int>> setup = {
-		// lan hexes, inward spiral (start at top, then counter clockwise) for
-		// placement of numbers
+		// land hexes, ordered along inward spiral (counter clockwise, starting at top)
+		// for placement of numbers according to rules
 		{ 3, 1 }, { 2, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 2, 5 },
 		{ 3, 5 }, { 4, 4 }, { 5, 3 }, { 5, 2 }, { 5, 1 }, { 4, 1 },
 		{ 3, 2 }, { 2, 3 }, { 2, 4 }, { 3, 4 }, { 4, 3 }, { 4, 2 }, { 3, 3 },
@@ -69,7 +69,6 @@ Board::Board() {
 		hex.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
 		hex.number_ = hex.type_ != Hex::Desert && hex.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
 	}
-
 }
 
 
