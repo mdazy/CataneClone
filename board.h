@@ -6,7 +6,7 @@
 
 class Hex {
 public:
-	enum Type { Invalid = -1, Water, Brick, Wood, Wheat, Sheep, Rock, Desert, nbTypes };
+	enum Type { Invalid = -1, Brick, Wood, Wheat, Sheep, Rock, Desert, Water, nbTypes, Any };
    
 	Hex( Type type = Invalid );
 
@@ -15,6 +15,21 @@ public:
 public:
 	Type type_;
 	int number_;
+};
+
+
+/**/
+
+
+class Node {
+public:
+	enum Type { None = 0, Town, City };
+	Node();
+
+public:
+	int player_;
+	Type type_;
+	Hex::Type harborType_;
 };
 
 
@@ -30,4 +45,5 @@ public:
 
 public:
 	std::vector<std::vector<Hex>> hex_;
+	std::vector<std::vector<Node>> node_;
 };

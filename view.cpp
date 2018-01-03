@@ -56,6 +56,7 @@ void View::paintEvent( QPaintEvent* event ) {
     f.setPixelSize( max( 6.0, textSize / 2.5 ) );
     p.setFont( f );
 
+    // hexes
     for( int x = 0; x < gridWidth; x++ ) {
     	for( int y = 0; y < gridHeight; y++ ) {
             const auto& h = board_->hex_[ y ][ x ];
@@ -74,7 +75,27 @@ void View::paintEvent( QPaintEvent* event ) {
             float oy = ty + tx / 2;
             QPointF center( width() / 2 + ox * radius, height() / 2 + oy * 2 * innerRadius );
 
-		    p.drawConvexPolygon( hex.translated( center ) );
+            auto curHex = hex.translated( center );
+		    p.drawConvexPolygon( curHex );
+
+            // draw nodes
+            //int nx[ 6 ] = { x + 1, x + 1, x, x, x, x + 1 };
+            //int ny[ 6 ] = { 2 * y + x + 1, 2 * y + x, 2 * y + x , 2 * y + x + 1, 2 * y + x + 2, 2 * y + x + 2 };
+            for( int i = 0; i < 6; i++ ) {
+                p.setBrush( Qt::white );
+                p.setPen( Qt::black );
+                p.drawEllipse( curHex[ i ], radius * 0.2, radius * 0.2 );
+                if( ( curHex[ i ].x() - mouseX_ ) * ( curHex[ i ].x() - mouseX_ ) + ( curHex[ i ].y() - mouseY_ ) * ( curHex[ i ].y() - mouseY_ ) < radius * 0.2 * radius * 0.2 ) {
+                    p.setBrush( Qt::NoBrush );
+                    auto prevPen = p.pen();
+                    QPen pen( Qt::red );
+                    pen.setWidth( 2 );
+                    p.setPen( pen );
+                    p.drawEllipse( curHex[ i ], radius * 0.1, radius * 0.1 );
+                    p.setPen( prevPen );
+                }
+
+            }
 
             // highlight hex under mouse
             if( ( center.x() - mouseX_ ) * ( center.x() - mouseX_ ) + ( center.y() - mouseY_ ) * ( center.y() - mouseY_ ) < innerRadius * innerRadius ) {

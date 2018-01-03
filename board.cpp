@@ -11,11 +11,18 @@ Hex::Hex( Type type ) : type_( type ), number_( -1 ) {
 
 
 const QColor& Hex::color() const {
-  static const QColor colors[ nbTypes ] = { Qt::blue, Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow };
-  if( type_ < 0 ) {
-  	return QColor();
-  }
-  return colors[ type_ ];
+	static const QColor colors[ nbTypes ] = { Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow, Qt::blue };
+  	if( type_ < 0 ) {
+  		return colors[ 0 ];
+  	}
+  	return colors[ type_ ];
+}
+
+
+/**/
+
+
+Node::Node() : player_( -1 ), type_( None ), harborType_( Hex::Invalid ) {
 }
 
 
@@ -25,6 +32,7 @@ const QColor& Hex::color() const {
 Board::Board() {
 	// standard map is 7 by 7
 	hex_.resize( 7, vector<Hex>( 7 ) );
+	node_.resize( height() * 2 + width() + 2, vector<Node>( width() + 1 ) );
 
 	// standard repartition of hexes
 	vector<Hex::Type> types = {
@@ -62,8 +70,8 @@ Board::Board() {
 		{ 2, 1 }, { 2, 6 }, { 3, 0 }, { 3, 6 }, { 4, 0 }, { 4, 5 },
 		{ 5, 0 }, { 5, 4 }, { 6, 0 }, { 6, 1 }, { 6, 2 }, { 6, 3 }
 	};
-	int iType = 0;
-	int iNumber = 0;
+	unsigned int iType = 0;
+	unsigned int iNumber = 0;
 	for( const auto& s : setup ) {
 		auto& h = hex_[ s.second ][ s.first ];
 		h.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
