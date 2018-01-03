@@ -65,8 +65,6 @@ void View::paintEvent( QPaintEvent* event ) {
     			continue;
     		}
 
-    		p.setBrush( h.color() );
-
             // shift coordinates so that 0,0 is the center of the map
     		float tx = x - gridWidth / 2;
     		float ty = y - gridHeight / 2;
@@ -76,36 +74,59 @@ void View::paintEvent( QPaintEvent* event ) {
             QPointF center( width() / 2 + ox * radius, height() / 2 + oy * 2 * innerRadius );
 
             auto curHex = hex.translated( center );
+            p.setBrush( h.color() );
+            p.setPen( Qt::black );
 		    p.drawConvexPolygon( curHex );
 
             // draw nodes
-            //int nx[ 6 ] = { x + 1, x + 1, x, x, x, x + 1 };
-            //int ny[ 6 ] = { 2 * y + x + 1, 2 * y + x, 2 * y + x , 2 * y + x + 1, 2 * y + x + 2, 2 * y + x + 2 };
+            int nx[ 6 ] = { x + 1, x + 1, x, x, x, x + 1 };
+            int ny[ 6 ] = { 2 * y + x + 1, 2 * y + x, 2 * y + x , 2 * y + x + 1, 2 * y + x + 2, 2 * y + x + 2 };
             for( int i = 0; i < 6; i++ ) {
-                p.setBrush( Qt::white );
-                p.setPen( Qt::black );
-                p.drawEllipse( curHex[ i ], radius * 0.2, radius * 0.2 );
+                // node
+                cerr << nx[ i ] << " " << ny[ i ] << " - " ;
+                const auto& n = board_->node_[ ny[ i ] ][ nx[ i ] ];
+                if( n.harborType_ != Hex::Invalid ) {
+                    // TODO: draw harbor
+                }
+                if( n.type_ != Node::None ) {
+                    QPolygonF curNode;
+                    if( n.type_ == Node::Town ) {
+                        curNode << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x(), curHex[ i ].y() - 2 * radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() + radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() + radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) );
+                    } else {
+                        curNode << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x(), curHex[ i ].y() - 2 * radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() + radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() + 3 * radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() + 3 * radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) )
+                            << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) );
+                    }
+                    p.setBrush( Qt::white ); // TODO: player color
+                    p.setPen( Qt::black );
+                    p.drawPolygon( curNode );
+                }
+
+                // highlight node under mouse
                 if( ( curHex[ i ].x() - mouseX_ ) * ( curHex[ i ].x() - mouseX_ ) + ( curHex[ i ].y() - mouseY_ ) * ( curHex[ i ].y() - mouseY_ ) < radius * 0.2 * radius * 0.2 ) {
                     p.setBrush( Qt::NoBrush );
-                    auto prevPen = p.pen();
                     QPen pen( Qt::red );
                     pen.setWidth( 2 );
                     p.setPen( pen );
                     p.drawEllipse( curHex[ i ], radius * 0.1, radius * 0.1 );
-                    p.setPen( prevPen );
                 }
-
             }
+            cerr << endl;
 
             // highlight hex under mouse
             if( ( center.x() - mouseX_ ) * ( center.x() - mouseX_ ) + ( center.y() - mouseY_ ) * ( center.y() - mouseY_ ) < innerRadius * innerRadius ) {
                 p.setBrush( Qt::NoBrush );
-                auto prevPen = p.pen();
                 QPen pen( h.color() == Qt::red ? Qt::black : Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( center, innerRadius * 0.85, innerRadius * 0.85 );
-                p.setPen( prevPen );
             }
 
             // draw number on land tiles
@@ -113,13 +134,12 @@ void View::paintEvent( QPaintEvent* event ) {
                 continue;
             }
             // white disc centered inside hex
-            auto prevPen = p.pen();
             p.setPen( Qt::NoPen );
             p.setBrush( Qt::white );
             p.drawEllipse( center, radius / 2.5, radius / 2.5 );
-            p.setPen( prevPen );
             // number centered in disc
             QRectF textBox( center.x() - textSize / 2, center.y() - textSize / 2, textSize, textSize );
+            p.setPen( Qt::black );
             p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
     	}
     }

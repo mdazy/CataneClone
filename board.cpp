@@ -34,6 +34,13 @@ Board::Board() {
 	hex_.resize( 7, vector<Hex>( 7 ) );
 	node_.resize( height() * 2 + width() + 2, vector<Node>( width() + 1 ) );
 
+	for( auto& r : node_ ) {
+		for( auto& n : r ) {
+			n.type_ = Node::Type( rand() % 3 );
+			n.player_ = rand() % 4;
+		}
+	}
+
 	// standard repartition of hexes
 	vector<Hex::Type> types = {
 		Hex::Wheat, Hex::Wheat, Hex::Wheat, Hex::Wheat,
