@@ -17,10 +17,17 @@ public:
 	int number_;
 };
 
-class Board : public std::vector<std::vector<Hex>> {
+
+/**/
+
+
+class Board {
 public:
 	Board();
 
 	int height() const;
 	int width() const;
+
+public:
+	std::vector<std::vector<Hex>> hex_;
 };

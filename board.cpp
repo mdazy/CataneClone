@@ -24,7 +24,7 @@ const QColor& Hex::color() const {
 
 Board::Board() {
 	// standard map is 7 by 7
-	resize( 7, vector<Hex>( 7 ) );
+	hex_.resize( 7, vector<Hex>( 7 ) );
 
 	// standard repartition of hexes
 	vector<Hex::Type> types = {
@@ -65,15 +65,15 @@ Board::Board() {
 	int iType = 0;
 	int iNumber = 0;
 	for( const auto& s : setup ) {
-		auto& hex = at( s.second )[ s.first ];
-		hex.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
-		hex.number_ = hex.type_ != Hex::Desert && hex.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
+		auto& h = hex_[ s.second ][ s.first ];
+		h.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
+		h.number_ = h.type_ != Hex::Desert && h.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
 	}
 }
 
 
 int Board::height() const {
-	return size();
+	return hex_.size();
 }
 
 
@@ -81,5 +81,5 @@ int Board::width() const {
 	if( height() == 0 ) {
 		return 0;
 	}
-	return at( 0 ).size();
+	return hex_[ 0 ].size();
 }

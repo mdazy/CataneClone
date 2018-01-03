@@ -58,7 +58,7 @@ void View::paintEvent( QPaintEvent* event ) {
 
     for( int x = 0; x < gridWidth; x++ ) {
     	for( int y = 0; y < gridHeight; y++ ) {
-            const auto& h = (*board_)[ y ][ x ];
+            const auto& h = board_->hex_[ y ][ x ];
 
     		if( h.type_ == Hex::Invalid ) {
     			continue;
@@ -77,14 +77,13 @@ void View::paintEvent( QPaintEvent* event ) {
 		    p.drawConvexPolygon( hex.translated( center ) );
 
             // highlight hex under mouse
-            float selectionRadius = innerRadius * 0.85;
-            if( ( center.x() - mouseX_ ) * ( center.x() - mouseX_ ) + ( center.y() - mouseY_ ) * ( center.y() - mouseY_ ) < selectionRadius * selectionRadius ) {
+            if( ( center.x() - mouseX_ ) * ( center.x() - mouseX_ ) + ( center.y() - mouseY_ ) * ( center.y() - mouseY_ ) < innerRadius * innerRadius ) {
                 p.setBrush( Qt::NoBrush );
                 auto prevPen = p.pen();
                 QPen pen( h.color() == Qt::red ? Qt::black : Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
-                p.drawEllipse( center, selectionRadius, selectionRadius );
+                p.drawEllipse( center, innerRadius * 0.85, innerRadius * 0.85 );
                 p.setPen( prevPen );
             }
 
