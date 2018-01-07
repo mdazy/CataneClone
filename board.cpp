@@ -10,15 +10,6 @@ Hex::Hex( Type type ) : type_( type ), number_( -1 ) {
 }
 
 
-const QColor& Hex::color() const {
-	static const QColor colors[ nbTypes ] = { Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow, Qt::blue };
-  	if( type_ < 0 ) {
-  		return colors[ 0 ];
-  	}
-  	return colors[ type_ ];
-}
-
-
 /**/
 
 
@@ -88,29 +79,30 @@ Board::Board() {
 	// random nodes for display test purposes
 	for( auto& r : node_ ) {
 		for( auto& n : r ) {
-			n.type_ = Node::Type( rand() % 3 );
+			n.type_ = rand() % 5 == 0 ? Node::Type( rand() % 3 ) : Node::None;
 			n.player_ = rand() % 4;
+			n.harborType_ = rand() % 10 == 0 ? Hex::Type( rand() % Hex::Water ) : Hex::Invalid;
 		}
 	}
 
 	// harcoded roads for display test purposes
 	Road r;
 	r.fromX_ = 4;
-	r.fromY_ = 4;
+	r.fromY_ = 6;
 
 	r.player_ = rand() % 4;
 	r.toX_ = 5;
-	r.toY_ = 4;
+	r.toY_ = 6;
+	road_.push_back( r );
+
+	r.player_ = rand() % 4;
+	r.toX_ = 4;
+	r.toY_ = 7;
 	road_.push_back( r );
 
 	r.player_ = rand() % 4;
 	r.toX_ = 4;
 	r.toY_ = 5;
-	road_.push_back( r );
-
-	r.player_ = rand() % 4;
-	r.toX_ = 4;
-	r.toY_ = 3;
 	road_.push_back( r );
 }
 

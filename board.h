@@ -10,8 +10,6 @@ public:
    
 	Hex( Type type = Invalid );
 
-	const QColor& color() const;
-
 public:
 	Type type_;
 	int number_;

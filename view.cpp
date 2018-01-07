@@ -11,6 +11,7 @@ using namespace std;
 
 const float degToRad = 3.1415926 / 180.0;
 const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127, 0.0 ) };
+const QColor tileColor[ Hex::nbTypes ] = { Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow, Qt::blue };
 
 
 View::View( QWidget* parent ) : QWidget( parent ), board_( 0 ), mouseX_( 0 ), mouseY_( 0 ) {
@@ -73,7 +74,7 @@ void View::drawHexes( QPainter& p, Hex::Type type ) const {
             QPointF hexCenter( radius_ * ( 1 + hx * 1.5 ) + centerShiftX_, innerRadius_ * ( 1 + hy * 2 + hx ) + centerShiftY_ );
 
             auto curHex = hex.translated( hexCenter );
-            p.setBrush( h.color() );
+            p.setBrush( h.type_ >= 0 ? tileColor[ h.type_ ] : QColor() );
             QPen pen( Qt::black );
             pen.setWidth( 2 );
             p.setPen( pen );
@@ -82,7 +83,7 @@ void View::drawHexes( QPainter& p, Hex::Type type ) const {
             // highlight hex under mouse
             if( dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_ ) {
                 p.setBrush( Qt::NoBrush );
-                QPen pen( h.color() == Qt::red ? Qt::black : Qt::red );
+                QPen pen( h.type_ == Hex::Brick ? Qt::black : Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( hexCenter, innerRadius_ * 0.85, innerRadius_ * 0.85 );
@@ -114,7 +115,11 @@ void View::drawNodes( QPainter& p, bool drawHarbors ) const {
             QPointF nc = nodeCenter( nx, ny );
             if( drawHarbors ) {
                 if( n.harborType_ != Hex::Invalid ) {
-                    // TODO: draw harbor
+                    p.setBrush( tileColor[ n.harborType_ ] );
+                    QPen pen( Qt::black );
+                    pen.setWidth( 2 );
+                    p.setPen( pen );
+                    p.drawEllipse( nc, radius_ * 0.6, radius_ * 0.6 );
                 }
             } else if( n.type_ != Node::None ) {
                 QPolygonF curNode;
@@ -211,8 +216,8 @@ void View::paintEvent( QPaintEvent* event ) {
     // layers in order
     drawHexes( p, Hex::Water );
     drawNodes( p, true ); // harbors
-    drawRoads( p );
     drawHexes( p ); // land hexes
+    drawRoads( p );
     drawNodes( p ); // land nodes
 
     QWidget::paintEvent( event );
