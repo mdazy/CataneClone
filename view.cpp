@@ -106,6 +106,8 @@ void View::paintEvent( QPaintEvent* event ) {
     	}
     }
 
+    const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, Qt::white };
+
     // nodes
     float nodeRadius = radius * 0.2;
     float nodeDiag = nodeRadius * cos( 45 * degToRad );
@@ -146,7 +148,7 @@ void View::paintEvent( QPaintEvent* event ) {
                         << QPointF( nodeCenter.x() + 3 * nodeDiag, nodeCenter.y() + nodeDiag )
                         << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() + nodeDiag );
                 }
-                p.setBrush( Qt::white ); // TODO: player color
+                p.setBrush( playerColor[ n.player_ ] );
                 p.setPen( Qt::black );
                 p.drawPolygon( curNode );
             }
