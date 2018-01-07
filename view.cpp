@@ -10,6 +10,7 @@
 using namespace std;
 
 const float degToRad = 3.1415926 / 180.0;
+const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127, 0.0 ) };
 
 
 View::View( QWidget* parent ) : QWidget( parent ), board_( 0 ), mouseX_( 0 ), mouseY_( 0 ) {
@@ -32,7 +33,7 @@ float dist( float ax, float ay, float bx, float by ) {
 }
 
 
-QPointF nodeCenter( unsigned int nx, unsigned int ny, float radius, float innerRadius, float centerShiftX, float centerShiftY, float verticalShift ) {
+QPointF View::nodeCenter( unsigned int nx, unsigned int ny ) const {
     int hx = 0;
     int hy = 0;
     int rad = 0;
@@ -45,7 +46,128 @@ QPointF nodeCenter( unsigned int nx, unsigned int ny, float radius, float innerR
         hy = ( ny - nx - 1 ) / 2;
         rad = -1;
     }
-    return QPointF( radius * ( 1 + hx * 1.5 + rad ) + centerShiftX, innerRadius * ( 1 + hy * 2 + hx - verticalShift ) + centerShiftY );
+    return QPointF( radius_ * ( 1 + hx * 1.5 + rad ) + centerShiftX_, innerRadius_ * ( 1 + hy * 2 + hx ) + centerShiftY_ );
+}
+
+
+// draws valid hexes of the given type
+// if type is Hex::Any, then only land hexes are drawn
+void View::drawHexes( QPainter& p, Hex::Type type ) const {
+    QPolygonF hex;
+    for( int i = 0; i < 6; i++ ) {
+        hex << QPointF( radius_ * cos( i * 60 * degToRad ), radius_ * sin( i * 60 * degToRad ) );
+    }
+
+    for( unsigned int hx = 0; hx < board_->hexWidth(); hx++ ) {
+        for( unsigned int hy = 0; hy < board_->hexHeight(); hy++ ) {
+            const auto& h = board_->hex_[ hy ][ hx ];
+
+            if(
+                ( type == Hex::Any && ( h.type_ == Hex::Invalid || h.type_ == Hex::Water ) ) ||
+                ( type != Hex::Any && h.type_ != type )
+            ) {
+                continue;
+            }
+
+            // center of the hex
+            QPointF hexCenter( radius_ * ( 1 + hx * 1.5 ) + centerShiftX_, innerRadius_ * ( 1 + hy * 2 + hx ) + centerShiftY_ );
+
+            auto curHex = hex.translated( hexCenter );
+            p.setBrush( h.color() );
+            QPen pen( Qt::black );
+            pen.setWidth( 2 );
+            p.setPen( pen );
+            p.drawConvexPolygon( curHex );
+
+            // highlight hex under mouse
+            if( dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_ ) {
+                p.setBrush( Qt::NoBrush );
+                QPen pen( h.color() == Qt::red ? Qt::black : Qt::red );
+                pen.setWidth( 2 );
+                p.setPen( pen );
+                p.drawEllipse( hexCenter, innerRadius_ * 0.85, innerRadius_ * 0.85 );
+            }
+
+            // draw number on land tiles
+            if( h.number_ < 0 ) {
+                continue;
+            }
+            // white disc centered inside hex
+            p.setPen( Qt::NoPen );
+            p.setBrush( Qt::white );
+            p.drawEllipse( hexCenter, radius_ / 2.5, radius_ / 2.5 );
+            // number centered in disc
+            QRectF textBox( hexCenter.x() - textSize_ / 2, hexCenter.y() - textSize_ / 2, textSize_, textSize_ );
+            p.setPen( Qt::black );
+            p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
+        }
+    }
+}
+
+
+// draws nodes
+// if drawHarbors is true, only harbors are drawn, otherwise only towns and cities are drawn
+void View::drawNodes( QPainter& p, bool drawHarbors ) const {
+    for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
+        for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
+            const auto& n = board_->node_[ ny ][ nx ];
+            QPointF nc = nodeCenter( nx, ny );
+            if( drawHarbors ) {
+                if( n.harborType_ != Hex::Invalid ) {
+                    // TODO: draw harbor
+                }
+            } else if( n.type_ != Node::None ) {
+                QPolygonF curNode;
+                if( n.type_ == Node::Town ) {
+                    curNode << QPointF( nc.x() - nodeDiag_, nc.y() - nodeDiag_ )
+                        << QPointF( nc.x(), nc.y() - 2 * nodeDiag_ )
+                        << QPointF( nc.x() + nodeDiag_, nc.y() - nodeDiag_ )
+                        << QPointF( nc.x() + nodeDiag_, nc.y() + nodeDiag_ )
+                        << QPointF( nc.x() - nodeDiag_, nc.y() + nodeDiag_ );
+                } else {
+                    curNode << QPointF( nc.x() - 2 * nodeDiag_, nc.y() - nodeDiag_ )
+                        << QPointF( nc.x() - nodeDiag_, nc.y() - 2 * nodeDiag_ )
+                        << QPointF( nc.x(), nc.y() - nodeDiag_ )
+                        << QPointF( nc.x() + 2 * nodeDiag_, nc.y() - nodeDiag_ )
+                        << QPointF( nc.x() + 2 * nodeDiag_, nc.y() + nodeDiag_ )
+                        << QPointF( nc.x() - 2 * nodeDiag_, nc.y() + nodeDiag_ );
+                }
+                p.setBrush( playerColor[ n.player_ ] );
+                QPen pen( Qt::black );
+                pen.setWidth( 2 );
+                p.setPen( pen );
+                p.drawPolygon( curNode );
+            }
+     
+            // highlight node under mouse
+            if( dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius_ ) {
+                p.setBrush( Qt::NoBrush );
+                QPen pen( Qt::red );
+                pen.setWidth( 2 );
+                p.setPen( pen );
+                p.drawEllipse( nc, nodeRadius_ * 0.5, nodeRadius_ * 0.5 );
+            }
+        }
+    }
+}
+
+
+// draws roads
+void View::drawRoads( QPainter& p ) const {
+    for( const auto& r : board_->road_ ) {
+        QPointF from = nodeCenter( r.fromX_, r.fromY_);
+        QPointF to = nodeCenter( r.toX_, r.toY_ );
+        QPen pen( Qt::black );
+        pen.setWidth( radius_ * 0.23 );
+        p.setPen( pen );
+        p.drawLine( from, to );
+        pen = QPen( playerColor[ r.player_ ] );
+        pen.setWidth( radius_ * 0.16 );
+        p.setPen( pen );
+        p.drawLine( from, to );
+
+        // TODO: highlight selection
+    }    
 }
 
 
@@ -65,134 +187,33 @@ void View::paintEvent( QPaintEvent* event ) {
     // determine best radius to view full grid
     float radiusFromHeight = height() / totalHeight / sin( 60 * degToRad );
     float radiusFromWidth = width() / ( 1 + board_->hexWidth() * 1.5 );
-    float radius = min( radiusFromWidth, radiusFromHeight );
-    float innerRadius = radius * sin( 60 * degToRad );
+    radius_ = min( radiusFromWidth, radiusFromHeight );
+    innerRadius_ = radius_ * sin( 60 * degToRad );
 
     // shifts to center display
-    float centerShiftX = ( width() - radius * ( 1 + board_->hexWidth() * 1.5 ) ) / 2;
-    float centerShiftY = ( height() - innerRadius * totalHeight ) / 2;
+    centerShiftX_ = ( width() - radius_ * ( 1 + board_->hexWidth() * 1.5 ) ) / 2;
+    centerShiftY_ = ( height() - innerRadius_ * totalHeight ) / 2 - verticalShift * innerRadius_;
 
-    QPolygonF hex;
-    for( int i = 0; i < 6; i++ ) {
-        hex << QPointF( radius * cos( i * 60 * degToRad ), radius * sin( i * 60 * degToRad ) );
-    }
+    // node dimensions
+    nodeRadius_ = radius_ * 0.2;
+    nodeDiag_ = nodeRadius_ * cos( 45 * degToRad );
 
     QPainter p( this );
     p.setRenderHint( QPainter::Antialiasing );
     p.setRenderHint( QPainter::TextAntialiasing );
 
     // font scaling
-    float textSize = 2 * radius * cos( 45 * degToRad );
+    textSize_ = 2 * radius_ * cos( 45 * degToRad );
     auto f = p.font();
-    f.setPixelSize( max( 6.0, textSize / 2.5 ) );
+    f.setPixelSize( max( 6.0, textSize_ / 2.5 ) );
     p.setFont( f );
 
-    // hexes
-    for( unsigned int hx = 0; hx < board_->hexWidth(); hx++ ) {
-    	for( unsigned int hy = 0; hy < board_->hexHeight(); hy++ ) {
-            const auto& h = board_->hex_[ hy ][ hx ];
-
-    		if( h.type_ == Hex::Invalid ) {
-    			continue;
-    		}
-
-            // center of the hex
-            QPointF hexCenter( radius * ( 1 + hx * 1.5 ) + centerShiftX, innerRadius * ( 1 + hy * 2 + hx - verticalShift ) + centerShiftY );
-
-            auto curHex = hex.translated( hexCenter );
-            p.setBrush( h.color() );
-            QPen pen( Qt::black );
-            pen.setWidth( 2 );
-            p.setPen( pen );
-		    p.drawConvexPolygon( curHex );
-
-            // highlight hex under mouse
-            if( dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius ) {
-                p.setBrush( Qt::NoBrush );
-                QPen pen( h.color() == Qt::red ? Qt::black : Qt::red );
-                pen.setWidth( 2 );
-                p.setPen( pen );
-                p.drawEllipse( hexCenter, innerRadius * 0.85, innerRadius * 0.85 );
-            }
-
-            // draw number on land tiles
-            if( h.number_ < 0 ) {
-                continue;
-            }
-            // white disc centered inside hex
-            p.setPen( Qt::NoPen );
-            p.setBrush( Qt::white );
-            p.drawEllipse( hexCenter, radius / 2.5, radius / 2.5 );
-            // number centered in disc
-            QRectF textBox( hexCenter.x() - textSize / 2, hexCenter.y() - textSize / 2, textSize, textSize );
-            p.setPen( Qt::black );
-            p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
-    	}
-    }
-
-    const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127, 0.0 ) };
-
-    // roads
-    for( const auto& r : board_->road_ ) {
-        QPointF from = nodeCenter( r.fromX_, r.fromY_, radius, innerRadius, centerShiftX, centerShiftY, verticalShift );
-        QPointF to = nodeCenter( r.toX_, r.toY_, radius, innerRadius, centerShiftX, centerShiftY, verticalShift );
-        QPen pen( Qt::black );
-        pen.setWidth( radius * 0.23 );
-        p.setPen( pen );
-        p.drawLine( from, to );
-        pen = QPen( playerColor[ r.player_ ] );
-        pen.setWidth( radius * 0.16 );
-        p.setPen( pen );
-        p.drawLine( from, to );
-
-        // TODO: highlight selection
-    }
-
-    // nodes
-    float nodeRadius = radius * 0.2;
-    float nodeDiag = nodeRadius * cos( 45 * degToRad );
-    for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
-        for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
-            const auto& n = board_->node_[ ny ][ nx ];
-            if( n.harborType_ != Hex::Invalid ) {
-                // TODO: draw harbor
-            }
-
-            QPointF nc = nodeCenter( nx, ny, radius, innerRadius, centerShiftX, centerShiftY, verticalShift );
-
-            if( n.type_ != Node::None ) {
-                QPolygonF curNode;
-                if( n.type_ == Node::Town ) {
-                    curNode << QPointF( nc.x() - nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x(), nc.y() - 2 * nodeDiag )
-                        << QPointF( nc.x() + nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x() + nodeDiag, nc.y() + nodeDiag )
-                        << QPointF( nc.x() - nodeDiag, nc.y() + nodeDiag );
-                } else {
-                    curNode << QPointF( nc.x() - 2 * nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x() - nodeDiag, nc.y() - 2 * nodeDiag )
-                        << QPointF( nc.x(), nc.y() - nodeDiag )
-                        << QPointF( nc.x() + 2 * nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x() + 2 * nodeDiag, nc.y() + nodeDiag )
-                        << QPointF( nc.x() - 2 * nodeDiag, nc.y() + nodeDiag );
-                }
-                p.setBrush( playerColor[ n.player_ ] );
-                QPen pen( Qt::black );
-                pen.setWidth( 2 );
-                p.setPen( pen );
-                p.drawPolygon( curNode );
-            }
-
-            // highlight node under mouse
-            if( dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius ) {
-                p.setBrush( Qt::NoBrush );
-                QPen pen( Qt::red );
-                pen.setWidth( 2 );
-                p.setPen( pen );
-                p.drawEllipse( nc, nodeRadius * 0.5, nodeRadius * 0.5 );
-            }
-        }
-    }
+    // layers in order
+    drawHexes( p, Hex::Water );
+    drawNodes( p, true ); // harbors
+    drawRoads( p );
+    drawHexes( p ); // land hexes
+    drawNodes( p ); // land nodes
 
     QWidget::paintEvent( event );
 }
