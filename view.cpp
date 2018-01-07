@@ -144,6 +144,8 @@ void View::paintEvent( QPaintEvent* event ) {
         pen.setWidth( radius * 0.16 );
         p.setPen( pen );
         p.drawLine( from, to );
+
+        // TODO: highlight selection
     }
 
     // nodes
@@ -167,12 +169,12 @@ void View::paintEvent( QPaintEvent* event ) {
                         << QPointF( nc.x() + nodeDiag, nc.y() + nodeDiag )
                         << QPointF( nc.x() - nodeDiag, nc.y() + nodeDiag );
                 } else {
-                    curNode << QPointF( nc.x() - nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x(), nc.y() - 2 * nodeDiag )
-                        << QPointF( nc.x() + nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x() + 3 * nodeDiag, nc.y() - nodeDiag )
-                        << QPointF( nc.x() + 3 * nodeDiag, nc.y() + nodeDiag )
-                        << QPointF( nc.x() - nodeDiag, nc.y() + nodeDiag );
+                    curNode << QPointF( nc.x() - 2 * nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x() - nodeDiag, nc.y() - 2 * nodeDiag )
+                        << QPointF( nc.x(), nc.y() - nodeDiag )
+                        << QPointF( nc.x() + 2 * nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x() + 2 * nodeDiag, nc.y() + nodeDiag )
+                        << QPointF( nc.x() - 2 * nodeDiag, nc.y() + nodeDiag );
                 }
                 p.setBrush( playerColor[ n.player_ ] );
                 QPen pen( Qt::black );
