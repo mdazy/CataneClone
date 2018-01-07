@@ -79,7 +79,9 @@ void View::paintEvent( QPaintEvent* event ) {
 
             auto curHex = hex.translated( hexCenter );
             p.setBrush( h.color() );
-            p.setPen( Qt::black );
+            QPen pen( Qt::black );
+            pen.setWidth( 2 );
+            p.setPen( pen );
 		    p.drawConvexPolygon( curHex );
 
             // highlight hex under mouse
@@ -149,7 +151,9 @@ void View::paintEvent( QPaintEvent* event ) {
                         << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() + nodeDiag );
                 }
                 p.setBrush( playerColor[ n.player_ ] );
-                p.setPen( Qt::black );
+                QPen pen( Qt::black );
+                pen.setWidth( 2 );
+                p.setPen( pen );
                 p.drawPolygon( curNode );
             }
 
