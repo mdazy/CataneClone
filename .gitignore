@@ -1,0 +1,5 @@
+.qmake.stash
+Makefile
+bin
+obj
+qtenv.sh
