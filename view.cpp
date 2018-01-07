@@ -110,7 +110,7 @@ void View::paintEvent( QPaintEvent* event ) {
     	}
     }
 
-    const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, Qt::white };
+    const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127, 0.0 ) };
 
     // nodes
     float nodeRadius = radius * 0.2;
