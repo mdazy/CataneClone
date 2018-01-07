@@ -36,6 +36,22 @@ public:
 /**/
 
 
+class Road {
+public:
+	Road();
+
+public:
+	int player_;
+	unsigned int fromX_;
+	unsigned int fromY_;
+	unsigned int toX_;
+	unsigned int toY_;
+};
+
+
+/**/
+
+
 class Board {
 public:
 	Board();
@@ -52,4 +68,5 @@ public:
 public:
 	std::vector<std::vector<Hex>> hex_;
 	std::vector<std::vector<Node>> node_;
+	std::vector<Road> road_;
 };

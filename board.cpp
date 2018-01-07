@@ -29,6 +29,13 @@ Node::Node() : player_( -1 ), type_( None ), harborType_( Hex::Invalid ) {
 /**/
 
 
+Road::Road() : player_( -1 ), fromX_( 0 ), fromY_( 0 ), toX_( 0 ), toY_( 0 ) {
+}
+
+
+/**/
+
+
 Board::Board() {
 	// standard map is 7 by 7
 	hex_.resize( 7, vector<Hex>( 7 ) );
@@ -85,6 +92,26 @@ Board::Board() {
 			n.player_ = rand() % 4;
 		}
 	}
+
+	// harcoded roads for display test purposes
+	Road r;
+	r.fromX_ = 4;
+	r.fromY_ = 4;
+
+	r.player_ = rand() % 4;
+	r.toX_ = 5;
+	r.toY_ = 4;
+	road_.push_back( r );
+
+	r.player_ = rand() % 4;
+	r.toX_ = 4;
+	r.toY_ = 5;
+	road_.push_back( r );
+
+	r.player_ = rand() % 4;
+	r.toX_ = 4;
+	r.toY_ = 3;
+	road_.push_back( r );
 }
 
 
