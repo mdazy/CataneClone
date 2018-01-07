@@ -40,8 +40,14 @@ class Board {
 public:
 	Board();
 
-	int height() const;
-	int width() const;
+	unsigned int hexHeight() const;
+	unsigned int hexWidth() const;
+
+	unsigned int nodeHeight() const;
+	unsigned int nodeWidth() const;
+
+	unsigned int minHeight() const;
+	unsigned int maxHeight() const;
 
 public:
 	std::vector<std::vector<Hex>> hex_;

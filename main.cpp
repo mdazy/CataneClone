@@ -18,6 +18,7 @@ int main( int argc, char** argv ) {
     srand( time( 0 ) );
 
     auto view = new View();
+    view->setMinimumSize( 500, 500 );
     Board board;
     view->board_ = &board;
     

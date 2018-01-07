@@ -13,7 +13,6 @@ const float degToRad = 3.1415926 / 180.0;
 
 
 View::View( QWidget* parent ) : QWidget( parent ), board_( 0 ), mouseX_( 0 ), mouseY_( 0 ) {
-    setMinimumSize( 500, 500 );
     setMouseTracking( true );
 }
 
@@ -27,22 +26,32 @@ void View::mouseMoveEvent( QMouseEvent* event ) {
 }
 
 
+// euclidean distance
+float dist( float ax, float ay, float bx, float by ) {
+    return sqrt( ( ax - bx ) * ( ax - bx ) + ( ay - by ) * ( ay - by ) );
+}
+
+
 void View::paintEvent( QPaintEvent* event ) {
     if( board_ == 0 ) {
         QWidget::paintEvent( event );
         return;
     }
 
-    int gridWidth = board_->width();
-    int gridHeight = board_->height();
+    // number of inner radius necessary to draw the full grid height
+    float totalHeight = 2 + board_->maxHeight() - board_->minHeight();
+    // vertical shift upwards to first valid hex center
+    float verticalShift = board_->minHeight() - 1;
 
-    // determine best radius so that circle within grid is fully visible
-    float hexHeight = height() / gridHeight;
-    float radiusFromHeight = hexHeight / 2 / sin( 60 * degToRad );
-    float hexWidth = width() / gridWidth / sin( 60 * degToRad );
-    float radiusFromWidth = hexWidth / 2;
+    // determine best radius to view full grid
+    float radiusFromHeight = height() / totalHeight / sin( 60 * degToRad );
+    float radiusFromWidth = width() / ( 1 + board_->hexWidth() * 1.5 );
     float radius = min( radiusFromWidth, radiusFromHeight );
     float innerRadius = radius * sin( 60 * degToRad );
+
+    // shifts to center display
+    float centerShiftX = ( width() - radius * ( 1 + board_->hexWidth() * 1.5 ) ) / 2;
+    float centerShiftY = ( height() - innerRadius * totalHeight ) / 2;
 
     QPolygonF hex;
     for( int i = 0; i < 6; i++ ) {
@@ -57,76 +66,29 @@ void View::paintEvent( QPaintEvent* event ) {
     p.setFont( f );
 
     // hexes
-    for( int x = 0; x < gridWidth; x++ ) {
-    	for( int y = 0; y < gridHeight; y++ ) {
-            const auto& h = board_->hex_[ y ][ x ];
+    for( unsigned int hx = 0; hx < board_->hexWidth(); hx++ ) {
+    	for( unsigned int hy = 0; hy < board_->hexHeight(); hy++ ) {
+            const auto& h = board_->hex_[ hy ][ hx ];
 
     		if( h.type_ == Hex::Invalid ) {
     			continue;
     		}
 
-            // shift coordinates so that 0,0 is the center of the map
-    		float tx = x - gridWidth / 2;
-    		float ty = y - gridHeight / 2;
             // center of the hex
-            float ox = tx * 1.5; // 1 + cos(60°)
-            float oy = ty + tx / 2;
-            QPointF center( width() / 2 + ox * radius, height() / 2 + oy * 2 * innerRadius );
+            QPointF hexCenter( radius * ( 1 + hx * 1.5 ) + centerShiftX, innerRadius * ( 1 + hy * 2 + hx - verticalShift ) + centerShiftY );
 
-            auto curHex = hex.translated( center );
+            auto curHex = hex.translated( hexCenter );
             p.setBrush( h.color() );
             p.setPen( Qt::black );
 		    p.drawConvexPolygon( curHex );
 
-            // draw nodes
-            int nx[ 6 ] = { x + 1, x + 1, x, x, x, x + 1 };
-            int ny[ 6 ] = { 2 * y + x + 1, 2 * y + x, 2 * y + x , 2 * y + x + 1, 2 * y + x + 2, 2 * y + x + 2 };
-            for( int i = 0; i < 6; i++ ) {
-                // node
-                cerr << nx[ i ] << " " << ny[ i ] << " - " ;
-                const auto& n = board_->node_[ ny[ i ] ][ nx[ i ] ];
-                if( n.harborType_ != Hex::Invalid ) {
-                    // TODO: draw harbor
-                }
-                if( n.type_ != Node::None ) {
-                    QPolygonF curNode;
-                    if( n.type_ == Node::Town ) {
-                        curNode << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x(), curHex[ i ].y() - 2 * radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() + radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() + radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) );
-                    } else {
-                        curNode << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x(), curHex[ i ].y() - 2 * radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() + radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() + 3 * radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() - radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() + 3 * radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) )
-                            << QPointF( curHex[ i ].x() - radius * 0.2 * cos( 45 * degToRad ), curHex[ i ].y() + radius * 0.2 * sin( 45 * degToRad ) );
-                    }
-                    p.setBrush( Qt::white ); // TODO: player color
-                    p.setPen( Qt::black );
-                    p.drawPolygon( curNode );
-                }
-
-                // highlight node under mouse
-                if( ( curHex[ i ].x() - mouseX_ ) * ( curHex[ i ].x() - mouseX_ ) + ( curHex[ i ].y() - mouseY_ ) * ( curHex[ i ].y() - mouseY_ ) < radius * 0.2 * radius * 0.2 ) {
-                    p.setBrush( Qt::NoBrush );
-                    QPen pen( Qt::red );
-                    pen.setWidth( 2 );
-                    p.setPen( pen );
-                    p.drawEllipse( curHex[ i ], radius * 0.1, radius * 0.1 );
-                }
-            }
-            cerr << endl;
-
             // highlight hex under mouse
-            if( ( center.x() - mouseX_ ) * ( center.x() - mouseX_ ) + ( center.y() - mouseY_ ) * ( center.y() - mouseY_ ) < innerRadius * innerRadius ) {
+            if( dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius ) {
                 p.setBrush( Qt::NoBrush );
                 QPen pen( h.color() == Qt::red ? Qt::black : Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
-                p.drawEllipse( center, innerRadius * 0.85, innerRadius * 0.85 );
+                p.drawEllipse( hexCenter, innerRadius * 0.85, innerRadius * 0.85 );
             }
 
             // draw number on land tiles
@@ -136,12 +98,68 @@ void View::paintEvent( QPaintEvent* event ) {
             // white disc centered inside hex
             p.setPen( Qt::NoPen );
             p.setBrush( Qt::white );
-            p.drawEllipse( center, radius / 2.5, radius / 2.5 );
+            p.drawEllipse( hexCenter, radius / 2.5, radius / 2.5 );
             // number centered in disc
-            QRectF textBox( center.x() - textSize / 2, center.y() - textSize / 2, textSize, textSize );
+            QRectF textBox( hexCenter.x() - textSize / 2, hexCenter.y() - textSize / 2, textSize, textSize );
             p.setPen( Qt::black );
             p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
     	}
+    }
+
+    // nodes
+    float nodeRadius = radius * 0.2;
+    float nodeDiag = nodeRadius * cos( 45 * degToRad );
+    for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
+        for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
+            const auto& n = board_->node_[ ny ][ nx ];
+            if( n.harborType_ != Hex::Invalid ) {
+                // TODO: draw harbor
+            }
+
+            int hx = 0;
+            int hy = 0;
+            int rad = 0;
+            if( nx % 2 == ny % 2 ) {
+                hx = nx - 1;
+                hy = ( ny - nx ) / 2;
+                rad = 1;
+            } else {
+                hx = nx;
+                hy = ( ny - nx - 1 ) / 2;
+                rad = -1;
+            }
+            QPointF nodeCenter( radius * ( 1 + hx * 1.5 + rad ) + centerShiftX, innerRadius * ( 1 + hy * 2 + hx - verticalShift ) + centerShiftY );
+
+            if( n.type_ != Node::None ) {
+                QPolygonF curNode;
+                if( n.type_ == Node::Town ) {
+                    curNode << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() - nodeDiag )
+                        << QPointF( nodeCenter.x(), nodeCenter.y() - 2 * nodeDiag )
+                        << QPointF( nodeCenter.x() + nodeDiag, nodeCenter.y() - nodeDiag )
+                        << QPointF( nodeCenter.x() + nodeDiag, nodeCenter.y() + nodeDiag )
+                        << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() + nodeDiag );
+                } else {
+                    curNode << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() - nodeDiag )
+                        << QPointF( nodeCenter.x(), nodeCenter.y() - 2 * nodeDiag )
+                        << QPointF( nodeCenter.x() + nodeDiag, nodeCenter.y() - nodeDiag )
+                        << QPointF( nodeCenter.x() + 3 * nodeDiag, nodeCenter.y() - nodeDiag )
+                        << QPointF( nodeCenter.x() + 3 * nodeDiag, nodeCenter.y() + nodeDiag )
+                        << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() + nodeDiag );
+                }
+                p.setBrush( Qt::white ); // TODO: player color
+                p.setPen( Qt::black );
+                p.drawPolygon( curNode );
+            }
+
+            // highlight node under mouse
+            if( dist( nodeCenter.x(), nodeCenter.y(), mouseX_, mouseY_ ) < nodeRadius ) {
+                p.setBrush( Qt::NoBrush );
+                QPen pen( Qt::red );
+                pen.setWidth( 2 );
+                p.setPen( pen );
+                p.drawEllipse( nodeCenter, nodeRadius * 0.5, nodeRadius * 0.5 );
+            }
+        }
     }
 
     QWidget::paintEvent( event );

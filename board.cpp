@@ -32,7 +32,7 @@ Node::Node() : player_( -1 ), type_( None ), harborType_( Hex::Invalid ) {
 Board::Board() {
 	// standard map is 7 by 7
 	hex_.resize( 7, vector<Hex>( 7 ) );
-	node_.resize( height() * 2 + width() + 2, vector<Node>( width() + 1 ) );
+	node_.resize( hexHeight() * 2 + hexWidth() + 2, vector<Node>( hexWidth() + 1 ) );
 
 	for( auto& r : node_ ) {
 		for( auto& n : r ) {
@@ -87,14 +87,58 @@ Board::Board() {
 }
 
 
-int Board::height() const {
+// height in number of hexes
+unsigned int Board::hexHeight() const {
 	return hex_.size();
 }
 
 
-int Board::width() const {
-	if( height() == 0 ) {
+// width in number of hexes
+unsigned int Board::hexWidth() const {
+	if( hexHeight() == 0 ) {
 		return 0;
 	}
 	return hex_[ 0 ].size();
+}
+
+
+// height in number of nodes
+unsigned int Board::nodeHeight() const {
+	return node_.size();
+}
+
+
+// width in number of nodes
+unsigned int Board::nodeWidth() const {
+	if( nodeHeight() == 0 ) {
+		return 0;
+	}
+	return node_[ 0 ].size();
+}
+
+
+// maximum vertical height of the lowest valid hex
+unsigned int Board::maxHeight() const {
+	unsigned int result = 0;
+	for( unsigned int hy = 0; hy < hexHeight(); hy++ ) {
+		for( unsigned int hx = 0; hx < hexWidth(); hx++ ) {
+			if( hex_[ hy ][ hx ].type_ != Hex::Invalid ) {
+				result = max( result, 1 + 2 * hy + hx );
+			}
+		}
+	}
+	return result;
+}
+
+// minimum vertical height of the highest valid hex
+unsigned int Board::minHeight() const {
+	unsigned int result = -1;
+	for( unsigned int hy = 0; hy < hexHeight(); hy++ ) {
+		for( unsigned int hx = 0; hx < hexWidth(); hx++ ) {
+			if( hex_[ hy ][ hx ].type_ != Hex::Invalid ) {
+				result = min( result, 1 + 2 * hy + hx );
+			}
+		}
+	}
+	return result;
 }
