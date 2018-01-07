@@ -32,6 +32,8 @@ float dist( float ax, float ay, float bx, float by ) {
 }
 
 
+// draws the board
+// highlights selection under mouse
 void View::paintEvent( QPaintEvent* event ) {
     if( board_ == 0 ) {
         QWidget::paintEvent( event );

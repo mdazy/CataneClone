@@ -34,13 +34,6 @@ Board::Board() {
 	hex_.resize( 7, vector<Hex>( 7 ) );
 	node_.resize( hexHeight() * 2 + hexWidth() + 2, vector<Node>( hexWidth() + 1 ) );
 
-	for( auto& r : node_ ) {
-		for( auto& n : r ) {
-			n.type_ = Node::Type( rand() % 3 );
-			n.player_ = rand() % 4;
-		}
-	}
-
 	// standard repartition of hexes
 	vector<Hex::Type> types = {
 		Hex::Wheat, Hex::Wheat, Hex::Wheat, Hex::Wheat,
@@ -52,7 +45,7 @@ Board::Board() {
 	};
 
 	// randomize
-	// TODO: factorize
+	// TODO: factorize template
 	int nbHexes = types.size();
 	for( int i = 0; i < 100; i++ ) {
 		int a = rand() % nbHexes;
@@ -83,6 +76,14 @@ Board::Board() {
 		auto& h = hex_[ s.second ][ s.first ];
 		h.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
 		h.number_ = h.type_ != Hex::Desert && h.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
+	}
+
+	// random nodes for display test purposes
+	for( auto& r : node_ ) {
+		for( auto& n : r ) {
+			n.type_ = Node::Type( rand() % 3 );
+			n.player_ = rand() % 4;
+		}
 	}
 }
 
