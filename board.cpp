@@ -26,6 +26,48 @@ Road::Road() : player_( -1 ), fromX_( 0 ), fromY_( 0 ), toX_( 0 ), toY_( 0 ) {
 
 /**/
 
+/*
+
+The board is composed of dual 2D grids of hexes and nodes.
+Hex 0,0 is located at the top left. Hex X and Y coordinates are positive along the SE and S axes, respectively.
+Node 0,0 is the NW node of the 0,0 hex. Node X and Y coordinates are positive along horizontal and vertical pseudo-axes.
+Note that according to this numbering, some nodes will not correspond to any hex of the hex grid and are therefore invalid.
+
+    +---+                         0,0---1,0
+   /     \                         /     \
+  /       \                       /       \
+ +   0,0   +---+                0,1      1,1---2,1
+  \       /     \                 \       /     \
+   \     /       \                 \     /       \
+    +---+   1,0   +               0,2---1,2       2,2
+   /     \       /                 /     \       /
+  /       \     /                 /       \     / 
+ +   1,1   +---+   \            0,3      1,3---2,3
+  \       /     \   x+            \       /     \
+   \     /       \                 \     /       \
+    +---+   1,1   +               0,4---1,4       2,4
+         \       /                       \       / 
+      |   \     /                         \     /
+      y+   +---+                         1,5---2,5
+
+
+This yields the following hex-to-node and node-to-hex mappings.
+
+Numbering of nodes around hex x,y   Numbering of hexes around node x,y   Numbering of hexes around node x,y
+                                      when x and y have same parity      when x and y have different parity
+
+       x,2y+x---x+1,2y+x                          \                                           /
+           /     \                                 \  x,(y-x-2)/2             x-1,(y-x-1)/2  /
+          /       \                                 \                                       /
+    x,2y+x1  x,y   x+1,2y+x1          x-1,(y-x)/2   x,y----                          ----x,y   x,(y-x-1)/2
+          \       /                                 /                                       \
+           \     /                                 /  x,(y-x)/2               x-1,(y-x+1)/2  \
+     x,2y+x+2---x+1,2y+x+2                        /                                           \
+
+
+Roads are represented by pairs of start and end nodes.
+*/        
+
 
 Board::Board() {
 	// standard map is 7 by 7

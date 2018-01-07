@@ -34,17 +34,22 @@ float dist( float ax, float ay, float bx, float by ) {
 }
 
 
+// returns the center of the given node
 QPointF View::nodeCenter( unsigned int nx, unsigned int ny ) const {
     int hx = 0;
     int hy = 0;
     int rad = 0;
     if( nx % 2 == ny % 2 ) {
+        // coords of the hex on the left
         hx = nx - 1;
         hy = ( ny - nx ) / 2;
+        // then the node is one radius to the right
         rad = 1;
     } else {
+        // coords of the hex on the right
         hx = nx;
         hy = ( ny - nx - 1 ) / 2;
+        // then the node is one radius to the left
         rad = -1;
     }
     return QPointF( radius_ * ( 1 + hx * 1.5 + rad ) + centerShiftX_, innerRadius_ * ( 1 + hy * 2 + hx ) + centerShiftY_ );
@@ -52,7 +57,7 @@ QPointF View::nodeCenter( unsigned int nx, unsigned int ny ) const {
 
 
 // draws valid hexes of the given type
-// if type is Hex::Any, then only land hexes are drawn
+// if type is Hex::Any, then only land hexes are drawn - it is assumed that water hexes have been drawn first
 void View::drawHexes( QPainter& p, Hex::Type type ) const {
     QPolygonF hex;
     for( int i = 0; i < 6; i++ ) {
@@ -170,8 +175,6 @@ void View::drawRoads( QPainter& p ) const {
         pen.setWidth( radius_ * 0.16 );
         p.setPen( pen );
         p.drawLine( from, to );
-
-        // TODO: highlight selection
     }    
 }
 
@@ -184,6 +187,10 @@ void View::paintEvent( QPaintEvent* event ) {
         return;
     }
 
+    // it is assumed that the hex grid has at least one valid hex on its leftmost and rightmost X columns
+    // so the full widget width can always be used
+    // for rows, the hexes with the min/max Y coords are not necessarily the highest/lowest ones from a
+    // graphical standpoint so we have to compute the exact vertical extent and possibly a vertical shift
     // number of inner radius necessary to draw the full grid height
     float totalHeight = 2 + board_->maxHeight() - board_->minHeight();
     // vertical shift upwards to first valid hex center
@@ -195,7 +202,7 @@ void View::paintEvent( QPaintEvent* event ) {
     radius_ = min( radiusFromWidth, radiusFromHeight );
     innerRadius_ = radius_ * sin( 60 * degToRad );
 
-    // shifts to center display
+    // shifts to center the display within the widget
     centerShiftX_ = ( width() - radius_ * ( 1 + board_->hexWidth() * 1.5 ) ) / 2;
     centerShiftY_ = ( height() - innerRadius_ * totalHeight ) / 2 - verticalShift * innerRadius_;
 
@@ -213,8 +220,8 @@ void View::paintEvent( QPaintEvent* event ) {
     f.setPixelSize( max( 6.0, textSize_ / 2.5 ) );
     p.setFont( f );
 
-    // layers in order
-    drawHexes( p, Hex::Water );
+    // superposed layers drawn in order
+    drawHexes( p, Hex::Water ); // water only
     drawNodes( p, true ); // harbors
     drawHexes( p ); // land hexes
     drawRoads( p );
