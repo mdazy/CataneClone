@@ -32,6 +32,23 @@ float dist( float ax, float ay, float bx, float by ) {
 }
 
 
+QPointF nodeCenter( unsigned int nx, unsigned int ny, float radius, float innerRadius, float centerShiftX, float centerShiftY, float verticalShift ) {
+    int hx = 0;
+    int hy = 0;
+    int rad = 0;
+    if( nx % 2 == ny % 2 ) {
+        hx = nx - 1;
+        hy = ( ny - nx ) / 2;
+        rad = 1;
+    } else {
+        hx = nx;
+        hy = ( ny - nx - 1 ) / 2;
+        rad = -1;
+    }
+    return QPointF( radius * ( 1 + hx * 1.5 + rad ) + centerShiftX, innerRadius * ( 1 + hy * 2 + hx - verticalShift ) + centerShiftY );
+}
+
+
 // draws the board
 // highlights selection under mouse
 void View::paintEvent( QPaintEvent* event ) {
@@ -61,6 +78,9 @@ void View::paintEvent( QPaintEvent* event ) {
     }
 
     QPainter p( this );
+    p.setRenderHint( QPainter::Antialiasing );
+    p.setRenderHint( QPainter::TextAntialiasing );
+
     // font scaling
     float textSize = 2 * radius * cos( 45 * degToRad );
     auto f = p.font();
@@ -112,6 +132,20 @@ void View::paintEvent( QPaintEvent* event ) {
 
     const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127, 0.0 ) };
 
+    // roads
+    for( const auto& r : board_->road_ ) {
+        QPointF from = nodeCenter( r.fromX_, r.fromY_, radius, innerRadius, centerShiftX, centerShiftY, verticalShift );
+        QPointF to = nodeCenter( r.toX_, r.toY_, radius, innerRadius, centerShiftX, centerShiftY, verticalShift );
+        QPen pen( Qt::black );
+        pen.setWidth( radius * 0.23 );
+        p.setPen( pen );
+        p.drawLine( from, to );
+        pen = QPen( playerColor[ r.player_ ] );
+        pen.setWidth( radius * 0.16 );
+        p.setPen( pen );
+        p.drawLine( from, to );
+    }
+
     // nodes
     float nodeRadius = radius * 0.2;
     float nodeDiag = nodeRadius * cos( 45 * degToRad );
@@ -122,35 +156,23 @@ void View::paintEvent( QPaintEvent* event ) {
                 // TODO: draw harbor
             }
 
-            int hx = 0;
-            int hy = 0;
-            int rad = 0;
-            if( nx % 2 == ny % 2 ) {
-                hx = nx - 1;
-                hy = ( ny - nx ) / 2;
-                rad = 1;
-            } else {
-                hx = nx;
-                hy = ( ny - nx - 1 ) / 2;
-                rad = -1;
-            }
-            QPointF nodeCenter( radius * ( 1 + hx * 1.5 + rad ) + centerShiftX, innerRadius * ( 1 + hy * 2 + hx - verticalShift ) + centerShiftY );
+            QPointF nc = nodeCenter( nx, ny, radius, innerRadius, centerShiftX, centerShiftY, verticalShift );
 
             if( n.type_ != Node::None ) {
                 QPolygonF curNode;
                 if( n.type_ == Node::Town ) {
-                    curNode << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() - nodeDiag )
-                        << QPointF( nodeCenter.x(), nodeCenter.y() - 2 * nodeDiag )
-                        << QPointF( nodeCenter.x() + nodeDiag, nodeCenter.y() - nodeDiag )
-                        << QPointF( nodeCenter.x() + nodeDiag, nodeCenter.y() + nodeDiag )
-                        << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() + nodeDiag );
+                    curNode << QPointF( nc.x() - nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x(), nc.y() - 2 * nodeDiag )
+                        << QPointF( nc.x() + nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x() + nodeDiag, nc.y() + nodeDiag )
+                        << QPointF( nc.x() - nodeDiag, nc.y() + nodeDiag );
                 } else {
-                    curNode << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() - nodeDiag )
-                        << QPointF( nodeCenter.x(), nodeCenter.y() - 2 * nodeDiag )
-                        << QPointF( nodeCenter.x() + nodeDiag, nodeCenter.y() - nodeDiag )
-                        << QPointF( nodeCenter.x() + 3 * nodeDiag, nodeCenter.y() - nodeDiag )
-                        << QPointF( nodeCenter.x() + 3 * nodeDiag, nodeCenter.y() + nodeDiag )
-                        << QPointF( nodeCenter.x() - nodeDiag, nodeCenter.y() + nodeDiag );
+                    curNode << QPointF( nc.x() - nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x(), nc.y() - 2 * nodeDiag )
+                        << QPointF( nc.x() + nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x() + 3 * nodeDiag, nc.y() - nodeDiag )
+                        << QPointF( nc.x() + 3 * nodeDiag, nc.y() + nodeDiag )
+                        << QPointF( nc.x() - nodeDiag, nc.y() + nodeDiag );
                 }
                 p.setBrush( playerColor[ n.player_ ] );
                 QPen pen( Qt::black );
@@ -160,12 +182,12 @@ void View::paintEvent( QPaintEvent* event ) {
             }
 
             // highlight node under mouse
-            if( dist( nodeCenter.x(), nodeCenter.y(), mouseX_, mouseY_ ) < nodeRadius ) {
+            if( dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius ) {
                 p.setBrush( Qt::NoBrush );
                 QPen pen( Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
-                p.drawEllipse( nodeCenter, nodeRadius * 0.5, nodeRadius * 0.5 );
+                p.drawEllipse( nc, nodeRadius * 0.5, nodeRadius * 0.5 );
             }
         }
     }
