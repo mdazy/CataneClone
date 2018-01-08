@@ -120,11 +120,12 @@ Board::Board() {
 		h.number_ = h.type_ != Hex::Desert && h.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
 	}
 
+	// standard repartition of harbors
 	vector<Hex::Type> harborTypes = {
 		Hex::Wood, Hex::Wheat, Hex::Brick, Hex::Sheep, Hex::Rock, Hex::Any, Hex::Any, Hex::Any, Hex::Any
 	};
 	randomize( harborTypes );
-	
+
 	vector<pair<pair<int, int>, pair<int, int>>> harborSetup = {
 		{ { 3, 5 }, { 4, 5 } }, // NW, NE nodes of hex 3,1
 		{ { 2, 6 }, { 2, 7 } }, // NW, W nodes of hex 2, 2
@@ -136,7 +137,6 @@ Board::Board() {
 		{ { 6, 10 }, { 6, 9 } }, // E, NE nodes of hex 5, 2
 		{ { 5, 7 }, { 5, 6 } }, // E, NE nodes of hex 4, 1
 	};
-
 	iType = 0;
 	for( const auto& s : harborSetup ) {
 		auto& n1 = node_[ s.first.second ][ s.first.first ];
