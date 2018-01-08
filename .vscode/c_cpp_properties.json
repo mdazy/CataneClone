@@ -52,7 +52,7 @@
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/ucrt",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/shared",
                 "C:/Program Files (x86)/Windows Kits/10/Include/10.0.15063.0/winrt",
-                "${QTDIR}/include",
+                "/home/dazy/Qt/5.9.3/gcc_64/include",
                 "${workspaceRoot}"
             ],
             "defines": [
