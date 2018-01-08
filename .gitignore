@@ -1,5 +1,8 @@
 .qmake.stash
-Makefile
+Makefile*
 bin
 obj
+debug
+release
 qtenv.sh
+set_qt.bat
