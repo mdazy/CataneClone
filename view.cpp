@@ -120,11 +120,11 @@ void View::drawNodes( QPainter& p, bool drawHarbors ) const {
             QPointF nc = nodeCenter( nx, ny );
             if( drawHarbors ) {
                 if( n.harborType_ != Hex::Invalid ) {
-                    p.setBrush( tileColor[ n.harborType_ ] );
+                    p.setBrush( n.harborType_ == Hex::Any ? Qt::white : tileColor[ n.harborType_ ] );
                     QPen pen( Qt::black );
                     pen.setWidth( 2 );
                     p.setPen( pen );
-                    p.drawEllipse( nc, radius_ * 0.6, radius_ * 0.6 );
+                    p.drawEllipse( nc, radius_ * 0.4, radius_ * 0.4 );
                 }
             } else if( n.type_ != Node::None ) {
                 QPolygonF curNode;
