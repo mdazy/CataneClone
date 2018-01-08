@@ -68,6 +68,18 @@ Numbering of nodes around hex x,y   Numbering of hexes around node x,y   Numberi
 Roads are represented by pairs of start and end nodes.
 */        
 
+// randomize contents a vector
+template<typename T>
+void randomize( vector<T>& v ) {
+	int size = v.size();
+	for( int i = 0; i < size * 2; i++ ) {
+		int a = rand() % size;
+		int b = ( a + rand() % ( size - 1 ) ) % size;
+		auto t = v[ a ];
+		v[ a ] = v[ b ];
+		v[ b ] = t;
+	}
+}
 
 Board::Board() {
 	// standard map is 7 by 7
@@ -83,23 +95,13 @@ Board::Board() {
 		Hex::Brick, Hex::Brick, Hex::Brick,
 		Hex::Desert
 	};
-
-	// randomize
-	// TODO: factorize template
-	int nbHexes = types.size();
-	for( int i = 0; i < 100; i++ ) {
-		int a = rand() % nbHexes;
-		int b = ( a + rand() % ( nbHexes - 1 ) ) % nbHexes;
-		auto t = types[ a ];
-		types[ a ] = types[ b ];
-		types[ b ] = t;
-	}
+	randomize( types );
 
 	// standard numbering of land hexes
 	vector<int> numbers = { 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11 };
 
 	// map setup
-	vector<pair<int, int>> setup = {
+	vector<pair<int, int>> hexSetup = {
 		// land hexes, ordered along inward spiral (counter clockwise, starting at top)
 		// for placement of numbers according to rules
 		{ 3, 1 }, { 2, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 2, 5 },
@@ -112,19 +114,35 @@ Board::Board() {
 	};
 	unsigned int iType = 0;
 	unsigned int iNumber = 0;
-	for( const auto& s : setup ) {
+	for( const auto& s : hexSetup ) {
 		auto& h = hex_[ s.second ][ s.first ];
 		h.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
 		h.number_ = h.type_ != Hex::Desert && h.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
 	}
 
-	// random nodes for display test purposes
-	for( auto& r : node_ ) {
-		for( auto& n : r ) {
-			n.type_ = rand() % 5 == 0 ? Node::Type( rand() % 3 ) : Node::None;
-			n.player_ = rand() % 4;
-			n.harborType_ = rand() % 10 == 0 ? Hex::Type( rand() % Hex::Water ) : Hex::Invalid;
-		}
+	vector<Hex::Type> harborTypes = {
+		Hex::Wood, Hex::Wheat, Hex::Brick, Hex::Sheep, Hex::Rock, Hex::Any, Hex::Any, Hex::Any, Hex::Any
+	};
+	randomize( harborTypes );
+	
+	vector<pair<pair<int, int>, pair<int, int>>> harborSetup = {
+		{ { 3, 5 }, { 4, 5 } }, // NW, NE nodes of hex 3,1
+		{ { 2, 6 }, { 2, 7 } }, // NW, W nodes of hex 2, 2
+		{ { 1, 9 }, { 1, 10 } }, // NW, W nodes of hex 1, 4
+		{ { 1, 12 }, { 1, 13 } }, // W, SW nodes of hex 1, 5
+		{ { 2, 14 }, { 3, 14 } }, // SW, SE nodes of hex 2, 5
+		{ { 4, 14 }, { 5, 14 } }, // SW, SW nodes of hex 4, 4
+		{ { 6, 13 }, { 6, 12 } }, // SE, E nodes of hex 5, 3
+		{ { 6, 10 }, { 6, 9 } }, // E, NE nodes of hex 5, 2
+		{ { 5, 7 }, { 5, 6 } }, // E, NE nodes of hex 4, 1
+	};
+
+	iType = 0;
+	for( const auto& s : harborSetup ) {
+		auto& n1 = node_[ s.first.second ][ s.first.first ];
+		auto& n2 = node_[ s.second.second ][ s.second.first ];
+		n1.harborType_ = harborTypes[ iType ];
+		n2.harborType_ = harborTypes[ iType++ ];
 	}
 
 	// harcoded roads for display test purposes
