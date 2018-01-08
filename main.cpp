@@ -7,6 +7,7 @@
 #include "view.h"
 
 #include <vector>
+#include <ctime>
 
 using namespace std;
 
