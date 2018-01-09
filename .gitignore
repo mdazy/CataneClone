@@ -1,7 +1,9 @@
 .qmake.stash
 Makefile*
+moc_*
 bin
 obj
+moc
 debug
 release
 qtenv.sh
