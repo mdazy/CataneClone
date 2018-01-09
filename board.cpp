@@ -144,26 +144,6 @@ Board::Board() {
 		n1.harborType_ = harborTypes[ iType ];
 		n2.harborType_ = harborTypes[ iType++ ];
 	}
-
-	// harcoded roads for display test purposes
-	Road r;
-	r.fromX_ = 4;
-	r.fromY_ = 6;
-
-	r.player_ = rand() % 4;
-	r.toX_ = 5;
-	r.toY_ = 6;
-	road_.push_back( r );
-
-	r.player_ = rand() % 4;
-	r.toX_ = 4;
-	r.toY_ = 7;
-	road_.push_back( r );
-
-	r.player_ = rand() % 4;
-	r.toX_ = 4;
-	r.toY_ = 5;
-	road_.push_back( r );
 }
 
 

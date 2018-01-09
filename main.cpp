@@ -1,10 +1,9 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QDesktopWidget>
 #include <QtWidgets/QMainWindow>
-#include <QtWidgets/QVBoxLayout>
-#include <QtWidgets/QWidget>
 
-#include "boardView.h"
+#include "gameView.h"
+#include "game.h"
 
 #include <vector>
 #include <ctime>
@@ -18,19 +17,18 @@ int main( int argc, char** argv ) {
 
     srand( time( 0 ) );
 
-    auto view = new BoardView();
+    Game game;
+
+    auto view = new GameView( &game );
     view->setMinimumSize( 500, 500 );
-    Board board;
-    view->board_ = &board;
     
-    auto mainW = new QWidget();
-    mainWindow.setCentralWidget( mainW );
-    
-    auto mainL = new QVBoxLayout( mainW );
-    mainL->addWidget( view );
+    mainWindow.setCentralWidget( view );
     
     auto desktop = app.desktop();
     mainWindow.move( ( desktop->width() - 500 ) / 2, ( desktop->height() - 500 ) / 2 );
     mainWindow.show();
+
+    game.newGame();
+    
     return app.exec();
 }

@@ -34,6 +34,8 @@ signals:
 
 public:
 	Board* board_;
+	int fromX_;
+	int fromY_;
 
 private:
 	// for selection
@@ -42,8 +44,6 @@ private:
 	int mouseY_;
 	int nodeX_;
 	int nodeY_;
-	int fromX_;
-	int fromY_;
 	int hexX_;
 	int hexY_;
 
