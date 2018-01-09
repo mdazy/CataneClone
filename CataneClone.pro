@@ -7,6 +7,6 @@ win32:CONFIG -= x86 release
 
 QT += widgets
 
-SOURCES += main.cpp view.cpp board.cpp
+SOURCES += main.cpp boardView.cpp board.cpp
 
-HEADERS += view.h board.h
+HEADERS += boardView.h board.h

@@ -1,4 +1,4 @@
-#include "view.h"
+#include "boardView.h"
 
 #include <QtGui/QMouseEvent>
 #include <QtGui/QPainter>
@@ -14,7 +14,7 @@ const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127
 const QColor tileColor[ Hex::nbTypes ] = { Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow, Qt::blue };
 
 
-View::View( QWidget* parent ) :
+BoardView::BoardView( QWidget* parent ) :
     QWidget( parent ),
     board_( 0 ),
     selectionMode_( None ), mouseX_( 0 ), mouseY_( 0 ), nodeX_( -1 ), nodeY_( -1 ), fromX_( -1 ), fromY_( -1 ), hexX_( -1 ), hexY_( -1 ),
@@ -24,8 +24,8 @@ View::View( QWidget* parent ) :
 }
 
 
-void View::mouseMoveEvent( QMouseEvent* event ) {
-    // track mouse and update viewer for picking feedback
+void BoardView::mouseMoveEvent( QMouseEvent* event ) {
+    // track mouse and update view for picking feedback
     mouseX_ = event->pos().x();
     mouseY_ = event->pos().y();
     update();
@@ -33,7 +33,7 @@ void View::mouseMoveEvent( QMouseEvent* event ) {
 }
 
 
-void View::mouseReleaseEvent( QMouseEvent* event ) {
+void BoardView::mouseReleaseEvent( QMouseEvent* event ) {
     if( selectionMode_ == Hex && hexX_ != -1 && hexY_ != -1 ) {
         emit hexSelected( hexX_, hexY_ );
         setSelectionMode( None );
@@ -65,7 +65,7 @@ float dist( float ax, float ay, float bx, float by ) {
 
 
 // returns the center of the given node
-QPointF View::nodeCenter( unsigned int nx, unsigned int ny ) const {
+QPointF BoardView::nodeCenter( unsigned int nx, unsigned int ny ) const {
     int hx = 0;
     int hy = 0;
     int rad = 0;
@@ -88,7 +88,7 @@ QPointF View::nodeCenter( unsigned int nx, unsigned int ny ) const {
 
 // draws valid hexes of the given type
 // if type is Hex::Any, then only land hexes are drawn - it is assumed that water hexes have been drawn first
-void View::drawHexes( QPainter& p, Hex::Type type ) {
+void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
     QPolygonF hex;
     for( int i = 0; i < 6; i++ ) {
         hex << QPointF( radius_ * cos( i * 60 * degToRad ), radius_ * sin( i * 60 * degToRad ) );
@@ -145,7 +145,7 @@ void View::drawHexes( QPainter& p, Hex::Type type ) {
 
 // draws nodes
 // if drawHarbors is true, only harbors are drawn, otherwise only towns and cities are drawn
-void View::drawNodes( QPainter& p, bool drawHarbors ) {
+void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
     for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
         for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
             const auto& n = board_->node_[ ny ][ nx ];
@@ -206,7 +206,7 @@ void View::drawNodes( QPainter& p, bool drawHarbors ) {
 
 
 // draws roads
-void View::drawRoads( QPainter& p ) const {
+void BoardView::drawRoads( QPainter& p ) const {
     for( const auto& r : board_->road_ ) {
         QPointF from = nodeCenter( r.fromX_, r.fromY_);
         QPointF to = nodeCenter( r.toX_, r.toY_ );
@@ -224,7 +224,7 @@ void View::drawRoads( QPainter& p ) const {
 
 // draws the board
 // highlights selection under mouse
-void View::paintEvent( QPaintEvent* event ) {
+void BoardView::paintEvent( QPaintEvent* event ) {
     if( board_ == 0 ) {
         QWidget::paintEvent( event );
         return;
@@ -280,7 +280,7 @@ void View::paintEvent( QPaintEvent* event ) {
 }
 
 
-void View::setSelectionMode( SelectionMode mode ) {
+void BoardView::setSelectionMode( SelectionMode mode ) {
     selectionMode_ = mode;
     // other selections are reset during paint but from for road must be preserved between two clicks
     fromX_ = -1;

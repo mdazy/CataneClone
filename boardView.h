@@ -7,11 +7,11 @@
 class QMouseEvent;
 class QPaintEvent;
 
-class View : public QWidget {
+class BoardView : public QWidget {
 	Q_OBJECT;
 public:
 	enum SelectionMode { None = 0, Hex, Node, Road };
-	View( QWidget* parent  = Q_NULLPTR );
+	BoardView( QWidget* parent  = Q_NULLPTR );
 
 	void setSelectionMode( SelectionMode mode );
 	
