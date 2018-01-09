@@ -14,7 +14,12 @@ const QColor playerColor[ 4 ] = { Qt::red, Qt::green, Qt::blue, QColor( 255, 127
 const QColor tileColor[ Hex::nbTypes ] = { Qt::red, Qt::darkGreen, Qt::yellow, Qt::green, Qt::gray, Qt::darkYellow, Qt::blue };
 
 
-View::View( QWidget* parent ) : QWidget( parent ), board_( 0 ), mouseX_( 0 ), mouseY_( 0 ) {
+View::View( QWidget* parent ) :
+    QWidget( parent ),
+    board_( 0 ),
+    selectionMode_( None ), mouseX_( 0 ), mouseY_( 0 ), nodeX_( -1 ), nodeY_( -1 ), fromX_( -1 ), fromY_( -1 ), hexX_( -1 ), hexY_( -1 ),
+    radius_( 0.0 ), innerRadius_( 0.0 ), nodeRadius_( 0.0 ), nodeDiag_( 0.0 ), centerShiftX_( 0.0 ), centerShiftY_( 0.0 )
+{
     setMouseTracking( true );
 }
 
@@ -25,6 +30,31 @@ void View::mouseMoveEvent( QMouseEvent* event ) {
     mouseY_ = event->pos().y();
     update();
     QWidget::mouseMoveEvent( event );
+}
+
+
+void View::mouseReleaseEvent( QMouseEvent* event ) {
+    if( selectionMode_ == Hex && hexX_ != -1 && hexY_ != -1 ) {
+        emit hexSelected( hexX_, hexY_ );
+        setSelectionMode( None );
+        update();
+    } else if( selectionMode_ == Node && nodeX_ != -1 && nodeY_ != -1 ) {
+        emit nodeSelected( nodeX_, nodeY_ );
+        setSelectionMode( None );
+        update();
+    } else if( selectionMode_ == Road && nodeX_ != -1 && nodeY_ != -1 ) {
+        if( fromX_ != -1 && fromY_ != -1 ) {
+            emit roadSelected( fromX_, fromY_, nodeX_, nodeY_ );
+            setSelectionMode( None );
+        } else {
+            fromX_ = nodeX_;
+            fromY_ = nodeY_;
+            nodeX_ = -1;
+            nodeY_ = -1;
+        }
+        update();
+    }
+    QWidget::mouseReleaseEvent( event );
 }
 
 
@@ -58,7 +88,7 @@ QPointF View::nodeCenter( unsigned int nx, unsigned int ny ) const {
 
 // draws valid hexes of the given type
 // if type is Hex::Any, then only land hexes are drawn - it is assumed that water hexes have been drawn first
-void View::drawHexes( QPainter& p, Hex::Type type ) const {
+void View::drawHexes( QPainter& p, Hex::Type type ) {
     QPolygonF hex;
     for( int i = 0; i < 6; i++ ) {
         hex << QPointF( radius_ * cos( i * 60 * degToRad ), radius_ * sin( i * 60 * degToRad ) );
@@ -85,13 +115,15 @@ void View::drawHexes( QPainter& p, Hex::Type type ) const {
             p.setPen( pen );
             p.drawConvexPolygon( curHex );
 
-            // highlight hex under mouse
-            if( dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_ ) {
+            // hex selection
+            if( selectionMode_ == Hex && dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_ ) {
                 p.setBrush( Qt::NoBrush );
                 QPen pen( h.type_ == Hex::Brick ? Qt::black : Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( hexCenter, innerRadius_ * 0.85, innerRadius_ * 0.85 );
+                hexX_ = hx;
+                hexY_ = hy;
             }
 
             // draw number on land tiles
@@ -113,11 +145,17 @@ void View::drawHexes( QPainter& p, Hex::Type type ) const {
 
 // draws nodes
 // if drawHarbors is true, only harbors are drawn, otherwise only towns and cities are drawn
-void View::drawNodes( QPainter& p, bool drawHarbors ) const {
+void View::drawNodes( QPainter& p, bool drawHarbors ) {
     for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
         for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
             const auto& n = board_->node_[ ny ][ nx ];
             QPointF nc = nodeCenter( nx, ny );
+            // highlight first node of road selection
+            if( nx == fromX_ && ny == fromY_ ) {
+                p.setBrush( Qt::black );
+                p.setPen( Qt::NoPen );
+                p.drawEllipse( nc, nodeRadius_ * 0.8, nodeRadius_ * 0.8 );
+            }
             if( drawHarbors ) {
                 if( n.harborType_ != Hex::Invalid ) {
                     p.setBrush( n.harborType_ == Hex::Any ? Qt::white : tileColor[ n.harborType_ ] );
@@ -149,13 +187,18 @@ void View::drawNodes( QPainter& p, bool drawHarbors ) const {
                 p.drawPolygon( curNode );
             }
      
-            // highlight node under mouse
-            if( dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius_ ) {
+            // node/road selection
+            if(
+                ( selectionMode_ == Node || ( selectionMode_ == Road && ( nx != fromX_ || ny != fromY_ ) ) ) &&
+                dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius_
+            ) {
                 p.setBrush( Qt::NoBrush );
                 QPen pen( Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( nc, nodeRadius_ * 0.5, nodeRadius_ * 0.5 );
+                nodeX_ = nx;
+                nodeY_ = ny;
             }
         }
     }
@@ -186,6 +229,12 @@ void View::paintEvent( QPaintEvent* event ) {
         QWidget::paintEvent( event );
         return;
     }
+
+    // reset selection
+    nodeX_ = -1;
+    nodeY_ = -1;
+    hexX_ = -1;
+    hexY_ = -1;
 
     // it is assumed that the hex grid has at least one valid hex on its leftmost and rightmost X columns
     // so the full widget width can always be used
@@ -228,4 +277,12 @@ void View::paintEvent( QPaintEvent* event ) {
     drawNodes( p ); // land nodes
 
     QWidget::paintEvent( event );
+}
+
+
+void View::setSelectionMode( SelectionMode mode ) {
+    selectionMode_ = mode;
+    // other selections are reset during paint but from for road must be preserved between two clicks
+    fromX_ = -1;
+    fromY_ = -1;
 }
