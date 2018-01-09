@@ -35,17 +35,21 @@ void BoardView::mouseMoveEvent( QMouseEvent* event ) {
 
 void BoardView::mouseReleaseEvent( QMouseEvent* event ) {
     if( selectionMode_ == Hex && hexX_ != -1 && hexY_ != -1 ) {
+        setSelectionMode( None );
+        update();
         emit hexSelected( hexX_, hexY_ );
-        setSelectionMode( None );
-        update();
     } else if( selectionMode_ == Node && nodeX_ != -1 && nodeY_ != -1 ) {
-        emit nodeSelected( nodeX_, nodeY_ );
         setSelectionMode( None );
         update();
+        emit nodeSelected( nodeX_, nodeY_ );
     } else if( selectionMode_ == Road && nodeX_ != -1 && nodeY_ != -1 ) {
         if( fromX_ != -1 && fromY_ != -1 ) {
-            emit roadSelected( fromX_, fromY_, nodeX_, nodeY_ );
+            int fx = fromX_;
+            int fy = fromY_;
+            int tx = nodeX_;
+            int ty = nodeY_;
             setSelectionMode( None );
+            emit roadSelected( fx, fy, tx, ty );
         } else {
             fromX_ = nodeX_;
             fromY_ = nodeY_;
