@@ -4,6 +4,8 @@
 
 #include <vector>
 
+#include "utils.h"
+
 class Hex {
 public:
 	enum Type { Invalid = -1, Brick, Wood, Wheat, Sheep, Rock, Desert, Water, nbTypes, Any };
@@ -52,7 +54,6 @@ public:
 
 class Board {
 public:
-	typedef std::pair<int, int> Pos;
 	Board();
 
 	unsigned int hexHeight() const;
@@ -64,8 +65,8 @@ public:
 	unsigned int minHeight() const;
 	unsigned int maxHeight() const;
 
-	static std::vector<Pos> nodesAroundHex( Pos h );
-	static std::vector<Pos> hexesAroundNode( Pos n );
+	static std::vector<Pos> nodesAroundHex( const Pos& h );
+	static std::vector<Pos> hexesAroundNode( const Pos& n );
 
 public:
 	std::vector<std::vector<Hex>> hex_;

@@ -204,33 +204,29 @@ unsigned int Board::minHeight() const {
 }
 
 // nodes around hex, may include out of bounds indices
-vector<Board::Pos> Board::nodesAroundHex( Pos h ) {
-	auto x = h.first;
-	auto y = h.second;
-	vector<Board::Pos> result;
-	result.emplace_back( x, 2 * y + x );
-	result.emplace_back( x, 2 * y + x + 1);
-	result.emplace_back( x, 2 * y + x + 2 );
-	result.emplace_back( x + 1, 2 * y + x );
-	result.emplace_back( x + 1 , 2 * y + x + 1);
-	result.emplace_back( x + 1, 2 * y + x + 2 );
+vector<Pos> Board::nodesAroundHex( const Pos& h ) {
+	vector<Pos> result;
+	result.emplace_back( h.x(), 2 * h.y() + h.x() );
+	result.emplace_back( h.x(), 2 * h.y() + h.x() + 1);
+	result.emplace_back( h.x(), 2 * h.y() + h.x() + 2 );
+	result.emplace_back( h.x() + 1, 2 * h.y() + h.x() );
+	result.emplace_back( h.x() + 1 , 2 * h.y() + h.x() + 1);
+	result.emplace_back( h.x() + 1, 2 * h.y() + h.x() + 2 );
 	return result;
 }
 
 
 // hexes around node, may include out of bounds indices
-vector<Board::Pos> Board::hexesAroundNode( Pos n ) {
-	auto x = n.first;
-	auto y = n.second;
-	vector<Board::Pos> result;
-	if( x % 2 == y % 2 ) {
-		result.emplace_back( x - 1, ( y - x ) / 2 );
-		result.emplace_back( x, ( y - x - 2 ) / 2 );
-		result.emplace_back( x, ( y - x ) / 2 );
+vector<Pos> Board::hexesAroundNode( const Pos& n ) {
+	vector<Pos> result;
+	if( n.x() % 2 == n.y() % 2 ) {
+		result.emplace_back( n.x() - 1, ( n.y() - n.x() ) / 2 );
+		result.emplace_back( n.x(), ( n.y() - n.x() - 2 ) / 2 );
+		result.emplace_back( n.x(), ( n.y() - n.x() ) / 2 );
 	} else {
-		result.emplace_back( x - 1, ( y - x - 1 ) / 2 );
-		result.emplace_back( x, ( y - x - 1 ) / 2 );
-		result.emplace_back( x - 1, ( y - x + 1 ) / 2 );
+		result.emplace_back( n.x() - 1, ( n.y() - n.x() - 1 ) / 2 );
+		result.emplace_back( n.x(), ( n.y() - n.x() - 1 ) / 2 );
+		result.emplace_back( n.x() - 1, ( n.y() - n.x() + 1 ) / 2 );
 	}
 	return result;
 
