@@ -44,7 +44,6 @@ void GameView::pickStartNode() {
 
 
 void GameView::pickStartRoad( int fromX, int fromY ) {
-    cerr << "pickStartRoad( " << fromX << ", " << fromY << " )" << endl;
     boardView_->setSelectionMode( BoardView::Road );
     boardView_->fromX_ = fromX;
     boardView_->fromY_ = fromY;
