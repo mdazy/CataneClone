@@ -1,0 +1,3 @@
+ - selection restrictions : highlight in view or just loop in game?
+ - add player card state
+ - add robber in game state and view
