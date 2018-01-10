@@ -53,6 +53,11 @@ void Game::startNodePicked( unsigned int nx, unsigned int ny ) {
                 player_[ curPlayer_ ].resources_[ h.type_ ]++;
             }
         }
+        cerr << "Resources of player " << curPlayer_ << ": ";
+        for( const auto& c : player_[ curPlayer_ ].resources_ ) {
+            cerr << c << " ";
+        }
+        cerr << endl;
     }
     emit requestRoad( nx, ny );
 }
@@ -75,10 +80,9 @@ void Game::startRoadPicked( unsigned int fromX, unsigned int fromY, unsigned int
         }
     } else {
         if( curPlayer_ == 0 ) {
-            // TODO: done
-        } else {
-            curPlayer_--;
+            return;
         }
+        curPlayer_--;
     }
     emit requestNode();
 }
