@@ -42,10 +42,8 @@ public:
 
 public:
 	int player_;
-	unsigned int fromX_;
-	unsigned int fromY_;
-	unsigned int toX_;
-	unsigned int toY_;
+	Pos from_;
+	Pos to_;
 };
 
 

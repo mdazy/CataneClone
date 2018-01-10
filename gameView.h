@@ -2,6 +2,8 @@
 
 #include <QtWidgets/QStackedWidget>
 
+#include "utils.h"
+
 class QPushButton;
 
 class Game;
@@ -16,7 +18,7 @@ public slots:
     void pickNbPlayers();
     void pickStartPositions();
     void pickStartNode();
-    void pickStartRoad( int fromX, int fromY );
+    void pickStartRoad( const Pos& from );
 
 signals:
     void nbPlayersPicked( int nbPlayers );

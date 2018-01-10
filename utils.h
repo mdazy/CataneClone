@@ -8,4 +8,6 @@ public:
     int& y() { return second; }
     const int& x() const { return first; }
     const int& y() const { return second; }
+
+    bool valid() const { return first >= 0 && second >= 0; };
 };

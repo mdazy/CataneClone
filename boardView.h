@@ -22,30 +22,27 @@ protected:
 	void paintEvent( QPaintEvent* event ) override;
 
 	// custom
-	QPointF nodeCenter( unsigned int nx, unsigned int ny ) const;
+	QPointF nodeCenter( const Pos& n ) const;
 	void drawHexes( QPainter& p, Hex::Type type = Hex::Any );
 	void drawNodes( QPainter& p, bool drawHarbors = false );
 	void drawRoads( QPainter& p ) const;
 
 signals:
-	void hexSelected( unsigned int hx, unsigned int hy );
-	void nodeSelected( unsigned int nx, unsigned int ny );
-	void roadSelected( unsigned int fromX, unsigned int fromY, unsigned int toX, unsigned int toY );
+	void hexSelected( Pos h );
+	void nodeSelected( Pos n );
+	void roadSelected( Pos from, Pos to );
 
 public:
 	Board* board_;
-	int fromX_;
-	int fromY_;
+	Pos from_;
 
 private:
 	// for selection
 	SelectionMode selectionMode_;
 	int mouseX_;
 	int mouseY_;
-	int nodeX_;
-	int nodeY_;
-	int hexX_;
-	int hexY_;
+	Pos node_;
+	Pos hex_;
 
 	// for painting
 	float radius_;

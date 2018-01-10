@@ -20,7 +20,7 @@ Node::Node() : player_( -1 ), type_( None ), harborType_( Hex::Invalid ) {
 /**/
 
 
-Road::Road() : player_( -1 ), fromX_( 0 ), fromY_( 0 ), toX_( 0 ), toY_( 0 ) {
+Road::Road() : player_( -1 ) {
 }
 
 

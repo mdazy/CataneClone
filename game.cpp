@@ -36,15 +36,15 @@ void Game::startWithPlayers( int nbPlayers ) {
 }
 
 
-void Game::startNodePicked( unsigned int nx, unsigned int ny ) {
-    auto& n = board_.node_[ ny ][ nx ];
+void Game::startNodePicked( const Pos& np ) {
+    auto& n = board_.node_[ np.y() ][ np.x() ];
     n.player_ = curPlayer_;
     n.type_ = Node::Town;
     if( !pickStartAscending_ ) {
-        for( const auto& hp : Board::hexesAroundNode( { nx, ny } )  ) {
+        for( const auto& hp : Board::hexesAroundNode( np )  ) {
             auto hx = hp.first;
             auto hy = hp.second;
-            if( hx < 0 || hx >= board_.hexWidth() || hy < 0 || hy >= board_.hexHeight() ) {
+            if( !hp.valid() || hx >= board_.hexWidth() || hy >= board_.hexHeight() ) {
                 // out of bounds
                 continue;
             }
@@ -53,23 +53,16 @@ void Game::startNodePicked( unsigned int nx, unsigned int ny ) {
                 player_[ curPlayer_ ].resources_[ h.type_ ]++;
             }
         }
-        cerr << "Resources of player " << curPlayer_ << ": ";
-        for( const auto& c : player_[ curPlayer_ ].resources_ ) {
-            cerr << c << " ";
-        }
-        cerr << endl;
     }
-    emit requestRoad( nx, ny );
+    emit requestRoad( np );
 }
 
 
-void Game::startRoadPicked( unsigned int fromX, unsigned int fromY, unsigned int toX, unsigned int toY ) {
+void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     Road r;
     r.player_ = curPlayer_;
-    r.fromX_ = fromX;
-    r.fromY_ = fromY;
-    r.toX_ = toX;
-    r.toY_ = toY;
+    r.from_ = from;
+    r.to_ = to;
     board_.road_.push_back( r );
 
     if( pickStartAscending_ ) {

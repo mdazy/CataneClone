@@ -31,9 +31,9 @@ void GameView::pickStartPositions() {
     buildGameView();
     setCurrentWidget( gameView_ );
     connect( game_, SIGNAL( requestNode() ), this, SLOT( pickStartNode() ) );
-    connect( game_, SIGNAL( requestRoad( int, int ) ), this, SLOT( pickStartRoad( int, int ) ) );
-    connect( boardView_, SIGNAL( nodeSelected( unsigned int, unsigned int ) ), game_, SLOT( startNodePicked( unsigned int, unsigned int ) ) );
-    connect( boardView_, SIGNAL( roadSelected( unsigned int, unsigned int, unsigned int, unsigned int ) ), game_, SLOT( startRoadPicked( unsigned int, unsigned int, unsigned int, unsigned int ) ) );
+    connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickStartRoad( const Pos& ) ) );
+    connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( startNodePicked( const Pos& ) ) );
+    connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
     pickStartNode();
 }
 
@@ -43,10 +43,9 @@ void GameView::pickStartNode() {
 }
 
 
-void GameView::pickStartRoad( int fromX, int fromY ) {
+void GameView::pickStartRoad( const Pos& from ) {
     boardView_->setSelectionMode( BoardView::Road );
-    boardView_->fromX_ = fromX;
-    boardView_->fromY_ = fromY;
+    boardView_->from_ = from;
 }
 
 

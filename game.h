@@ -21,14 +21,14 @@ public:
 public slots:
     void newGame();
     void startWithPlayers( int nbPlayers );
-    void startNodePicked( unsigned int nx, unsigned int ny );
-    void startRoadPicked( unsigned int fromX, unsigned int fromY, unsigned int toX, unsigned int toY );
+    void startNodePicked( const Pos& np );
+    void startRoadPicked( const Pos& from, const Pos& to );
 
 signals:
     void requestNbPlayers();
     void requestStartPositions();
     void requestNode();
-    void requestRoad( int fromX = -1, int fromY = -1 );
+    void requestRoad( Pos from = Pos() );
 
 
 public:

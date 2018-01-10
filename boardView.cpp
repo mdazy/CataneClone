@@ -17,7 +17,7 @@ const QColor tileColor[ Hex::nbTypes ] = { Qt::red, Qt::darkGreen, Qt::yellow, Q
 BoardView::BoardView( QWidget* parent ) :
     QWidget( parent ),
     board_( 0 ),
-    selectionMode_( None ), mouseX_( 0 ), mouseY_( 0 ), nodeX_( -1 ), nodeY_( -1 ), fromX_( -1 ), fromY_( -1 ), hexX_( -1 ), hexY_( -1 ),
+    selectionMode_( None ), mouseX_( 0 ), mouseY_( 0 ),
     radius_( 0.0 ), innerRadius_( 0.0 ), nodeRadius_( 0.0 ), nodeDiag_( 0.0 ), centerShiftX_( 0.0 ), centerShiftY_( 0.0 )
 {
     setMouseTracking( true );
@@ -34,27 +34,24 @@ void BoardView::mouseMoveEvent( QMouseEvent* event ) {
 
 
 void BoardView::mouseReleaseEvent( QMouseEvent* event ) {
-    if( selectionMode_ == Hex && hexX_ != -1 && hexY_ != -1 ) {
+    if( selectionMode_ == Hex && hex_.valid() ) {
         setSelectionMode( None );
         update();
-        emit hexSelected( hexX_, hexY_ );
-    } else if( selectionMode_ == Node && nodeX_ != -1 && nodeY_ != -1 ) {
+        emit hexSelected( hex_ );
+    } else if( selectionMode_ == Node && node_.valid() ) {
         setSelectionMode( None );
         update();
-        emit nodeSelected( nodeX_, nodeY_ );
-    } else if( selectionMode_ == Road && nodeX_ != -1 && nodeY_ != -1 ) {
-        if( fromX_ != -1 && fromY_ != -1 ) {
-            int fx = fromX_;
-            int fy = fromY_;
-            int tx = nodeX_;
-            int ty = nodeY_;
+        emit nodeSelected( node_ );
+    } else if( selectionMode_ == Road && node_.valid() ) {
+        if( from_.valid() ) {
+            Pos from = from_;
+            Pos to = node_;
             setSelectionMode( None );
-            emit roadSelected( fx, fy, tx, ty );
+            node_ = Pos();
+            emit roadSelected( from, to );
         } else {
-            fromX_ = nodeX_;
-            fromY_ = nodeY_;
-            nodeX_ = -1;
-            nodeY_ = -1;
+            from_ = node_;
+            node_ = Pos();
         }
         update();
     }
@@ -69,20 +66,20 @@ float dist( float ax, float ay, float bx, float by ) {
 
 
 // returns the center of the given node
-QPointF BoardView::nodeCenter( unsigned int nx, unsigned int ny ) const {
+QPointF BoardView::nodeCenter( const Pos& n ) const {
     int hx = 0;
     int hy = 0;
     int rad = 0;
-    if( nx % 2 == ny % 2 ) {
+    if( n.x() % 2 == n.y() % 2 ) {
         // coords of the hex on the left
-        hx = nx - 1;
-        hy = ( ny - nx ) / 2;
+        hx = n.x() - 1;
+        hy = ( n.y() - n.x() ) / 2;
         // then the node is one radius to the right
         rad = 1;
     } else {
         // coords of the hex on the right
-        hx = nx;
-        hy = ( ny - nx - 1 ) / 2;
+        hx = n.x();
+        hy = ( n.y() - n.x() - 1 ) / 2;
         // then the node is one radius to the left
         rad = -1;
     }
@@ -126,8 +123,7 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( hexCenter, innerRadius_ * 0.85, innerRadius_ * 0.85 );
-                hexX_ = hx;
-                hexY_ = hy;
+                hex_ = Pos( hx, hy );
             }
 
             // draw number on land tiles
@@ -152,10 +148,11 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
 void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
     for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
         for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
+            Pos np( nx, ny );
             const auto& n = board_->node_[ ny ][ nx ];
-            QPointF nc = nodeCenter( nx, ny );
+            QPointF nc = nodeCenter( np );
             // highlight first node of road selection
-            if( nx == fromX_ && ny == fromY_ ) {
+            if( np == from_ ) {
                 p.setBrush( Qt::black );
                 p.setPen( Qt::NoPen );
                 p.drawEllipse( nc, nodeRadius_ * 0.8, nodeRadius_ * 0.8 );
@@ -192,8 +189,9 @@ void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
             }
      
             // node/road selection
+            // TODO: fix/remove np!=from when selection restriction is implemented
             if(
-                ( selectionMode_ == Node || ( selectionMode_ == Road && ( nx != fromX_ || ny != fromY_ ) ) ) &&
+                ( selectionMode_ == Node || ( selectionMode_ == Road && np != from_ ) ) &&
                 dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius_
             ) {
                 p.setBrush( Qt::NoBrush );
@@ -201,8 +199,7 @@ void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( nc, nodeRadius_ * 0.5, nodeRadius_ * 0.5 );
-                nodeX_ = nx;
-                nodeY_ = ny;
+                node_ = np;
             }
         }
     }
@@ -212,8 +209,8 @@ void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
 // draws roads
 void BoardView::drawRoads( QPainter& p ) const {
     for( const auto& r : board_->road_ ) {
-        QPointF from = nodeCenter( r.fromX_, r.fromY_);
-        QPointF to = nodeCenter( r.toX_, r.toY_ );
+        QPointF from = nodeCenter( r.from_ );
+        QPointF to = nodeCenter( r.to_ );
         QPen pen( Qt::black );
         pen.setWidth( radius_ * 0.23 );
         p.setPen( pen );
@@ -235,10 +232,8 @@ void BoardView::paintEvent( QPaintEvent* event ) {
     }
 
     // reset selection
-    nodeX_ = -1;
-    nodeY_ = -1;
-    hexX_ = -1;
-    hexY_ = -1;
+    node_ = Pos();
+    hex_ = Pos();
 
     // it is assumed that the hex grid has at least one valid hex on its leftmost and rightmost X columns
     // so the full widget width can always be used
@@ -287,6 +282,5 @@ void BoardView::paintEvent( QPaintEvent* event ) {
 void BoardView::setSelectionMode( SelectionMode mode ) {
     selectionMode_ = mode;
     // other selections are reset during paint but from for road must be preserved between two clicks
-    fromX_ = -1;
-    fromY_ = -1;
+    from_ = Pos();
 }
