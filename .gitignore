@@ -6,5 +6,4 @@ obj
 moc
 debug
 release
-qtenv.sh
-set_qt.bat
+qtenv.*
