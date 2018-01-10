@@ -54,14 +54,14 @@ class Board {
 public:
 	Board();
 
-	unsigned int hexHeight() const;
-	unsigned int hexWidth() const;
+	int hexHeight() const;
+	int hexWidth() const;
 
-	unsigned int nodeHeight() const;
-	unsigned int nodeWidth() const;
+	int nodeHeight() const;
+	int nodeWidth() const;
 
-	unsigned int minHeight() const;
-	unsigned int maxHeight() const;
+	int minHeight() const;
+	int maxHeight() const;
 
 	static std::vector<Pos> nodesAroundHex( const Pos& h );
 	static std::vector<Pos> nodesAroundNode( const Pos& n );

@@ -148,13 +148,13 @@ Board::Board() {
 
 
 // height in number of hexes
-unsigned int Board::hexHeight() const {
+int Board::hexHeight() const {
 	return hex_.size();
 }
 
 
 // width in number of hexes
-unsigned int Board::hexWidth() const {
+int Board::hexWidth() const {
 	if( hexHeight() == 0 ) {
 		return 0;
 	}
@@ -163,13 +163,13 @@ unsigned int Board::hexWidth() const {
 
 
 // height in number of nodes
-unsigned int Board::nodeHeight() const {
+int Board::nodeHeight() const {
 	return node_.size();
 }
 
 
 // width in number of nodes
-unsigned int Board::nodeWidth() const {
+int Board::nodeWidth() const {
 	if( nodeHeight() == 0 ) {
 		return 0;
 	}
@@ -178,10 +178,10 @@ unsigned int Board::nodeWidth() const {
 
 
 // maximum vertical height of the lowest valid hex
-unsigned int Board::maxHeight() const {
-	unsigned int result = 0;
-	for( unsigned int hy = 0; hy < hexHeight(); hy++ ) {
-		for( unsigned int hx = 0; hx < hexWidth(); hx++ ) {
+int Board::maxHeight() const {
+	int result = 0;
+	for( int hy = 0; hy < hexHeight(); hy++ ) {
+		for( int hx = 0; hx < hexWidth(); hx++ ) {
 			if( hex_[ hy ][ hx ].type_ != Hex::Invalid ) {
 				result = max( result, 1 + 2 * hy + hx );
 			}
@@ -191,10 +191,10 @@ unsigned int Board::maxHeight() const {
 }
 
 // minimum vertical height of the highest valid hex
-unsigned int Board::minHeight() const {
-	unsigned int result = -1;
-	for( unsigned int hy = 0; hy < hexHeight(); hy++ ) {
-		for( unsigned int hx = 0; hx < hexWidth(); hx++ ) {
+int Board::minHeight() const {
+	int result = -1;
+	for( int hy = 0; hy < hexHeight(); hy++ ) {
+		for( int hx = 0; hx < hexWidth(); hx++ ) {
 			if( hex_[ hy ][ hx ].type_ != Hex::Invalid ) {
 				result = min( result, 1 + 2 * hy + hx );
 			}

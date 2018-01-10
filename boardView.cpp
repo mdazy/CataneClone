@@ -96,8 +96,8 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
         hex << QPointF( radius_ * cos( i * 60 * degToRad ), radius_ * sin( i * 60 * degToRad ) );
     }
 
-    for( unsigned int hx = 0; hx < board_->hexWidth(); hx++ ) {
-        for( unsigned int hy = 0; hy < board_->hexHeight(); hy++ ) {
+    for( int hx = 0; hx < board_->hexWidth(); hx++ ) {
+        for( int hy = 0; hy < board_->hexHeight(); hy++ ) {
             const auto& h = board_->hex_[ hy ][ hx ];
 
             if(
@@ -147,8 +147,8 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
 // draws nodes
 // if drawHarbors is true, only harbors are drawn, otherwise only towns and cities are drawn
 void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
-    for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
-        for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
+    for( int nx = 0; nx < board_->nodeWidth(); nx++ ) {
+        for( int ny = 0; ny < board_->nodeHeight(); ny++ ) {
             Pos np( nx, ny );
             bool allowed = std::find( board_->allowedNodes_.begin(), board_->allowedNodes_.end(), np ) != board_->allowedNodes_.end();
             const auto& n = board_->node_[ ny ][ nx ];
