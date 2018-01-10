@@ -192,7 +192,7 @@ int Board::maxHeight() const {
 
 // minimum vertical height of the highest valid hex
 int Board::minHeight() const {
-	int result = -1;
+	int result = 1 + 2 * hexHeight() + hexWidth();
 	for( int hy = 0; hy < hexHeight(); hy++ ) {
 		for( int hx = 0; hx < hexWidth(); hx++ ) {
 			if( hex_[ hy ][ hx ].type_ != Hex::Invalid ) {
