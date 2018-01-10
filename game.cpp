@@ -32,6 +32,7 @@ void Game::startWithPlayers( int nbPlayers ) {
     nbPlayers_ = nbPlayers;
     player_.resize( nbPlayers_ );
     curPlayer_ = 0;
+    setupAllowedBuildNodes();
     emit requestStartPositions();
 }
 
@@ -54,6 +55,16 @@ void Game::startNodePicked( const Pos& np ) {
             }
         }
     }
+    // setup allowed nodes around selected town
+    board_.allowedNodes_.clear();
+    for( const auto& nn : Board::nodesAroundNode( np ) ) {
+        if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
+            continue;
+        }
+        if( board_.landNode( nn ) && board_.node_[ nn.y() ][ nn.x() ].type_ == Node::None ) {
+            board_.allowedNodes_.push_back( nn );
+        }
+    }
     emit requestRoad( np );
 }
 
@@ -73,9 +84,43 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
         }
     } else {
         if( curPlayer_ == 0 ) {
+            board_.allowedNodes_.clear();
             return;
         }
         curPlayer_--;
     }
+    setupAllowedBuildNodes();
     emit requestNode();
+}
+
+
+void Game::setupAllowedBuildNodes() {
+    // setup allowed nodes on land
+    board_.allowedNodes_.clear();
+    for( int ny = 0; ny < board_.nodeHeight(); ny++ ) {
+        for( int nx = 0; nx < board_.nodeWidth(); nx++ ) {
+            Pos np( nx, ny );
+            if( !board_.landNode( np ) ) {
+                continue;
+            }
+            const auto& n = board_.node_[ ny ][ nx ];
+            if( n.type_ != Node::None ) {
+                // already built
+                continue;
+            }
+            bool hasNeighbor = false;
+            for( const auto& nn : Board::nodesAroundNode( np ) ) {
+                if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
+                    continue;
+                }
+                if( board_.node_[ nn.y() ][ nn.x() ].type_ != Node::None ) {
+                    hasNeighbor = true;
+                    break;
+                }
+            }
+            if( !hasNeighbor ) {
+                board_.allowedNodes_.push_back( np );
+            }
+        }
+    }
 }

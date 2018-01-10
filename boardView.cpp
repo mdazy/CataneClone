@@ -6,6 +6,7 @@
 
 #include <cmath>
 #include <iostream>
+#include <algorithm>
 
 using namespace std;
 
@@ -149,13 +150,28 @@ void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
     for( unsigned int nx = 0; nx < board_->nodeWidth(); nx++ ) {
         for( unsigned int ny = 0; ny < board_->nodeHeight(); ny++ ) {
             Pos np( nx, ny );
+            bool allowed = std::find( board_->allowedNodes_.begin(), board_->allowedNodes_.end(), np ) != board_->allowedNodes_.end();
             const auto& n = board_->node_[ ny ][ nx ];
             QPointF nc = nodeCenter( np );
-            // highlight first node of road selection
+            // highlight selectable nodes
+            if( ( selectionMode_ == Node || selectionMode_ == Road ) && allowed ) {
+                bool underMouse = dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius_;
+                p.setBrush( underMouse ? QBrush( Qt::white ) : Qt::NoBrush );
+                QPen pen( Qt::white );
+                pen.setWidth( 2 );
+                p.setPen( pen );
+                p.drawEllipse( nc, nodeRadius_, nodeRadius_ );
+                if( underMouse ) {
+                    node_ = np;
+                }
+            }
+            // highlight first road node
             if( np == from_ ) {
                 p.setBrush( Qt::black );
-                p.setPen( Qt::NoPen );
-                p.drawEllipse( nc, nodeRadius_ * 0.8, nodeRadius_ * 0.8 );
+                QPen pen( Qt::white );
+                pen.setWidth( 2 );
+                p.setPen( pen );
+                p.drawEllipse( nc, nodeRadius_, nodeRadius_ );
             }
             if( drawHarbors ) {
                 if( n.harborType_ != Hex::Invalid ) {
@@ -186,20 +202,6 @@ void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawPolygon( curNode );
-            }
-     
-            // node/road selection
-            // TODO: fix/remove np!=from when selection restriction is implemented
-            if(
-                ( selectionMode_ == Node || ( selectionMode_ == Road && np != from_ ) ) &&
-                dist( nc.x(), nc.y(), mouseX_, mouseY_ ) < nodeRadius_
-            ) {
-                p.setBrush( Qt::NoBrush );
-                QPen pen( Qt::red );
-                pen.setWidth( 2 );
-                p.setPen( pen );
-                p.drawEllipse( nc, nodeRadius_ * 0.5, nodeRadius_ * 0.5 );
-                node_ = np;
             }
         }
     }

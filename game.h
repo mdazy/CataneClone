@@ -30,6 +30,8 @@ signals:
     void requestNode();
     void requestRoad( Pos from = Pos() );
 
+protected:
+    void setupAllowedBuildNodes();
 
 public:
     Board board_;

@@ -216,6 +216,20 @@ vector<Pos> Board::nodesAroundHex( const Pos& h ) {
 }
 
 
+// nodes around node, may include out of bounds indices
+vector<Pos> Board::nodesAroundNode( const Pos& n ) {
+	vector<Pos> result;
+	result.emplace_back( n.x(), n.y() - 1 );
+	result.emplace_back( n.x(), n.y() + 1 );
+	if( n.x() % 2 == n.y() % 2 ) {
+		result.emplace_back( n.x() + 1, n.y() );
+	} else {
+		result.emplace_back( n.x() - 1, n.y() );
+	}
+	return result;	
+}
+
+
 // hexes around node, may include out of bounds indices
 vector<Pos> Board::hexesAroundNode( const Pos& n ) {
 	vector<Pos> result;
@@ -230,4 +244,18 @@ vector<Pos> Board::hexesAroundNode( const Pos& n ) {
 	}
 	return result;
 
+}
+
+
+// return true if at least one hex around the node is not water
+bool Board::landNode( const Pos& n ) const {
+	for( const auto& h : hexesAroundNode( n ) ) {
+		if( !h.valid() || h.x() >= hexWidth() || h.y() >= hexHeight() ) {
+			continue;
+		}
+		if( hex_[ h.y() ][ h.x() ].type_ > Hex::Invalid && hex_[ h.y() ][ h.x() ].type_ < Hex::Water ) {
+			return true;
+		}
+	}
+	return false;
 }

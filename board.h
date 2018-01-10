@@ -64,10 +64,15 @@ public:
 	unsigned int maxHeight() const;
 
 	static std::vector<Pos> nodesAroundHex( const Pos& h );
+	static std::vector<Pos> nodesAroundNode( const Pos& n );
 	static std::vector<Pos> hexesAroundNode( const Pos& n );
+
+	bool landNode( const Pos& n ) const;
 
 public:
 	std::vector<std::vector<Hex>> hex_;
 	std::vector<std::vector<Node>> node_;
 	std::vector<Road> road_;
+
+	std::vector<Pos> allowedNodes_;
 };
