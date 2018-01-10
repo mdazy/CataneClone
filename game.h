@@ -4,6 +4,15 @@
 
 #include "board.h"
 
+class Player {
+public:
+    Player();
+
+public:
+    std::vector<int> resources_;
+};
+
+
 class Game : public QObject {
     Q_OBJECT;
 public:
@@ -24,6 +33,7 @@ signals:
 
 public:
     Board board_;
+    std::vector<Player> player_;
     unsigned int nbPlayers_;
     unsigned int curPlayer_;
     bool pickStartAscending_;
