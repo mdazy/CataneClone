@@ -202,3 +202,36 @@ unsigned int Board::minHeight() const {
 	}
 	return result;
 }
+
+// nodes around hex, may include out of bounds indices
+vector<Board::Pos> Board::nodesAroundHex( Pos h ) {
+	auto x = h.first;
+	auto y = h.second;
+	vector<Board::Pos> result;
+	result.emplace_back( x, 2 * y + x );
+	result.emplace_back( x, 2 * y + x + 1);
+	result.emplace_back( x, 2 * y + x + 2 );
+	result.emplace_back( x + 1, 2 * y + x );
+	result.emplace_back( x + 1 , 2 * y + x + 1);
+	result.emplace_back( x + 1, 2 * y + x + 2 );
+	return result;
+}
+
+
+// hexes around node, may include out of bounds indices
+vector<Board::Pos> Board::hexesAroundNode( Pos n ) {
+	auto x = n.first;
+	auto y = n.second;
+	vector<Board::Pos> result;
+	if( x % 2 == y % 2 ) {
+		result.emplace_back( x - 1, ( y - x ) / 2 );
+		result.emplace_back( x, ( y - x - 2 ) / 2 );
+		result.emplace_back( x, ( y - x ) / 2 );
+	} else {
+		result.emplace_back( x - 1, ( y - x - 1 ) / 2 );
+		result.emplace_back( x, ( y - x - 1 ) / 2 );
+		result.emplace_back( x - 1, ( y - x + 1 ) / 2 );
+	}
+	return result;
+
+}

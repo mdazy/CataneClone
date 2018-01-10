@@ -52,6 +52,7 @@ public:
 
 class Board {
 public:
+	typedef std::pair<int, int> Pos;
 	Board();
 
 	unsigned int hexHeight() const;
@@ -62,6 +63,9 @@ public:
 
 	unsigned int minHeight() const;
 	unsigned int maxHeight() const;
+
+	static std::vector<Pos> nodesAroundHex( Pos h );
+	static std::vector<Pos> hexesAroundNode( Pos n );
 
 public:
 	std::vector<std::vector<Hex>> hex_;
