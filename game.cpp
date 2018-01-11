@@ -20,6 +20,10 @@ Game::Game( QObject* parent ) :
     nbPlayers_( 0 ), curPlayer_( 0 ),
     pickStartAscending_( true )
 {
+    player_.resize( 4 );
+    for( int i = 0; i < 4; i++ ) {
+        player_[ i ].number_ = i + 1;
+    }
 }
 
 
@@ -30,7 +34,6 @@ void Game::newGame() {
 
 void Game::startWithPlayers( int nbPlayers ) {
     nbPlayers_ = nbPlayers;
-    player_.resize( nbPlayers_ );
     curPlayer_ = 0;
     setupAllowedBuildNodes();
     emit requestStartPositions();
@@ -54,6 +57,7 @@ void Game::startNodePicked( const Pos& np ) {
                 player_[ curPlayer_ ].resources_[ h.type_ ]++;
             }
         }
+        emit updatePlayer( curPlayer_ );
     }
     // setup allowed nodes around selected town
     board_.allowedNodes_.clear();

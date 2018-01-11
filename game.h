@@ -9,6 +9,7 @@ public:
     Player();
 
 public:
+    int number_;
     std::vector<int> resources_;
 };
 
@@ -29,6 +30,7 @@ signals:
     void requestStartPositions();
     void requestNode();
     void requestRoad( Pos from = Pos() );
+    void updatePlayer( int player );
 
 protected:
     void setupAllowedBuildNodes();

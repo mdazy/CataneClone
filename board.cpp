@@ -6,6 +6,9 @@ using namespace std;
 /**/
 
 
+const QString Hex::typeName[] = { "brick", "wood", "wheat", "sheep", "rock" };
+
+
 Hex::Hex( Type type ) : type_( type ), number_( -1 ) {
 }
 

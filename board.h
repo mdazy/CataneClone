@@ -9,6 +9,7 @@
 class Hex {
 public:
 	enum Type { Invalid = -1, Brick, Wood, Wheat, Sheep, Rock, Desert, Water, nbTypes, Any };
+	static const QString typeName[ Desert ];
    
 	Hex( Type type = Invalid );
 

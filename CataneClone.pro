@@ -8,6 +8,6 @@ win32:CONFIG -= x86 release
 
 QT += widgets
 
-SOURCES += main.cpp boardView.cpp board.cpp gameView.cpp game.cpp
+SOURCES += main.cpp boardView.cpp board.cpp gameView.cpp game.cpp playerView.cpp
 
-HEADERS += utils.h boardView.h board.h gameView.h game.h
+HEADERS += utils.h boardView.h board.h gameView.h game.h playerView.h

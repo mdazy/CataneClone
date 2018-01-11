@@ -1,3 +1,2 @@
- - add view of player card state
  - add robber in game state and view
  - harbor setup: prevent harbor on hex of same resource

@@ -8,6 +8,7 @@ class QPushButton;
 
 class Game;
 class BoardView;
+class PlayerView;
 
 class GameView : public QStackedWidget {
     Q_OBJECT;
@@ -19,6 +20,7 @@ public slots:
     void pickStartPositions();
     void pickStartNode();
     void pickStartRoad( const Pos& from );
+    void updatePlayer( int player );
 
 signals:
     void nbPlayersPicked( int nbPlayers );
@@ -39,4 +41,5 @@ protected:
 
     QWidget* gameView_;
     BoardView* boardView_;
+    std::vector<PlayerView*> playerView_;
 };

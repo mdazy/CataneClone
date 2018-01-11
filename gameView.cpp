@@ -4,6 +4,7 @@
 #include "gameView.h"
 #include "game.h"
 #include "boardView.h"
+#include "playerView.h"
 
 #include <iostream>
 using namespace std;
@@ -18,17 +19,18 @@ GameView::GameView( Game* game, QWidget* parent ) :
     connect( this, SIGNAL( nbPlayersPicked( int ) ), game, SLOT( startWithPlayers( int ) ) );
 
     connect( game, SIGNAL( requestStartPositions() ), this, SLOT( pickStartPositions() ) );
+
+    buildPlayersSelection();
+    buildGameView();
 }
 
 
 void GameView::pickNbPlayers() {
-    buildPlayersSelection();
     setCurrentWidget( playersSelection_ );
 }
 
 
 void GameView::pickStartPositions() {
-    buildGameView();
     setCurrentWidget( gameView_ );
     connect( game_, SIGNAL( requestNode() ), this, SLOT( pickStartNode() ) );
     connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickStartRoad( const Pos& ) ) );
@@ -50,9 +52,6 @@ void GameView::pickStartRoad( const Pos& from ) {
 
 
 void GameView::buildPlayersSelection() {
-    if( playersSelection_ != 0 ) {
-        return;
-    }
     playersSelection_ = new QWidget;
     addWidget( playersSelection_ );
     auto l = new QHBoxLayout( playersSelection_ );
@@ -67,22 +66,32 @@ void GameView::buildPlayersSelection() {
 
 
 void GameView::nbPlayersPicked() {
-    if( sender() == players3_ ) {
-        emit nbPlayersPicked( 3 );
-    } else {
-        emit nbPlayersPicked( 4 );
+    int nbPlayers = sender() == players3_ ? 3 : 4;
+    for( int i = nbPlayers; i < 4; i++ ) {
+        playerView_[ i ]->hide();
     }
+    emit nbPlayersPicked( nbPlayers );
 }
 
 
 void GameView::buildGameView() {
-    if( gameView_ != 0 ) {
-        return;
-    }
     gameView_ = new QWidget;
     addWidget( gameView_ );
     auto l = new QHBoxLayout( gameView_ );
     boardView_ = new BoardView;
     boardView_->board_ = &game_->board_;
-    l->addWidget( boardView_ );
+    l->addWidget( boardView_, 1 );
+    auto vl = new QVBoxLayout();
+    l->addLayout( vl );
+    for( int i = 0; i < 4; i++ ) {
+        auto pv = new PlayerView( &game_->player_[ i ] );
+        vl->addWidget( pv );
+        playerView_.push_back( pv );
+    }
+    connect( game_, SIGNAL( updatePlayer( int ) ), this, SLOT( updatePlayer( int ) ) );
+}
+
+
+void GameView::updatePlayer( int player ) {
+    playerView_[ player ]->updateView();
 }
