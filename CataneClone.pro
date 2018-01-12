@@ -10,4 +10,4 @@ QT += widgets
 
 SOURCES += main.cpp boardView.cpp board.cpp gameView.cpp game.cpp playerView.cpp
 
-HEADERS += utils.h boardView.h board.h gameView.h game.h playerView.h
+HEADERS += utils.h viewUtils.h boardView.h board.h gameView.h game.h playerView.h

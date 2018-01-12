@@ -1,14 +1,19 @@
-#include <QtWidgets/QLabel>
-#include <QtWidgets/QVBoxLayout>
-
-#include "game.h"
 #include "playerView.h"
 
+#include <QtWidgets/QLabel>
+#include <QtWidgets/QVBoxLayout>
+#include <QtGui/QPalette>
+
+#include "game.h"
+#include "viewUtils.h"
+
 PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player_( p ) {
-    auto l = new QVBoxLayout( this );
-    l->addWidget( new QLabel( "<b>Player " + QString::number( p->number_ ) + "</b>" ) );
+    auto vl = new QVBoxLayout( this );
+    auto l = new QLabel( "<b>Player " + QString::number( p->number_ ) + "</b>" );
+    l->setStyleSheet( "background-color:" + playerColor[ p->number_ - 1 ].name( QColor::HexRgb ) );
+    vl->addWidget( l );
     resources_ = new QLabel( "0 cards" );
-    l->addWidget( resources_ );
+    vl->addWidget( resources_ );
 }
 
 
