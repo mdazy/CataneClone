@@ -25,7 +25,8 @@ int main( int argc, char** argv ) {
     mainWindow.setCentralWidget( view );
     
     auto desktop = app.desktop();
-    mainWindow.move( ( desktop->width() - 500 ) / 2, ( desktop->height() - 500 ) / 2 );
+    QRect screen = desktop->screenGeometry( desktop->primaryScreen() );
+    mainWindow.move( ( screen.width() - 500 ) / 2, ( screen.height() - 500 ) / 2 );
     mainWindow.show();
 
     game.newGame();
