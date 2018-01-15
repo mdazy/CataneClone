@@ -1,2 +1,5 @@
- - add robber in game state and view
+ - turn structure: add processing for 7
+   - discard cards over 7
+   - robber movement and pick player to rob from
+    
  - harbor setup: prevent harbor on hex of same resource
