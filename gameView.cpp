@@ -6,6 +6,7 @@
 #include "game.h"
 #include "boardView.h"
 #include "playerView.h"
+#include "die.h"
 
 #include <iostream>
 using namespace std;
@@ -81,12 +82,22 @@ void GameView::nbPlayersPicked() {
 void GameView::buildGameView() {
     gameView_ = new QWidget;
     addWidget( gameView_ );
+    // layout for board + game state
     auto l = new QHBoxLayout( gameView_ );
     boardView_ = new BoardView;
     boardView_->board_ = &game_->board_;
     l->addWidget( boardView_, 1 );
+    // layout for game state
     auto vl = new QVBoxLayout();
     l->addLayout( vl );
+    // layout for dice
+    l = new QHBoxLayout();
+    vl->addLayout( l );
+    die1_ = new Die();
+    die2_ = new Die();
+    l->addWidget( die1_ );
+    l->addWidget( die2_ );
+    // players
     for( int i = 0; i < 4; i++ ) {
         auto pv = new PlayerView( &game_->player_[ i ] );
         vl->addWidget( pv );
@@ -108,6 +119,8 @@ void GameView::updatePlayer( int player ) {
 
 
 void GameView::nextTurn( int dice1, int dice2 ) {
+    die1_->setValue( dice1 );
+    die2_->setValue( dice2 );
     updatePlayer();
     if( QMessageBox::question(
         this, "Turn done", "Player rolled " + QString::number( dice1 ) + " and " + QString::number( dice2 ),

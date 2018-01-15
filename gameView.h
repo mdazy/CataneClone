@@ -9,6 +9,7 @@ class QPushButton;
 class Game;
 class BoardView;
 class PlayerView;
+class Die;
 
 class GameView : public QStackedWidget {
     Q_OBJECT;
@@ -43,5 +44,7 @@ protected:
 
     QWidget* gameView_;
     BoardView* boardView_;
+    Die* die1_;
+    Die* die2_;
     std::vector<PlayerView*> playerView_;
 };
