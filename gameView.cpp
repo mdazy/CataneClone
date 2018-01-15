@@ -1,4 +1,5 @@
 #include <QtWidgets/QHBoxLayout>
+#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
 
 #include "gameView.h"
@@ -19,6 +20,9 @@ GameView::GameView( Game* game, QWidget* parent ) :
     connect( this, SIGNAL( nbPlayersPicked( int ) ), game, SLOT( startWithPlayers( int ) ) );
 
     connect( game, SIGNAL( requestStartPositions() ), this, SLOT( pickStartPositions() ) );
+
+    connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( nextTurn( int, int ) ) );
+    connect( this, SIGNAL( turnDone() ), game, SLOT( nextTurn() ) );
 
     buildPlayersSelection();
     buildGameView();
@@ -93,5 +97,22 @@ void GameView::buildGameView() {
 
 
 void GameView::updatePlayer( int player ) {
-    playerView_[ player ]->updateView();
+    if( player >= 0 ) {
+        playerView_[ player ]->updateView();
+    } else {
+        for( int i = 0; i < game_->nbPlayers_; i++ ) {
+            playerView_[ i ]->updateView();
+        }
+    }
+}
+
+
+void GameView::nextTurn( int dice1, int dice2 ) {
+    updatePlayer();
+    if( QMessageBox::question(
+        this, "Turn done", "Player rolled " + QString::number( dice1 ) + " and " + QString::number( dice2 ),
+        QMessageBox::Ok | QMessageBox::Close, QMessageBox::Ok
+    ) == QMessageBox::Ok ) {
+        emit turnDone();
+    }
 }

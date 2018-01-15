@@ -1,5 +1,7 @@
 #include "game.h"
 
+#include <QtCore/QTimer>
+
 #include <iostream>
 using namespace std;
 
@@ -22,8 +24,10 @@ Game::Game( QObject* parent ) :
 {
     player_.resize( 4 );
     for( int i = 0; i < 4; i++ ) {
-        player_[ i ].number_ = i + 1;
+        player_[ i ].number_ = i;
     }
+
+    connect( this, SIGNAL( rollDice() ), this, SLOT( nextTurn() ) );
 }
 
 
@@ -89,6 +93,8 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     } else {
         if( curPlayer_ == 0 ) {
             board_.allowedNodes_.clear();
+            // start game
+            QTimer::singleShot( 0, this, SLOT( nextTurn() ) );
             return;
         }
         curPlayer_--;
@@ -127,4 +133,32 @@ void Game::setupAllowedBuildNodes() {
             }
         }
     }
+}
+
+
+void Game::nextTurn() {
+    int dice1 = 1 + rand() % 6;
+    int dice2 = 1 + rand() % 6;
+    int number = dice1 + dice2;
+
+    for( int hx = 0; hx < board_.hexWidth(); hx++ ) {
+        for( int hy = 0; hy < board_.hexHeight(); hy++ ) {
+            const auto& h = board_.hex_[ hy ][ hx ];
+            if( h.number_ != number ) {
+                continue;
+            }
+            Pos curP( hx, hy );
+            if( curP == board_.robber_ ) {
+                continue;
+            }
+            for( const auto& p : Board::nodesAroundHex( curP ) ) {
+                const auto& n = board_.node_[ p.y() ][ p.x() ];
+                if( n.type_ != Node::None ) {
+                    player_[ n.player_ ].resources_[ h.type_ ]++;
+                }
+            }
+        }
+    }
+    emit updatePlayer();
+    emit diceRolled( dice1, dice2 );
 }

@@ -9,8 +9,8 @@
 
 PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player_( p ) {
     auto vl = new QVBoxLayout( this );
-    auto l = new QLabel( "<b>Player " + QString::number( p->number_ ) + "</b>" );
-    l->setStyleSheet( "background-color:" + playerColor[ p->number_ - 1 ].name( QColor::HexRgb ) );
+    auto l = new QLabel( "<b>Player " + QString::number( p->number_ + 1 ) + "</b>" );
+    l->setStyleSheet( "background-color:" + playerColor[ p->number_ ].name( QColor::HexRgb ) );
     vl->addWidget( l );
     resources_ = new QLabel( "0 cards" );
     vl->addWidget( resources_ );

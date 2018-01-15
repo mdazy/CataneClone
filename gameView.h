@@ -20,10 +20,12 @@ public slots:
     void pickStartPositions();
     void pickStartNode();
     void pickStartRoad( const Pos& from );
-    void updatePlayer( int player );
+    void updatePlayer( int player = -1 );
+    void nextTurn( int dice1, int dice2 );
 
 signals:
     void nbPlayersPicked( int nbPlayers );
+    void turnDone();
 
 protected slots:
     void nbPlayersPicked();
