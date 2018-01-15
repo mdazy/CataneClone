@@ -76,4 +76,6 @@ public:
 	std::vector<Road> road_;
 
 	std::vector<Pos> allowedNodes_;
+
+	Pos robber_;
 };

@@ -126,17 +126,20 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
             }
 
             // draw number on land tiles
-            if( h.number_ < 0 ) {
+            bool hasRobber = board_->robber_ == Pos( hx, hy );
+            if( h.number_ < 0 && !hasRobber ) {
                 continue;
             }
             // white disc centered inside hex
             p.setPen( Qt::NoPen );
-            p.setBrush( Qt::white );
+            p.setBrush( hasRobber ? Qt::black : Qt::white );
             p.drawEllipse( hexCenter, radius_ / 2.5, radius_ / 2.5 );
             // number centered in disc
-            QRectF textBox( hexCenter.x() - textSize_ / 2, hexCenter.y() - textSize_ / 2, textSize_, textSize_ );
-            p.setPen( Qt::black );
-            p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
+            if( !hasRobber ) {
+                QRectF textBox( hexCenter.x() - textSize_ / 2, hexCenter.y() - textSize_ / 2, textSize_, textSize_ );
+                p.setPen( Qt::black );
+                p.drawText( textBox, Qt::AlignHCenter | Qt::AlignVCenter, QString::number( h.number_ ) );
+            }
         }
     }
 }

@@ -1,5 +1,7 @@
 #include "board.h"
 
+#include <iostream>
+
 using namespace std;
 
 
@@ -104,7 +106,7 @@ Board::Board() {
 	vector<int> numbers = { 5, 2, 6, 3, 8, 10, 9, 12, 11, 4, 8, 10, 9, 4, 5, 6, 3, 11 };
 
 	// map setup
-	vector<pair<int, int>> hexSetup = {
+	vector<Pos> hexSetup = {
 		// land hexes, ordered along inward spiral (counter clockwise, starting at top)
 		// for placement of numbers according to rules
 		{ 3, 1 }, { 2, 2 }, { 1, 3 }, { 1, 4 }, { 1, 5 }, { 2, 5 },
@@ -115,12 +117,17 @@ Board::Board() {
 		{ 2, 1 }, { 2, 6 }, { 3, 0 }, { 3, 6 }, { 4, 0 }, { 4, 5 },
 		{ 5, 0 }, { 5, 4 }, { 6, 0 }, { 6, 1 }, { 6, 2 }, { 6, 3 }
 	};
+	cerr << "TUPUDUKU" << endl;
 	unsigned int iType = 0;
 	unsigned int iNumber = 0;
 	for( const auto& s : hexSetup ) {
 		auto& h = hex_[ s.second ][ s.first ];
 		h.type_ = iType < types.size() ? types[ iType++ ] : Hex::Water;
 		h.number_ = h.type_ != Hex::Desert && h.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
+		if( h.type_ == Hex::Desert ) {
+			robber_ = s;
+			cerr << s.x() << " " << s.y() << endl;
+		}
 	}
 
 	// standard repartition of harbors
