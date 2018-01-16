@@ -17,16 +17,18 @@ GameView::GameView( Game* game, QWidget* parent ) :
     playersSelection_( 0 ), players3_( 0 ), players4_( 0 ),
     gameView_( 0 ), boardView_( 0 )
 {
+    buildPlayersSelection();
+    buildGameView();
+
     connect( game, SIGNAL( requestNbPlayers() ), this, SLOT( pickNbPlayers() ) );
     connect( this, SIGNAL( nbPlayersPicked( int ) ), game, SLOT( startWithPlayers( int ) ) );
 
     connect( game, SIGNAL( requestStartPositions() ), this, SLOT( pickStartPositions() ) );
 
-    connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( nextTurn( int, int ) ) );
-    connect( this, SIGNAL( turnDone() ), game, SLOT( nextTurn() ) );
+    connect( game, SIGNAL( rollDice() ), this, SLOT( rollDice() ) );
+    connect( roll_, SIGNAL( clicked() ), game_, SLOT( playTurn() ) );
 
-    buildPlayersSelection();
-    buildGameView();
+    connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( diceRolled( int, int ) ) );
 }
 
 
@@ -85,6 +87,7 @@ void GameView::buildGameView() {
     // layout for board + game state
     auto l = new QHBoxLayout( gameView_ );
     boardView_ = new BoardView;
+    boardView_->setMinimumSize( 500, 500 );
     boardView_->board_ = &game_->board_;
     l->addWidget( boardView_, 1 );
     // layout for game state
@@ -97,12 +100,18 @@ void GameView::buildGameView() {
     die2_ = new Die();
     l->addWidget( die1_ );
     l->addWidget( die2_ );
+    roll_ = new QPushButton( "Roll" );
+    roll_->setEnabled( false );
+    l->addWidget( roll_ );
     // players
     for( int i = 0; i < 4; i++ ) {
         auto pv = new PlayerView( &game_->player_[ i ] );
+        pv->setEnabled( false );
         vl->addWidget( pv );
         playerView_.push_back( pv );
+        connect( pv->pass_, SIGNAL( clicked() ), game_, SLOT( nextPlayer() ) );       
     }
+    vl->addStretch();
     connect( game_, SIGNAL( updatePlayer( int ) ), this, SLOT( updatePlayer( int ) ) );
 }
 
@@ -118,14 +127,16 @@ void GameView::updatePlayer( int player ) {
 }
 
 
-void GameView::nextTurn( int dice1, int dice2 ) {
-    die1_->setValue( dice1 );
-    die2_->setValue( dice2 );
+void GameView::rollDice() {
+    roll_->setEnabled( true );
+    playerView_[ game_->curPlayer_ ]->setEnabled( true );
+    playerView_[ ( game_->curPlayer_ + game_->nbPlayers_ - 1 ) % game_->nbPlayers_ ]->setEnabled( false );
+}
+
+
+void GameView::diceRolled( int die1, int die2 ) {
+    roll_->setEnabled( false );
+    die1_->setValue( die1 );
+    die2_->setValue( die2 );
     updatePlayer();
-    if( QMessageBox::question(
-        this, "Turn done", "Player rolled " + QString::number( dice1 ) + " and " + QString::number( dice2 ),
-        QMessageBox::Ok | QMessageBox::Close, QMessageBox::Ok
-    ) == QMessageBox::Ok ) {
-        emit turnDone();
-    }
 }

@@ -26,8 +26,6 @@ Game::Game( QObject* parent ) :
     for( int i = 0; i < 4; i++ ) {
         player_[ i ].number_ = i;
     }
-
-    connect( this, SIGNAL( rollDice() ), this, SLOT( nextTurn() ) );
 }
 
 
@@ -94,7 +92,7 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
         if( curPlayer_ == 0 ) {
             board_.allowedNodes_.clear();
             // start game
-            QTimer::singleShot( 0, this, SLOT( nextTurn() ) );
+            emit rollDice();
             return;
         }
         curPlayer_--;
@@ -136,7 +134,7 @@ void Game::setupAllowedBuildNodes() {
 }
 
 
-void Game::nextTurn() {
+void Game::playTurn() {
     int dice1 = 1 + rand() % 6;
     int dice2 = 1 + rand() % 6;
     int number = dice1 + dice2;
@@ -161,4 +159,10 @@ void Game::nextTurn() {
     }
     emit updatePlayer();
     emit diceRolled( dice1, dice2 );
+}
+
+
+void Game::nextPlayer() {
+    curPlayer_ = ( curPlayer_ + 1 ) % nbPlayers_;
+    emit rollDice();
 }

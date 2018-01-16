@@ -24,7 +24,8 @@ public slots:
     void startWithPlayers( int nbPlayers );
     void startNodePicked( const Pos& np );
     void startRoadPicked( const Pos& from, const Pos& to );
-    void nextTurn();
+    void playTurn();
+    void nextPlayer();
 
 signals:
     void requestNbPlayers();
@@ -32,8 +33,8 @@ signals:
     void requestNode();
     void requestRoad( Pos from = Pos() );
     void updatePlayer( int player = - 1 );
-    void diceRolled( int dice1, int dice2 );
-    
+    void rollDice();
+    void diceRolled( int die1, int die2 );
 
 protected:
     void setupAllowedBuildNodes();
@@ -41,7 +42,7 @@ protected:
 public:
     Board board_;
     std::vector<Player> player_;
-    unsigned int nbPlayers_;
-    unsigned int curPlayer_;
+    int nbPlayers_;
+    int curPlayer_;
     bool pickStartAscending_;
 };

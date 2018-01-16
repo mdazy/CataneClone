@@ -21,12 +21,13 @@ public slots:
     void pickStartPositions();
     void pickStartNode();
     void pickStartRoad( const Pos& from );
+    void rollDice();
+    void diceRolled( int die1, int die2 );
+
     void updatePlayer( int player = -1 );
-    void nextTurn( int dice1, int dice2 );
 
 signals:
     void nbPlayersPicked( int nbPlayers );
-    void turnDone();
 
 protected slots:
     void nbPlayersPicked();
@@ -46,5 +47,6 @@ protected:
     BoardView* boardView_;
     Die* die1_;
     Die* die2_;
+    QPushButton* roll_;
     std::vector<PlayerView*> playerView_;
 };
