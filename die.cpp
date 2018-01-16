@@ -1,4 +1,4 @@
-#include <Qtgui/QPainter>
+#include <QtGui/QPainter>
 
 #include <vector>
 
@@ -36,7 +36,7 @@ void Die::paintEvent( QPaintEvent* ) {
         int nx = d - 3 * ny;
         float x = ( nx + 0.5 ) * cellWidth;
         float y = ( ny + 0.5 ) * cellWidth;
-        p.drawEllipse( x, y, cellWidth * 0.2, cellWidth * 0.2 );
+        p.drawEllipse( x, y, cellWidth * 0.4, cellWidth * 0.4 );
     }
 
 }
