@@ -3,3 +3,9 @@
    - robber movement and pick player to rob from
     
  - harbor setup: prevent harbor on hex of same resource
+
+ - trade system
+   - start with bank and harbors
+   - between players only when network is available
+
+- dev cards
