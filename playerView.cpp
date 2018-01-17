@@ -22,10 +22,12 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
     auto hl = new QHBoxLayout();
     vl->addLayout( hl );
     trade_ = new QPushButton( "Trade" );
+    trade_->setToolTip( "Not implemented" );
     hl->addWidget( trade_ );
     build_ = new QPushButton( "Build" );
     hl->addWidget( build_ );
     card_ = new QPushButton( "Card" );
+    card_->setToolTip( "Not implemented" );
     hl->addWidget( card_ );
     pass_ = new QPushButton( "Pass" );
     hl->addWidget( pass_ ); 
@@ -46,12 +48,10 @@ void PlayerView::updateView() {
 }
 
 
-void PlayerView::changeEvent( QEvent* event ) {
-    if( event->type() == QEvent::EnabledChange ) {
-        trade_->setEnabled( isEnabled() );
-        build_->setEnabled( isEnabled() );
-        card_->setEnabled( isEnabled() );
-        pass_->setEnabled( isEnabled() );
-    }
-    QWidget::changeEvent( event );
+void PlayerView::enableButtons( bool enabled ) {
+    trade_->setEnabled( false );
+    build_->setEnabled( enabled && player_->game_->canBuild() );
+    build_->setToolTip( enabled && ! player_->game_->canBuild() ? "Nothing can be built" : "" );
+    card_->setEnabled( false );
+    pass_->setEnabled( enabled );
 }

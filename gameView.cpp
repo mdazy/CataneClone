@@ -106,7 +106,7 @@ void GameView::buildGameView() {
     // players
     for( int i = 0; i < 4; i++ ) {
         auto pv = new PlayerView( &game_->player_[ i ] );
-        pv->setEnabled( false );
+        pv->enableButtons( false );
         vl->addWidget( pv );
         playerView_.push_back( pv );
         connect( pv->pass_, SIGNAL( clicked() ), game_, SLOT( nextPlayer() ) );       
@@ -129,13 +129,13 @@ void GameView::updatePlayer( int player ) {
 
 void GameView::rollDice() {
     roll_->setEnabled( true );
-    playerView_[ game_->curPlayer_ ]->setEnabled( true );
-    playerView_[ ( game_->curPlayer_ + game_->nbPlayers_ - 1 ) % game_->nbPlayers_ ]->setEnabled( false );
+    playerView_[ ( game_->curPlayer_ + game_->nbPlayers_ - 1 ) % game_->nbPlayers_ ]->enableButtons( false );
 }
 
 
 void GameView::diceRolled( int die1, int die2 ) {
     roll_->setEnabled( false );
+    playerView_[ game_->curPlayer_ ]->enableButtons( true );
     die1_->setValue( die1 );
     die2_->setValue( die2 );
     updatePlayer();

@@ -12,7 +12,7 @@ class PlayerView : public QWidget {
 public:
     PlayerView( Player* p, QWidget* parent = Q_NULLPTR );
 
-    void changeEvent( QEvent* event ) override;
+    void enableButtons( bool enable );
 
     void updateView();
 
