@@ -7,7 +7,7 @@
 using namespace std;
 
 
-Die::Die( QWidget* parent ) : QWidget( parent ), value_( 1 ) {
+Die::Die( QWidget* parent ) : QWidget( parent ), value_( 0 ) {
     setFixedSize( 50, 50 );
 }
 
@@ -20,6 +20,7 @@ void Die::setValue( int value ) {
 
 void Die::paintEvent( QPaintEvent* ) {
     QPainter p( this );
+    p.setRenderHint( QPainter::Antialiasing );
 
     p.setBrush( Qt::white );
     QPen pen( Qt::black );
@@ -36,7 +37,7 @@ void Die::paintEvent( QPaintEvent* ) {
         int nx = d - 3 * ny;
         float x = ( nx + 0.5 ) * cellWidth;
         float y = ( ny + 0.5 ) * cellWidth;
-        p.drawEllipse( x, y, cellWidth * 0.4, cellWidth * 0.4 );
+        p.drawEllipse( QPointF( x, y ), cellWidth * 0.2, cellWidth * 0.2 );
     }
 
 }
