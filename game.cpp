@@ -9,7 +9,7 @@ using namespace std;
 /**/
 
 
-Player::Player() {
+Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ) {
     resources_.resize( Hex::Desert, 0 );
 }
 
@@ -22,10 +22,46 @@ Game::Game( QObject* parent ) :
     nbPlayers_( 0 ), curPlayer_( 0 ),
     pickStartAscending_( true )
 {
-    player_.resize( 4 );
     for( int i = 0; i < 4; i++ ) {
+        player_.emplace_back( this );
         player_[ i ].number_ = i;
     }
+}
+
+
+bool Game::canBuildTown() const {
+    const auto& p = player_[ curPlayer_ ];
+    bool hasCards = p.resources_[ Hex::Wood ] > 0 && p.resources_[ Hex::Brick ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
+    // TODO: check available positions on board
+    return hasCards && p.towns_ > 0;
+}
+
+
+bool Game::canBuildCity() const {
+    const auto& p = player_[ curPlayer_ ];
+    bool hasCards = p.resources_[ Hex::Wheat ] > 1 && p.resources_[ Hex::Rock ] > 2;
+    return hasCards && p.towns_ < 5 && p.cities_ > 0;
+}
+
+
+bool Game::canBuildRoad() const {
+    const auto& p = player_[ curPlayer_ ];
+    bool hasCards = p.resources_[ Hex::Wood ] > 0 && p.resources_[ Hex::Brick ] > 0;
+    // TODO: check available positions on board
+    return hasCards && p.roads_ > 0;
+}
+
+
+bool Game::canBuildCard() const {
+    const auto& p = player_[ curPlayer_ ];
+    bool hasCards = p.resources_[ Hex::Rock ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
+    // TODO: check remaining dev cards
+    return hasCards;
+}
+
+
+bool Game::canBuild() const {
+    return canBuildTown() || canBuildCity() || canBuildRoad() || canBuildCard();
 }
 
 
@@ -46,6 +82,7 @@ void Game::startNodePicked( const Pos& np ) {
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.player_ = curPlayer_;
     n.type_ = Node::Town;
+    player_[ curPlayer_ ].towns_--;
     if( !pickStartAscending_ ) {
         for( const auto& hp : Board::hexesAroundNode( np )  ) {
             auto hx = hp.first;
@@ -81,6 +118,7 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     r.from_ = from;
     r.to_ = to;
     board_.road_.push_back( r );
+    player_[ curPlayer_ ].roads_--;
 
     if( pickStartAscending_ ) {
         if( curPlayer_ == nbPlayers_ - 1 ) {

@@ -4,13 +4,19 @@
 
 #include "board.h"
 
+class Game;
+
 class Player {
 public:
-    Player();
+    Player( Game* game );
 
 public:
+    Game* game_;
     int number_;
     std::vector<int> resources_;
+    int towns_;
+    int cities_;
+    int roads_;
 };
 
 
@@ -18,6 +24,12 @@ class Game : public QObject {
     Q_OBJECT;
 public:
     Game( QObject* parent = Q_NULLPTR );
+
+    bool canBuildTown() const;
+    bool canBuildCity() const;
+    bool canBuildRoad() const;
+    bool canBuildCard() const;
+    bool canBuild() const;
 
 public slots:
     void newGame();
