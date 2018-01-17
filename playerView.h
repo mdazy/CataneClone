@@ -2,11 +2,11 @@
 
 #include <QtWidgets/QWidget>
 
+#include "game.h"
+
 class QEvent;
 class QLabel;
 class QPushButton;
-
-class Player;
 
 class PlayerView : public QWidget {
 public:
@@ -18,7 +18,9 @@ public:
 
 public:  
     Player* player_;
+    Player prevPlayer_;
     QLabel* resources_;
+    QLabel* tokens_;
     QPushButton* trade_;
     QPushButton* build_;
     QPushButton* card_;

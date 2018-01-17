@@ -130,6 +130,7 @@ void GameView::updatePlayer( int player ) {
 void GameView::rollDice() {
     roll_->setEnabled( true );
     playerView_[ ( game_->curPlayer_ + game_->nbPlayers_ - 1 ) % game_->nbPlayers_ ]->enableButtons( false );
+    updatePlayer();
 }
 
 

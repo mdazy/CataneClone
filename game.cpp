@@ -74,6 +74,7 @@ void Game::startWithPlayers( int nbPlayers ) {
     nbPlayers_ = nbPlayers;
     curPlayer_ = 0;
     setupAllowedBuildNodes();
+    emit updatePlayer();
     emit requestStartPositions();
 }
 
@@ -119,6 +120,7 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     r.to_ = to;
     board_.road_.push_back( r );
     player_[ curPlayer_ ].roads_--;
+    emit updatePlayer( curPlayer_ );
 
     if( pickStartAscending_ ) {
         if( curPlayer_ == nbPlayers_ - 1 ) {
@@ -195,7 +197,6 @@ void Game::playTurn() {
             }
         }
     }
-    emit updatePlayer();
     emit diceRolled( dice1, dice2 );
 }
 
