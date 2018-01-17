@@ -117,7 +117,6 @@ Board::Board() {
 		{ 2, 1 }, { 2, 6 }, { 3, 0 }, { 3, 6 }, { 4, 0 }, { 4, 5 },
 		{ 5, 0 }, { 5, 4 }, { 6, 0 }, { 6, 1 }, { 6, 2 }, { 6, 3 }
 	};
-	cerr << "TUPUDUKU" << endl;
 	unsigned int iType = 0;
 	unsigned int iNumber = 0;
 	for( const auto& s : hexSetup ) {
@@ -126,7 +125,6 @@ Board::Board() {
 		h.number_ = h.type_ != Hex::Desert && h.type_ != Hex::Water ? numbers[ iNumber++ ] : -1;
 		if( h.type_ == Hex::Desert ) {
 			robber_ = s;
-			cerr << s.x() << " " << s.y() << endl;
 		}
 	}
 
