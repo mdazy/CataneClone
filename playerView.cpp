@@ -71,10 +71,10 @@ void PlayerView::enableButtons( bool enabled ) {
     buildRoad_->setToolTip( enabled && ! player_->game_->canBuildRoad() ? "Cannot be built" : "" );
     buildTown_->setEnabled( enabled && player_->game_->canBuildTown() );
     buildTown_->setToolTip( enabled && ! player_->game_->canBuildTown() ? "Cannot be built" : "" );
-    buildCity_->setEnabled( enabled && player_->game_->canBuildCity() );
-    buildCity_->setToolTip( enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : "" );
-    buildCard_->setEnabled( enabled && player_->game_->canBuildCard() );
-    buildCard_->setToolTip( enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : "" );
+    buildCity_->setEnabled( false /*enabled && player_->game_->canBuildCity()*/ );
+    buildCity_->setToolTip( "Not implemented" /*enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : ""*/ );
+    buildCard_->setEnabled( false /*enabled && player_->game_->canBuildCard()*/ );
+    buildCard_->setToolTip( "Not implemented" /*enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : ""*/ );
     card_->setEnabled( false );
     pass_->setEnabled( enabled );
 }
