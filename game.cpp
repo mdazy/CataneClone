@@ -97,15 +97,7 @@ void Game::startNodePicked( const Pos& np ) {
         emit updatePlayer( curPlayer_ );
     }
     // setup allowed nodes around selected town
-    board_.allowedNodes_.clear();
-    for( const auto& nn : Board::nodesAroundNode( np ) ) {
-        if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
-            continue;
-        }
-        if( board_.landNode( nn ) && board_.node_[ nn.y() ][ nn.x() ].type_ == Node::None ) {
-            board_.allowedNodes_.push_back( nn );
-        }
-    }
+    setupAllowedRoadEndNodes( np );
     emit requestRoad( np );
 }
 
@@ -156,12 +148,8 @@ void Game::setupAllowedBuildNodes( bool start ) {
                 if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
                     continue;
                 }
-                if( board_.node_[ nn.y() ][ nn.x() ].type_ != Node::None ) {
-                    hasNeighbor = true;
-                }
-                if( find( board_.road_.begin(), board_.road_.end(), Road( curPlayer_, np, nn ) ) != board_.road_.end() ) {
-                    hasRoad = true;
-                }
+                hasNeighbor |= board_.node_[ nn.y() ][ nn.x() ].type_ != Node::None;
+                hasRoad |= board_.roadExists( np, nn, curPlayer_ );
             }
             // cannot build if node has an immediate neighbor
             if( hasNeighbor ) {
@@ -172,6 +160,47 @@ void Game::setupAllowedBuildNodes( bool start ) {
                 continue;
             }
             board_.allowedNodes_.push_back( np );
+        }
+    }
+}
+
+
+void Game::setupAllowedRoadStartNodes() {
+    board_.allowedNodes_.clear();
+    for( int ny = 0; ny < board_.nodeHeight(); ny++ ) {
+        for( int nx = 0; nx < board_.nodeWidth(); nx++ ) {
+            Pos np( nx, ny );
+            if( !board_.landNode( np ) ) {
+                continue;
+            }
+            // is there a construction from player on this node?
+            bool hasConstruction = board_.node_[ np.y() ][ np.x() ].type_ != Node::None && board_.node_[ np.y() ][ np.x() ].player_ == curPlayer_;
+            // inspect neighbor nodes for owned, connected roads and free target nodes
+            bool hasConnectedRoad = false;
+            bool hasFreeNeighbor = false;
+            for( const auto& nn : Board::nodesAroundNode( np ) ) {
+                if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() || !board_.landNode( nn ) ) {
+                    continue;
+                }
+                hasFreeNeighbor |= board_.node_[ nn.y() ][ nn.x() ].type_ == Node::None && !board_.roadExists( np, nn );
+                hasConnectedRoad |= board_.roadExists( np, nn, curPlayer_ );
+            }
+            if( hasFreeNeighbor && ( hasConstruction || hasConnectedRoad ) ) {
+                board_.allowedNodes_.push_back( np );
+            }
+        }
+    }
+}
+
+
+void Game::setupAllowedRoadEndNodes( const Pos& from ) {
+    board_.allowedNodes_.clear();
+    for( const auto& nn : Board::nodesAroundNode( from ) ) {
+        if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
+            continue;
+        }
+        if( board_.landNode( nn ) && board_.node_[ nn.y() ][ nn.x() ].type_ == Node::None && !board_.roadExists( from, nn ) ) {
+            board_.allowedNodes_.push_back( nn );
         }
     }
 }
@@ -211,6 +240,18 @@ void Game::nextPlayer() {
 
 
 void Game::buildRoad() {
+    setupAllowedRoadStartNodes();
+    emit requestRoad();
+}
+
+
+void Game::buildRoad( const Pos& from, const Pos& to ) {
+    auto& p = player_[ curPlayer_ ];
+    p.resources_[ Hex::Brick ]--;
+    p.resources_[ Hex::Wood ]--;
+    p.roads_--;
+    board_.road_.emplace_back( curPlayer_, from, to );
+    emit updatePlayer( curPlayer_ );
 }
 
 
@@ -230,7 +271,7 @@ void Game::buildTown( const Pos& np ) {
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.type_ = Node::Town;
     n.player_ = curPlayer_;
-    emit updatePlayer();
+    emit updatePlayer( curPlayer_ );
 }
 
 

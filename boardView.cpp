@@ -51,6 +51,7 @@ void BoardView::mouseReleaseEvent( QMouseEvent* event ) {
         } else {
             from_ = node_;
             node_ = Pos();
+            emit nodeSelected( from_ );
         }
         update();
     }

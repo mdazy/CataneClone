@@ -60,8 +60,17 @@ void GameView::pickStartNode() {
 
 
 void GameView::pickStartRoad( const Pos& from ) {
+    QObject::disconnect( boardView_, &BoardView::roadSelected, 0, 0 );
+    QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
+    if( playing_ ) {
+        connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( setupAllowedRoadEndNodes( const Pos& ) ) );
+        connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( buildRoad( const Pos&, const Pos& ) ) );
+    } else {
+        connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
+    }
     boardView_->setSelectionMode( BoardView::Road );
     boardView_->from_ = from;
+    boardView_->update();
 }
 
 
@@ -130,6 +139,7 @@ void GameView::buildGameView() {
 void GameView::updatePlayer( int player ) {
     if( player >= 0 ) {
         playerView_[ player ]->updateView();
+        playerView_[ player ]->enableButtons( true );
     } else {
         for( int i = 0; i < game_->nbPlayers_; i++ ) {
             playerView_[ i ]->updateView();

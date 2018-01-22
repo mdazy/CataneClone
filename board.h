@@ -72,6 +72,8 @@ public:
 
 	bool landNode( const Pos& n ) const;
 
+	bool roadExists( const Pos& from, const Pos& to, int player = -1 ) const;
+
 public:
 	std::vector<std::vector<Hex>> hex_;
 	std::vector<std::vector<Node>> node_;

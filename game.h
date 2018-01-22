@@ -35,9 +35,11 @@ public slots:
     void startWithPlayers( int nbPlayers );
     void startNodePicked( const Pos& np );
     void startRoadPicked( const Pos& from, const Pos& to );
+    void setupAllowedRoadEndNodes( const Pos& from );
     void playTurn();
     void nextPlayer();
     void buildRoad();
+    void buildRoad( const Pos& from, const Pos& to );
     void buildTown();
     void buildTown( const Pos& np );
     void buildCity();
@@ -54,6 +56,7 @@ signals:
 
 protected:
     void setupAllowedBuildNodes( bool start = false );
+    void setupAllowedRoadStartNodes();
 
 public:
     Board board_;

@@ -37,7 +37,7 @@ Road::Road( int player, const Pos& from, const Pos& to ) : player_( player ) {
 
 
 bool Road::operator ==( const Road& rhs ) const {
-	return player_ == rhs.player_ && from_ == rhs.from_ && to_ == rhs.to_;
+	return ( player_ == rhs.player_ || player_ < 0 || rhs.player_ < 0 ) && from_ == rhs.from_ && to_ == rhs.to_;
 }
 
 
@@ -278,4 +278,9 @@ bool Board::landNode( const Pos& n ) const {
 		}
 	}
 	return false;
+}
+
+
+bool Board::roadExists( const Pos& from, const Pos& to, int player ) const {
+	return find( road_.begin(), road_.end(), Road( player, from, to ) ) != road_.end();
 }
