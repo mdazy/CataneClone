@@ -39,6 +39,7 @@ protected:
 
 protected:
     Game* game_;
+    bool playing_;
 
     QWidget* playersSelection_;
     QPushButton* players3_;

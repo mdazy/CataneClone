@@ -39,7 +39,9 @@ public:
 
 class Road {
 public:
-	Road();
+	Road( int player, const Pos& from, const Pos& to );
+
+	bool operator ==( const Road& rhs ) const;
 
 public:
 	int player_;

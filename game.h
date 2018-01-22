@@ -25,11 +25,10 @@ class Game : public QObject {
 public:
     Game( QObject* parent = Q_NULLPTR );
 
-    bool canBuildTown() const;
+    bool canBuildTown();
     bool canBuildCity() const;
     bool canBuildRoad() const;
     bool canBuildCard() const;
-    bool canBuild() const;
 
 public slots:
     void newGame();
@@ -40,6 +39,7 @@ public slots:
     void nextPlayer();
     void buildRoad();
     void buildTown();
+    void buildTown( const Pos& np );
     void buildCity();
     void buildCard();
 
@@ -53,7 +53,7 @@ signals:
     void diceRolled( int die1, int die2 );
 
 protected:
-    void setupAllowedBuildNodes();
+    void setupAllowedBuildNodes( bool start = false );
 
 public:
     Board board_;

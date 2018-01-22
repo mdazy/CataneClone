@@ -29,11 +29,13 @@ Game::Game( QObject* parent ) :
 }
 
 
-bool Game::canBuildTown() const {
+bool Game::canBuildTown() {
     const auto& p = player_[ curPlayer_ ];
     bool hasCards = p.resources_[ Hex::Wood ] > 0 && p.resources_[ Hex::Brick ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
-    // TODO: check available positions on board
-    return hasCards && p.towns_ > 0;
+    setupAllowedBuildNodes();
+    int nbNodes = board_.allowedNodes_.size();
+    board_.allowedNodes_.clear();
+    return hasCards && p.towns_ > 0 && nbNodes > 0;
 }
 
 
@@ -60,11 +62,6 @@ bool Game::canBuildCard() const {
 }
 
 
-bool Game::canBuild() const {
-    return canBuildTown() || canBuildCity() || canBuildRoad() || canBuildCard();
-}
-
-
 void Game::newGame() {
     emit requestNbPlayers();
 }
@@ -73,7 +70,7 @@ void Game::newGame() {
 void Game::startWithPlayers( int nbPlayers ) {
     nbPlayers_ = nbPlayers;
     curPlayer_ = 0;
-    setupAllowedBuildNodes();
+    setupAllowedBuildNodes( true );
     emit updatePlayer();
     emit requestStartPositions();
 }
@@ -114,11 +111,7 @@ void Game::startNodePicked( const Pos& np ) {
 
 
 void Game::startRoadPicked( const Pos& from, const Pos& to ) {
-    Road r;
-    r.player_ = curPlayer_;
-    r.from_ = from;
-    r.to_ = to;
-    board_.road_.push_back( r );
+    board_.road_.emplace_back( curPlayer_, from, to );
     player_[ curPlayer_ ].roads_--;
     emit updatePlayer( curPlayer_ );
 
@@ -137,12 +130,12 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
         }
         curPlayer_--;
     }
-    setupAllowedBuildNodes();
+    setupAllowedBuildNodes( true );
     emit requestNode();
 }
 
 
-void Game::setupAllowedBuildNodes() {
+void Game::setupAllowedBuildNodes( bool start ) {
     // setup allowed nodes on land
     board_.allowedNodes_.clear();
     for( int ny = 0; ny < board_.nodeHeight(); ny++ ) {
@@ -156,19 +149,29 @@ void Game::setupAllowedBuildNodes() {
                 // already built
                 continue;
             }
+            // look for neighbord and owned roads leading to this node
             bool hasNeighbor = false;
+            bool hasRoad = false;
             for( const auto& nn : Board::nodesAroundNode( np ) ) {
                 if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
                     continue;
                 }
                 if( board_.node_[ nn.y() ][ nn.x() ].type_ != Node::None ) {
                     hasNeighbor = true;
-                    break;
+                }
+                if( find( board_.road_.begin(), board_.road_.end(), Road( curPlayer_, np, nn ) ) != board_.road_.end() ) {
+                    hasRoad = true;
                 }
             }
-            if( !hasNeighbor ) {
-                board_.allowedNodes_.push_back( np );
+            // cannot build if node has an immediate neighbor
+            if( hasNeighbor ) {
+                continue;
             }
+            // after initial placement, cannot build if there is no owned road leading to this node
+            if( !start && !hasRoad ) {
+                continue;
+            }
+            board_.allowedNodes_.push_back( np );
         }
     }
 }
@@ -212,6 +215,22 @@ void Game::buildRoad() {
 
 
 void Game::buildTown() {
+    setupAllowedBuildNodes();
+    emit requestNode();
+}
+
+
+void Game::buildTown( const Pos& np ) {
+    auto& p = player_[ curPlayer_ ];
+    p.resources_[ Hex::Brick ]--;
+    p.resources_[ Hex::Wheat ]--;
+    p.resources_[ Hex::Wood ]--;
+    p.resources_[ Hex::Sheep ]--;
+    p.towns_--;
+    auto& n = board_.node_[ np.y() ][ np.x() ];
+    n.type_ = Node::Town;
+    n.player_ = curPlayer_;
+    emit updatePlayer();
 }
 
 

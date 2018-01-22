@@ -13,7 +13,7 @@ using namespace std;
 
 GameView::GameView( Game* game, QWidget* parent ) :
     QStackedWidget( parent ),
-    game_( game ),
+    game_( game ), playing_( false ),
     playersSelection_( 0 ), players3_( 0 ), players4_( 0 ),
     gameView_( 0 ), boardView_( 0 )
 {
@@ -41,15 +41,21 @@ void GameView::pickStartPositions() {
     setCurrentWidget( gameView_ );
     connect( game_, SIGNAL( requestNode() ), this, SLOT( pickStartNode() ) );
     connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickStartRoad( const Pos& ) ) );
-    connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( startNodePicked( const Pos& ) ) );
     connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
     pickStartNode();
 }
 
 
 void GameView::pickStartNode() {
+    QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
+    if( playing_ ) {
+        connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( buildTown( const Pos& ) ) );
+    } else {
+        connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( startNodePicked( const Pos& ) ) );
+    }
     updatePlayer();
     boardView_->setSelectionMode( BoardView::Node );
+    boardView_->update();
 }
 
 
@@ -133,6 +139,7 @@ void GameView::updatePlayer( int player ) {
 
 
 void GameView::rollDice() {
+    playing_ = true;
     roll_->setEnabled( true );
     playerView_[ ( game_->curPlayer_ + game_->nbPlayers_ - 1 ) % game_->nbPlayers_ ]->enableButtons( false );
     updatePlayer();

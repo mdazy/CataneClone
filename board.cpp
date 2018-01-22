@@ -25,7 +25,19 @@ Node::Node() : player_( -1 ), type_( None ), harborType_( Hex::Invalid ) {
 /**/
 
 
-Road::Road() : player_( -1 ) {
+Road::Road( int player, const Pos& from, const Pos& to ) : player_( player ) {
+	if( to < from ) {
+		from_ = to;
+		to_ = from;
+	} else {
+		from_ = from;
+		to_ = to;
+	}
+}
+
+
+bool Road::operator ==( const Road& rhs ) const {
+	return player_ == rhs.player_ && from_ == rhs.from_ && to_ == rhs.to_;
 }
 
 
