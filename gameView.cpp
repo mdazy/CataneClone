@@ -48,6 +48,7 @@ void GameView::pickStartPositions() {
 
 
 void GameView::pickStartNode() {
+    updatePlayer();
     boardView_->setSelectionMode( BoardView::Node );
 }
 
