@@ -38,6 +38,10 @@ public slots:
     void startRoadPicked( const Pos& from, const Pos& to );
     void playTurn();
     void nextPlayer();
+    void buildRoad();
+    void buildTown();
+    void buildCity();
+    void buildCard();
 
 signals:
     void requestNbPlayers();

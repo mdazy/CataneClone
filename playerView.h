@@ -19,10 +19,14 @@ public:
 public:  
     Player* player_;
     Player prevPlayer_;
+    QLabel* playerName_;
     QLabel* resources_;
     QLabel* tokens_;
     QPushButton* trade_;
-    QPushButton* build_;
+    QPushButton* buildRoad_;
+    QPushButton* buildTown_;
+    QPushButton* buildCity_;
+    QPushButton* buildCard_;
     QPushButton* card_;
     QPushButton* pass_;
 };

@@ -1,5 +1,6 @@
 #pragma once
 
+#include <QtWidgets/QMessageBox>
 #include <QtWidgets/QStackedWidget>
 
 #include "utils.h"

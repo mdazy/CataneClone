@@ -205,3 +205,19 @@ void Game::nextPlayer() {
     curPlayer_ = ( curPlayer_ + 1 ) % nbPlayers_;
     emit rollDice();
 }
+
+
+void Game::buildRoad() {
+}
+
+
+void Game::buildTown() {
+}
+
+
+void Game::buildCity() {
+}
+
+
+void Game::buildCard() {
+}

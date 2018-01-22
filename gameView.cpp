@@ -110,6 +110,10 @@ void GameView::buildGameView() {
         pv->enableButtons( false );
         vl->addWidget( pv );
         playerView_.push_back( pv );
+        connect( pv->buildRoad_, SIGNAL( clicked() ), game_, SLOT( buildRoad() ) );
+        connect( pv->buildTown_, SIGNAL( clicked() ), game_, SLOT( buildTown() ) );
+        connect( pv->buildCity_, SIGNAL( clicked() ), game_, SLOT( buildCity() ) );
+        connect( pv->buildCard_, SIGNAL( clicked() ), game_, SLOT( buildCard() ) );
         connect( pv->pass_, SIGNAL( clicked() ), game_, SLOT( nextPlayer() ) );       
     }
     vl->addStretch();
