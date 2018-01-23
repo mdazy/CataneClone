@@ -2,7 +2,6 @@
 
 #include <QtCore/QTimer>
 
-#include <iostream>
 using namespace std;
 
 
@@ -11,6 +10,29 @@ using namespace std;
 
 Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ) {
     resources_.resize( Hex::Desert, 5 );
+}
+
+
+ostream& operator <<( ostream& out, const Player& p ) {
+    out << "# Player" << endl;
+    out << p.number_ << " ";
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        out << p.resources_[ i ] << " ";
+    }
+    out << p.towns_ << " " << p.cities_ << " " << p.roads_;
+    return out;
+}
+
+
+istream& operator >>( istream& in, Player& p ) {
+    string dummy;
+    getline( in , dummy );
+    in >> p.number_;
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        in >> p.resources_[ i ];
+    }
+    in >> p.towns_ >> p.cities_ >> p.roads_;
+    return in;
 }
 
 
@@ -75,6 +97,7 @@ void Game::startWithPlayers( int nbPlayers ) {
     setupAllowedBuildNodes( true );
     emit updatePlayer();
     emit requestStartPositions();
+    cout << *this << endl;
 }
 
 
@@ -315,4 +338,27 @@ void Game::buildCity( const Pos& np ) {
 
 
 void Game::buildCard() {
+}
+
+
+ostream& operator <<( ostream& out, const Game& g ) {
+    out << "# Game" << endl;
+    out << g.nbPlayers_ << endl;
+    for( int i = 0; i < g.nbPlayers_; i++ ) {
+        out << g.player_[ i ] << endl;
+    }
+    out << g.board_ << endl;
+    return out;
+}
+
+
+istream& operator >>( istream& in, Game& g ) {
+    string dummy;
+    getline( in , dummy );
+    in >> g.nbPlayers_;
+    for( int i = 0; i < g.nbPlayers_; i++ ) {
+        in >> g.player_[ i ]; in.ignore();
+    }
+    in >> g.board_; in.ignore();
+    return in;
 }

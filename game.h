@@ -2,9 +2,15 @@
 
 #include <QtCore/QObject>
 
+#include <iostream>
+
 #include "board.h"
 
 class Game;
+
+
+/**/
+
 
 class Player {
 public:
@@ -18,6 +24,12 @@ public:
     int cities_;
     int roads_;
 };
+
+std::ostream& operator <<( std::ostream& out, const Player& p );
+std::istream& operator >>( std::istream& in, Player& p );
+
+
+/**/
 
 
 class Game : public QObject {
@@ -67,3 +79,6 @@ public:
     int curPlayer_;
     bool pickStartAscending_;
 };
+
+std::ostream& operator <<( std::ostream& out, const Game& g );
+std::istream& operator >>( std::istream& in, Game& g );

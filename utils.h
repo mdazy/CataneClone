@@ -1,5 +1,7 @@
 #pragma once
 
+#include <iostream>
+
 class Pos : public std::pair<int, int> {
 public:
     Pos( int x = -1, int y = -1 ) : std::pair<int, int>( x, y ) {}
@@ -11,3 +13,6 @@ public:
 
     bool valid() const { return first >= 0 && second >= 0; };
 };
+
+std::ostream& operator <<( std::ostream& out, const Pos& p );
+std::istream& operator >>( std::istream& in, Pos& p );

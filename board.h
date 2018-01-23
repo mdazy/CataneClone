@@ -2,9 +2,14 @@
 
 #include <QtGui/QColor>
 
+#include <iostream>
 #include <vector>
 
 #include "utils.h"
+
+
+/**/
+
 
 class Hex {
 public:
@@ -17,6 +22,9 @@ public:
 	Type type_;
 	int number_;
 };
+
+std::ostream& operator <<( std::ostream& out, const Hex& h );
+std::istream& operator >>( std::istream& in, Hex& h );
 
 
 /**/
@@ -33,13 +41,16 @@ public:
 	Hex::Type harborType_;
 };
 
+std::ostream& operator <<( std::ostream& out, const Node& n );
+std::istream& operator >>( std::istream& in, Node& n );
+
 
 /**/
 
 
 class Road {
 public:
-	Road( int player, const Pos& from, const Pos& to );
+	Road( int player = -1, const Pos& from = Pos(), const Pos& to = Pos() );
 
 	bool operator ==( const Road& rhs ) const;
 
@@ -48,6 +59,9 @@ public:
 	Pos from_;
 	Pos to_;
 };
+
+std::ostream& operator <<( std::ostream& out, const Road& h );
+std::istream& operator >>( std::istream& in, Road& h );
 
 
 /**/
@@ -83,3 +97,6 @@ public:
 
 	Pos robber_;
 };
+
+std::ostream& operator <<( std::ostream& out, const Board& h );
+std::istream& operator >>( std::istream& in, Board& h );

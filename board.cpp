@@ -1,7 +1,5 @@
 #include "board.h"
 
-#include <iostream>
-
 using namespace std;
 
 
@@ -15,10 +13,39 @@ Hex::Hex( Type type ) : type_( type ), number_( -1 ) {
 }
 
 
+ostream& operator <<( ostream& out, const Hex& h ) {
+	out << h.type_ << " " << h.number_;
+	return out;
+}
+
+
+istream& operator >>( istream& in, Hex& h ) {
+	int type;
+	in >> type >> h.number_;
+	h.type_ = Hex::Type( type );
+	return in;
+}
+
+
 /**/
 
 
 Node::Node() : player_( -1 ), type_( None ), harborType_( Hex::Invalid ) {
+}
+
+
+ostream& operator <<( ostream& out, const Node& n ) {
+	out << n.player_ << " " << n.type_ << " " << n.harborType_;
+	return out;
+}
+
+
+istream& operator >>( istream& in, Node& n ) {
+	int type, harborType;
+	in >> n.player_ >> type >> harborType;
+	n.type_ = Node::Type( type );
+	n.harborType_ = Hex::Type( harborType );
+	return in;
 }
 
 
@@ -41,7 +68,20 @@ bool Road::operator ==( const Road& rhs ) const {
 }
 
 
+ostream& operator <<( ostream& out, const Road& r ) {
+	out << r.player_ << " " << r.from_ << " " << r.to_;
+	return out;
+}
+
+
+istream& operator >>( istream& in, Road& r ) {
+	in >> r.player_ >> r.from_ >> r.to_;
+	return in;
+}
+
+
 /**/
+
 
 /*
 
@@ -284,3 +324,71 @@ bool Board::landNode( const Pos& n ) const {
 bool Board::roadExists( const Pos& from, const Pos& to, int player ) const {
 	return find( road_.begin(), road_.end(), Road( player, from, to ) ) != road_.end();
 }
+
+
+ostream& operator <<( ostream& out, const Board& b ) {
+	out << "# Board" << endl;
+	out << b.hexWidth() << " " << b.hexHeight() << endl;
+
+	out << "# Hexes" << endl;
+	for( int hx = 0; hx < b.hexWidth(); hx++ ) {
+		for( int hy = 0; hy < b.hexHeight(); hy++ ) {
+			out << b.hex_[ hy ][ hx ] << " ";
+		}
+		out << endl;
+	}
+
+	out << "# Nodes" << endl;
+	for( int nx = 0; nx < b.nodeWidth(); nx++ ) {
+		for( int ny = 0; ny < b.nodeHeight(); ny++ ) {
+			out << b.node_[ ny ][ nx ] << " ";
+		}
+		out << endl;
+	}
+
+	out << "# Roads" << endl;
+	out << b.road_.size() << endl;
+	for( const auto& r : b.road_ ) {
+		out << r << endl;
+	}
+
+	return out;
+}
+
+
+istream& operator >>( istream& in, Board& b ) {
+	string dummy;
+
+	getline( in, dummy );
+	int hexWidth, hexHeight;
+	in >> hexWidth >> hexHeight; in.ignore();
+	b.hex_.resize( hexHeight, vector<Hex>( hexWidth ) );
+	b.node_.resize( hexHeight * 2 + hexWidth + 2, vector<Node>( hexWidth + 1 ) );
+
+	getline( in, dummy );
+	for( int hx = 0; hx < b.hexWidth(); hx++ ) {
+		for( int hy = 0; hy < b.hexHeight(); hy++ ) {
+			in >> b.hex_[ hy ][ hx ];
+		}
+		in.ignore();
+	}
+
+	getline( in, dummy );
+	for( int nx = 0; nx < b.nodeWidth(); nx++ ) {
+		for( int ny = 0; ny < b.nodeHeight(); ny++ ) {
+			in >> b.node_[ ny ][ nx ];
+		}
+		in.ignore();
+	}
+
+	getline( in, dummy );
+	int nbRoads;
+	in >> nbRoads; in.ignore();
+	b.road_.resize( nbRoads );
+	for( int i = 0; i < nbRoads; i++ ) {
+		in >> b.road_[ i ]; in.ignore();
+	}
+	
+	return in;
+}
+
