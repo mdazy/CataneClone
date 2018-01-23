@@ -39,17 +39,20 @@ void GameView::pickNbPlayers() {
 
 void GameView::pickStartPositions() {
     setCurrentWidget( gameView_ );
-    connect( game_, SIGNAL( requestNode() ), this, SLOT( pickStartNode() ) );
-    connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickStartRoad( const Pos& ) ) );
+    connect( game_, SIGNAL( requestNode( Node::Type ) ), this, SLOT( pickNode( Node::Type ) ) );
+    connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickRoad( const Pos& ) ) );
     connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
-    pickStartNode();
+    pickNode( Node::None );
 }
 
 
-void GameView::pickStartNode() {
+void GameView::pickNode( Node::Type type ) {
     QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
     if( playing_ ) {
-        connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( buildTown( const Pos& ) ) );
+        connect(
+            boardView_, SIGNAL( nodeSelected( Pos ) ),
+            game_, ( type == Node::Town ? SLOT( buildTown( const Pos& ) ) : SLOT( buildCity( const Pos& ) ) )
+        );
     } else {
         connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( startNodePicked( const Pos& ) ) );
     }
@@ -59,7 +62,7 @@ void GameView::pickStartNode() {
 }
 
 
-void GameView::pickStartRoad( const Pos& from ) {
+void GameView::pickRoad( const Pos& from ) {
     QObject::disconnect( boardView_, &BoardView::roadSelected, 0, 0 );
     QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
     if( playing_ ) {

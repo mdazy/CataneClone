@@ -27,7 +27,7 @@ public:
 
     bool canBuildTown();
     bool canBuildCity() const;
-    bool canBuildRoad() const;
+    bool canBuildRoad();
     bool canBuildCard() const;
 
 public slots:
@@ -43,12 +43,13 @@ public slots:
     void buildTown();
     void buildTown( const Pos& np );
     void buildCity();
+    void buildCity( const Pos& np );
     void buildCard();
 
 signals:
     void requestNbPlayers();
     void requestStartPositions();
-    void requestNode();
+    void requestNode( Node::Type );
     void requestRoad( Pos from = Pos() );
     void updatePlayer( int player = - 1 );
     void rollDice();
@@ -57,6 +58,7 @@ signals:
 protected:
     void setupAllowedBuildNodes( bool start = false );
     void setupAllowedRoadStartNodes();
+    void setupAllowedCityNodes();
 
 public:
     Board board_;

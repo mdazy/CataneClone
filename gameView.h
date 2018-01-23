@@ -3,6 +3,7 @@
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QStackedWidget>
 
+#include "board.h"
 #include "utils.h"
 
 class QPushButton;
@@ -20,8 +21,8 @@ public:
 public slots:
     void pickNbPlayers();
     void pickStartPositions();
-    void pickStartNode();
-    void pickStartRoad( const Pos& from );
+    void pickNode( Node::Type type );
+    void pickRoad( const Pos& from );
     void rollDice();
     void diceRolled( int die1, int die2 );
 

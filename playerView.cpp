@@ -24,10 +24,8 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
     auto hl = new QHBoxLayout();
     vl->addLayout( hl );
     trade_ = new QPushButton( "Trade" );
-    trade_->setToolTip( "Not implemented" );
     hl->addWidget( trade_ );
     card_ = new QPushButton( "Play card" );
-    card_->setToolTip( "Not implemented" );
     hl->addWidget( card_ );
     pass_ = new QPushButton( "Pass" );
     hl->addWidget( pass_ ); 
@@ -67,14 +65,16 @@ void PlayerView::updateView() {
 
 void PlayerView::enableButtons( bool enabled ) {
     trade_->setEnabled( false );
+    trade_->setToolTip( "Not implemented" );
     buildRoad_->setEnabled( enabled && player_->game_->canBuildRoad() );
     buildRoad_->setToolTip( enabled && ! player_->game_->canBuildRoad() ? "Cannot be built" : "" );
     buildTown_->setEnabled( enabled && player_->game_->canBuildTown() );
     buildTown_->setToolTip( enabled && ! player_->game_->canBuildTown() ? "Cannot be built" : "" );
-    buildCity_->setEnabled( false /*enabled && player_->game_->canBuildCity()*/ );
-    buildCity_->setToolTip( "Not implemented" /*enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : ""*/ );
+    buildCity_->setEnabled( enabled && player_->game_->canBuildCity() );
+    buildCity_->setToolTip( enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : "" );
     buildCard_->setEnabled( false /*enabled && player_->game_->canBuildCard()*/ );
     buildCard_->setToolTip( "Not implemented" /*enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : ""*/ );
     card_->setEnabled( false );
+    card_->setToolTip( "Not implemented" );
     pass_->setEnabled( enabled );
 }
