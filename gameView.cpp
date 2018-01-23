@@ -112,6 +112,15 @@ void GameView::buildGameView() {
     // layout for game state
     auto vl = new QVBoxLayout();
     l->addLayout( vl );
+    // load/save game state
+    l = new QHBoxLayout();
+    vl->addLayout( l );
+    auto p = new QPushButton( "Save state" );
+    l->addWidget( p );
+    connect( p, SIGNAL( clicked() ), game_, SLOT( save() ) );
+    p = new QPushButton( "Load state" );
+    l->addWidget( p );
+    connect( p, SIGNAL( clicked() ), game_, SLOT( load() ) );
     // layout for dice
     l = new QHBoxLayout();
     vl->addLayout( l );

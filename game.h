@@ -58,6 +58,9 @@ public slots:
     void buildCity( const Pos& np );
     void buildCard();
 
+    void load();
+    void save() const;
+
 signals:
     void requestNbPlayers();
     void requestStartPositions();

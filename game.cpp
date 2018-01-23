@@ -2,6 +2,8 @@
 
 #include <QtCore/QTimer>
 
+#include <fstream>
+
 using namespace std;
 
 
@@ -97,7 +99,6 @@ void Game::startWithPlayers( int nbPlayers ) {
     setupAllowedBuildNodes( true );
     emit updatePlayer();
     emit requestStartPositions();
-    cout << *this << endl;
 }
 
 
@@ -338,6 +339,22 @@ void Game::buildCity( const Pos& np ) {
 
 
 void Game::buildCard() {
+}
+
+
+void Game::load() {
+    ifstream file( "game.txt" );
+    if( file.good() ) {
+        file >> *this;
+    }
+}
+
+
+void Game::save() const {
+    ofstream file( "game.txt" );
+    if( file.good() ) {
+        file << *this;
+    }
 }
 
 
