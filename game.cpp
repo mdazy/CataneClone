@@ -9,7 +9,7 @@ using namespace std;
 
 
 Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ) {
-    resources_.resize( Hex::Desert, 5 );
+    resources_.resize( Hex::Desert, 0 );
 }
 
 
