@@ -56,7 +56,8 @@ void GameView::pickNode( Node::Type type ) {
     } else {
         connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( startNodePicked( const Pos& ) ) );
     }
-    updatePlayer();
+    //updatePlayer();
+    playerView_[ game_->curPlayer_ ]->enableButtons( false );
     boardView_->setSelectionMode( BoardView::Node );
     boardView_->update();
 }
@@ -71,6 +72,7 @@ void GameView::pickRoad( const Pos& from ) {
     } else {
         connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
     }
+    playerView_[ game_->curPlayer_ ]->enableButtons( false );
     boardView_->setSelectionMode( BoardView::Road );
     boardView_->from_ = from;
     boardView_->update();
