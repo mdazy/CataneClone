@@ -151,7 +151,7 @@ void GameView::buildGameView() {
 void GameView::updatePlayer( int player ) {
     if( player >= 0 ) {
         playerView_[ player ]->updateView();
-        playerView_[ player ]->enableButtons( true );
+        playerView_[ player ]->enableButtons( playing_ );
     } else {
         for( int i = 0; i < game_->nbPlayers_; i++ ) {
             playerView_[ i ]->updateView();
