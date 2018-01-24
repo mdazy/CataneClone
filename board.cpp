@@ -329,6 +329,7 @@ bool Board::roadExists( const Pos& from, const Pos& to, int player ) const {
 ostream& operator <<( ostream& out, const Board& b ) {
 	out << "# Board" << endl;
 	out << b.hexWidth() << " " << b.hexHeight() << endl;
+	out << b.robber_ << endl;
 
 	out << "# Hexes" << endl;
 	for( int hx = 0; hx < b.hexWidth(); hx++ ) {
@@ -362,6 +363,7 @@ istream& operator >>( istream& in, Board& b ) {
 	getline( in, dummy );
 	int hexWidth, hexHeight;
 	in >> hexWidth >> hexHeight; in.ignore();
+	in >> b.robber_; in.ignore();
 	b.hex_.resize( hexHeight, vector<Hex>( hexWidth ) );
 	b.node_.resize( hexHeight * 2 + hexWidth + 2, vector<Node>( hexWidth + 1 ) );
 
@@ -372,6 +374,7 @@ istream& operator >>( istream& in, Board& b ) {
 		}
 		in.ignore();
 	}
+	in.ignore();
 
 	getline( in, dummy );
 	for( int nx = 0; nx < b.nodeWidth(); nx++ ) {
@@ -380,6 +383,7 @@ istream& operator >>( istream& in, Board& b ) {
 		}
 		in.ignore();
 	}
+	in.ignore();
 
 	getline( in, dummy );
 	int nbRoads;

@@ -33,6 +33,7 @@ signals:
 
 protected slots:
     void nbPlayersPicked();
+    void loadState();
 
 protected:
     void buildPlayersSelection();

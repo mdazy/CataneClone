@@ -360,7 +360,7 @@ void Game::save() const {
 
 ostream& operator <<( ostream& out, const Game& g ) {
     out << "# Game" << endl;
-    out << g.nbPlayers_ << endl;
+    out << g.nbPlayers_ << " " << g.curPlayer_ << endl;
     for( int i = 0; i < g.nbPlayers_; i++ ) {
         out << g.player_[ i ] << endl;
     }
@@ -372,7 +372,7 @@ ostream& operator <<( ostream& out, const Game& g ) {
 istream& operator >>( istream& in, Game& g ) {
     string dummy;
     getline( in , dummy );
-    in >> g.nbPlayers_;
+    in >> g.nbPlayers_ >> g.curPlayer_; in.ignore();
     for( int i = 0; i < g.nbPlayers_; i++ ) {
         in >> g.player_[ i ]; in.ignore();
     }

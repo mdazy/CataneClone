@@ -120,7 +120,7 @@ void GameView::buildGameView() {
     connect( p, SIGNAL( clicked() ), game_, SLOT( save() ) );
     p = new QPushButton( "Load state" );
     l->addWidget( p );
-    connect( p, SIGNAL( clicked() ), game_, SLOT( load() ) );
+    connect( p, SIGNAL( clicked() ), this, SLOT( loadState() ) );
     // layout for dice
     l = new QHBoxLayout();
     vl->addLayout( l );
@@ -174,4 +174,10 @@ void GameView::diceRolled( int die1, int die2 ) {
     die1_->setValue( die1 );
     die2_->setValue( die2 );
     updatePlayer();
+}
+
+
+void GameView::loadState() {
+    game_->load();
+    update();
 }
