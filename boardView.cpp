@@ -167,7 +167,8 @@ void BoardView::drawNodes( QPainter& p, bool drawHarbors ) {
                 QPen pen( Qt::white );
                 pen.setWidth( 2 );
                 p.setPen( pen );
-                p.drawEllipse( nc, nodeRadius_, nodeRadius_ );
+                float radius = nodeRadius_ * ( n.type_ == Node::None ? 1 : 2 );
+                p.drawEllipse( nc, radius, radius );
                 if( underMouse ) {
                     node_ = np;
                 }
