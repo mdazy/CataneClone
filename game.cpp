@@ -15,6 +15,27 @@ Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_(
 }
 
 
+int Player::robCard() {
+    int nbCards = 0;
+    for( int r : resources_ ) {
+        nbCards += r;
+    }
+    if( nbCards == 0 ) {
+        return -1;
+    }
+    int n = 1 + rand() % nbCards;
+    for( int i = 0; i < resources_.size(); i++ ) {
+        nbCards -= resources_[ i ];
+        if( n > nbCards ) {
+            resources_[ i ]--;
+            return i;
+        }
+    }
+    // should not reach here
+    return -1;
+}
+
+
 ostream& operator <<( ostream& out, const Player& p ) {
     out << "# Player" << endl;
     out << p.number_ << " ";
@@ -376,17 +397,21 @@ void Game::robAround( const Pos& hp ) {
         emit requestNode();
     } else {
         curPlayer().state_ = Player::Waiting;
-        emit updatePlayer();
         emit updatePlayer( curPlayer_ );
     }
 }
 
 void Game::rob( const Pos& np ) {
-    // TODO: rob
-    const auto& n = board_.node_[ np.y() ][ np.x() ];
+    int from = board_.node_[ np.y() ][ np.x() ].player_;
+    if( from != -1 ) {
+        int r = player_[ from ].robCard();
+        if( r != -1 ) {
+            curPlayer().resources_[ r ]++;
+        }
+    }
     board_.allowedNodes_.clear();
     curPlayer().state_ = Player::Waiting;
-    emit updatePlayer();
+    emit updatePlayer( from, false );
     emit updatePlayer( curPlayer_ );
 }
 

@@ -52,12 +52,12 @@ void PlayerView::updateView() {
         int n = player_->resources_[ i ];
         int prevN = prevPlayer_.resources_[ i ];
         if( n > 0 ) {
-            text += ( prevN < n ? "<b>" : "" ) + QString::number( n ) + " " + Hex::typeName[ i ] + ( prevN < n ? "</b>" : "" ) + " ";
+            text += ( prevN != n ? "<b>" : "" ) + QString::number( n ) + " " + Hex::typeName[ i ] + ( prevN != n ? "</b>" : "" ) + " ";
         }
         total += n;
         prevTotal += prevN;
     }
-    resources_->setText( ( prevTotal < total ? "<b>" : "" ) + QString::number( total ) + " cards: " + ( prevTotal < total ? "</b>" : "" ) + text );
+    resources_->setText( ( prevTotal != total ? "<b>" : "" ) + QString::number( total ) + " cards: " + ( prevTotal != total ? "</b>" : "" ) + text );
     tokens_->setText( QString::number( player_->roads_ ) + " roads " + QString::number( player_->towns_ ) + " towns " + QString::number( player_->cities_ ) + " cities" );
     prevPlayer_ = *player_;
 }

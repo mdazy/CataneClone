@@ -122,7 +122,7 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
             if( selectionMode_ == Hex && allowed ) {
                 bool underMouse = dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_;
                 p.setBrush( underMouse ? QBrush( Qt::white ) : Qt::NoBrush );
-                QPen pen( h.type_ == Hex::Brick ? Qt::black : Qt::red );
+                QPen pen( Qt::white );
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( hexCenter, innerRadius_ * 0.85, innerRadius_ * 0.85 );

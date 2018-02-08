@@ -27,7 +27,7 @@ public slots:
     void rollDice();
     void diceRolled( int die1, int die2 );
 
-    void updatePlayer( int player = -1 );
+    void updatePlayer( int player = -1, bool buttons = true );
 
 signals:
     void nbPlayersPicked( int nbPlayers );

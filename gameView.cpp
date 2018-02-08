@@ -168,14 +168,16 @@ void GameView::buildGameView() {
         connect( pv->pass_, SIGNAL( clicked() ), game_, SLOT( nextPlayer() ) );       
     }
     vl->addStretch();
-    connect( game_, SIGNAL( updatePlayer( int ) ), this, SLOT( updatePlayer( int ) ) );
+    connect( game_, SIGNAL( updatePlayer( int, bool ) ), this, SLOT( updatePlayer( int, bool ) ) );
 }
 
 
-void GameView::updatePlayer( int player ) {
+void GameView::updatePlayer( int player, bool buttons ) {
     if( player >= 0 ) {
         playerView_[ player ]->updateView();
-        playerView_[ player ]->enableButtons( playing_ );
+        if( buttons ) {
+            playerView_[ player ]->enableButtons( playing_ );
+        }
     } else {
         for( int i = 0; i < game_->nbPlayers_; i++ ) {
             playerView_[ i ]->updateView();

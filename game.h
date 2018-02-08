@@ -17,6 +17,8 @@ public:
     enum State { Waiting, PickStartTown, PickStartRoad, PickBuildRoad, PickBuildTown, PickCity, PickRobTown };
     Player( Game* game );
 
+    int robCard();
+
 public:
     Game* game_;
     int number_;
@@ -74,7 +76,7 @@ signals:
     void requestNode();
     void requestRoad( Pos from = Pos() );
     void requestHex();
-    void updatePlayer( int player = - 1 );
+    void updatePlayer( int player = - 1, bool buttons = true );
     void rollDice();
     void diceRolled( int die1, int die2 );
 
