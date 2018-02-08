@@ -21,6 +21,7 @@ public:
 public slots:
     void pickNbPlayers();
     void pickStartPositions();
+    void pickHex();
     void pickNode();
     void pickRoad( const Pos& from );
     void rollDice();

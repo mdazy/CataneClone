@@ -282,6 +282,9 @@ void Game::playTurn() {
         }
     }
     emit diceRolled( dice1, dice2 );
+    if( number == 7 ) {
+        rob();
+    }
 }
 
 
@@ -351,6 +354,40 @@ void Game::buildCity( const Pos& np ) {
 
 
 void Game::buildCard() {
+}
+
+
+void Game::rob() {
+    curPlayer().state_ = Player::PickRobTown;
+    emit requestHex();
+}
+
+
+void Game::robAround( const Pos& hp ) {
+    board_.robber_ = hp;
+    board_.allowedNodes_.clear();
+    for( const auto& np : board_.nodesAroundHex( hp ) ) {
+        const auto& n = board_.node_[ np.y() ][ np.x() ];
+        if( n.type_ != Node::None && n.player_ != curPlayer_ ) {
+            board_.allowedNodes_.push_back( np );
+        }
+    }
+    if( board_.allowedNodes_.size() > 0 ) {
+        emit requestNode();
+    } else {
+        curPlayer().state_ = Player::Waiting;
+        emit updatePlayer();
+        emit updatePlayer( curPlayer_ );
+    }
+}
+
+void Game::rob( const Pos& np ) {
+    // TODO: rob
+    const auto& n = board_.node_[ np.y() ][ np.x() ];
+    board_.allowedNodes_.clear();
+    curPlayer().state_ = Player::Waiting;
+    emit updatePlayer();
+    emit updatePlayer( curPlayer_ );
 }
 
 

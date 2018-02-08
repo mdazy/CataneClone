@@ -29,6 +29,9 @@ GameView::GameView( Game* game, QWidget* parent ) :
     connect( roll_, SIGNAL( clicked() ), game_, SLOT( playTurn() ) );
 
     connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( diceRolled( int, int ) ) );
+
+    connect( game, SIGNAL( requestHex() ), this, SLOT( pickHex() ) );
+    connect( boardView_, SIGNAL( hexSelected( Pos ) ), game_, SLOT( robAround( const Pos& ) ) );
 }
 
 
@@ -46,6 +49,13 @@ void GameView::pickStartPositions() {
 }
 
 
+void GameView::pickHex() {
+    playerView_[ game_->curPlayer_ ]->enableButtons( false );
+    boardView_->setSelectionMode( BoardView::Hex );
+    boardView_->update();
+}
+
+
 void GameView::pickNode() {
     QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
     auto slot = SLOT( dummy() );
@@ -60,6 +70,10 @@ void GameView::pickNode() {
         }
         case Player::PickCity: {
             slot = SLOT( buildCity( const Pos& ) );
+            break;
+        }
+        case Player::PickRobTown: {
+            slot = SLOT( rob( const Pos& ) );
             break;
         }
     }

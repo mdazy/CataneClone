@@ -99,6 +99,8 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
         for( int hy = 0; hy < board_->hexHeight(); hy++ ) {
             const auto& h = board_->hex_[ hy ][ hx ];
 
+            bool allowed = h.type_ != Hex::Invalid && h.type_ != Hex::Water && board_->robber_ != Pos( hx, hy );
+
             if(
                 ( type == Hex::Any && ( h.type_ == Hex::Invalid || h.type_ == Hex::Water ) ) ||
                 ( type != Hex::Any && h.type_ != type )
@@ -117,13 +119,16 @@ void BoardView::drawHexes( QPainter& p, Hex::Type type ) {
             p.drawConvexPolygon( curHex );
 
             // hex selection
-            if( selectionMode_ == Hex && dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_ ) {
-                p.setBrush( Qt::NoBrush );
+            if( selectionMode_ == Hex && allowed ) {
+                bool underMouse = dist( hexCenter.x(), hexCenter.y(), mouseX_, mouseY_ ) < innerRadius_;
+                p.setBrush( underMouse ? QBrush( Qt::white ) : Qt::NoBrush );
                 QPen pen( h.type_ == Hex::Brick ? Qt::black : Qt::red );
                 pen.setWidth( 2 );
                 p.setPen( pen );
                 p.drawEllipse( hexCenter, innerRadius_ * 0.85, innerRadius_ * 0.85 );
-                hex_ = Pos( hx, hy );
+                if( underMouse ) {
+                    hex_ = Pos( hx, hy );
+                }
             }
 
             // draw number on land tiles

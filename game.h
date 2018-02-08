@@ -62,6 +62,8 @@ public slots:
     void buildCity();
     void buildCity( const Pos& np );
     void buildCard();
+    void rob( const Pos& np );
+    void robAround( const Pos& hp );
 
     void load();
     void save() const;
@@ -71,6 +73,7 @@ signals:
     void requestStartPositions();
     void requestNode();
     void requestRoad( Pos from = Pos() );
+    void requestHex();
     void updatePlayer( int player = - 1 );
     void rollDice();
     void diceRolled( int die1, int die2 );
@@ -79,6 +82,7 @@ protected:
     void setupAllowedBuildNodes( bool start = false );
     void setupAllowedRoadStartNodes();
     void setupAllowedCityNodes();
+    void rob();
 
 public:
     Board board_;
