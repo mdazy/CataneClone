@@ -10,7 +10,7 @@ using namespace std;
 /**/
 
 
-Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ) {
+Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ), state_( Waiting ) {
     resources_.resize( Hex::Desert, 0 );
 }
 
@@ -34,6 +34,8 @@ istream& operator >>( istream& in, Player& p ) {
         in >> p.resources_[ i ];
     }
     in >> p.towns_ >> p.cities_ >> p.roads_;
+    // TODO
+    p.state_ = Player::Waiting;
     return in;
 }
 
@@ -54,7 +56,7 @@ Game::Game( QObject* parent ) :
 
 
 bool Game::canBuildTown() {
-    const auto& p = player_[ curPlayer_ ];
+    const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Wood ] > 0 && p.resources_[ Hex::Brick ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
     setupAllowedBuildNodes();
     int nbNodes = board_.allowedNodes_.size();
@@ -64,14 +66,14 @@ bool Game::canBuildTown() {
 
 
 bool Game::canBuildCity() const {
-    const auto& p = player_[ curPlayer_ ];
+    const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Wheat ] > 1 && p.resources_[ Hex::Rock ] > 2;
     return hasCards && p.towns_ < 5 && p.cities_ > 0;
 }
 
 
 bool Game::canBuildRoad() {
-    const auto& p = player_[ curPlayer_ ];
+    const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Wood ] > 0 && p.resources_[ Hex::Brick ] > 0;
     setupAllowedRoadStartNodes();
     int nbNodes = board_.allowedNodes_.size();
@@ -81,7 +83,7 @@ bool Game::canBuildRoad() {
 
 
 bool Game::canBuildCard() const {
-    const auto& p = player_[ curPlayer_ ];
+    const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Rock ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
     // TODO: check remaining dev cards
     return hasCards;
@@ -96,6 +98,7 @@ void Game::newGame() {
 void Game::startWithPlayers( int nbPlayers ) {
     nbPlayers_ = nbPlayers;
     curPlayer_ = 0;
+    curPlayer().state_ = Player::PickStartTown;
     setupAllowedBuildNodes( true );
     emit updatePlayer();
     emit requestStartPositions();
@@ -106,7 +109,7 @@ void Game::startNodePicked( const Pos& np ) {
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.player_ = curPlayer_;
     n.type_ = Node::Town;
-    player_[ curPlayer_ ].towns_--;
+    curPlayer().towns_--;
     if( !pickStartAscending_ ) {
         for( const auto& hp : Board::hexesAroundNode( np )  ) {
             auto hx = hp.first;
@@ -117,12 +120,13 @@ void Game::startNodePicked( const Pos& np ) {
             }
             const auto& h = board_.hex_[ hy ][ hx ];
             if( h.type_ > Hex::Invalid && h.type_ < Hex::Desert ) {
-                player_[ curPlayer_ ].resources_[ h.type_ ]++;
+                curPlayer().resources_[ h.type_ ]++;
             }
         }
         emit updatePlayer( curPlayer_ );
     }
     // setup allowed nodes around selected town
+    player_[ curPlayer_].state_ = Player::PickStartRoad;
     setupAllowedRoadEndNodes( np );
     emit requestRoad( np );
 }
@@ -130,7 +134,8 @@ void Game::startNodePicked( const Pos& np ) {
 
 void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     board_.road_.emplace_back( curPlayer_, from, to );
-    player_[ curPlayer_ ].roads_--;
+    curPlayer().roads_--;
+    curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
 
     if( pickStartAscending_ ) {
@@ -148,8 +153,9 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
         }
         curPlayer_--;
     }
+    curPlayer().state_ = Player::PickStartTown;
     setupAllowedBuildNodes( true );
-    emit requestNode( Node::None );
+    emit requestNode();
 }
 
 
@@ -287,28 +293,31 @@ void Game::nextPlayer() {
 
 void Game::buildRoad() {
     setupAllowedRoadStartNodes();
+    curPlayer().state_ = Player::PickBuildRoad;
     emit requestRoad();
 }
 
 
 void Game::buildRoad( const Pos& from, const Pos& to ) {
-    auto& p = player_[ curPlayer_ ];
+    auto& p = curPlayer();
     p.resources_[ Hex::Brick ]--;
     p.resources_[ Hex::Wood ]--;
     p.roads_--;
     board_.road_.emplace_back( curPlayer_, from, to );
+    curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
 }
 
 
 void Game::buildTown() {
     setupAllowedBuildNodes();
-    emit requestNode( Node::Town );
+    curPlayer().state_ = Player::PickBuildTown;
+    emit requestNode();
 }
 
 
 void Game::buildTown( const Pos& np ) {
-    auto& p = player_[ curPlayer_ ];
+    auto& p = curPlayer();
     p.resources_[ Hex::Brick ]--;
     p.resources_[ Hex::Wheat ]--;
     p.resources_[ Hex::Wood ]--;
@@ -317,23 +326,26 @@ void Game::buildTown( const Pos& np ) {
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.type_ = Node::Town;
     n.player_ = curPlayer_;
+    curPlayer().state_ = Player::PickBuildRoad;
     emit updatePlayer( curPlayer_ );
 }
 
 
 void Game::buildCity() {
     setupAllowedCityNodes();
-    emit requestNode( Node::City );
+    curPlayer().state_ = Player::PickCity;
+    emit requestNode();
 }
 
 
 void Game::buildCity( const Pos& np ) {
-    auto& p = player_[ curPlayer_ ];
+    auto& p = curPlayer();
     p.resources_[ Hex::Rock ] -= 3;
     p.resources_[ Hex::Wheat ] -= 2;
     p.towns_++;
     p.cities_--;
     board_.node_[ np.y() ][ np.x() ].type_ = Node::City;
+    curPlayer().state_ = Player::PickBuildRoad;
     emit updatePlayer( curPlayer_ );
 }
 

@@ -21,7 +21,7 @@ public:
 public slots:
     void pickNbPlayers();
     void pickStartPositions();
-    void pickNode( Node::Type type );
+    void pickNode();
     void pickRoad( const Pos& from );
     void rollDice();
     void diceRolled( int die1, int die2 );

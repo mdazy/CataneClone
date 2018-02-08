@@ -14,6 +14,7 @@ class Game;
 
 class Player {
 public:
+    enum State { Waiting, PickStartTown, PickStartRoad, PickBuildRoad, PickBuildTown, PickCity, PickRobTown };
     Player( Game* game );
 
 public:
@@ -23,6 +24,7 @@ public:
     int towns_;
     int cities_;
     int roads_;
+    State state_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Player& p );
@@ -41,6 +43,9 @@ public:
     bool canBuildCity() const;
     bool canBuildRoad();
     bool canBuildCard() const;
+
+    Player& curPlayer() { return player_[ curPlayer_ ]; }
+    const Player& curPlayer() const { return player_[ curPlayer_ ]; }
 
 public slots:
     void newGame();
@@ -64,7 +69,7 @@ public slots:
 signals:
     void requestNbPlayers();
     void requestStartPositions();
-    void requestNode( Node::Type );
+    void requestNode();
     void requestRoad( Pos from = Pos() );
     void updatePlayer( int player = - 1 );
     void rollDice();
