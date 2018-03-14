@@ -11,6 +11,8 @@ class Game;
 
 /**/
 
+enum DevCard { Knight = 0, Point, Roads, Monopoly, Invention };
+
 
 class Player {
 public:
@@ -23,6 +25,7 @@ public:
     Game* game_;
     int number_;
     std::vector<int> resources_;
+    std::vector<int> devCards_;
     int towns_;
     int cities_;
     int roads_;
@@ -89,6 +92,7 @@ protected:
 public:
     Board board_;
     std::vector<Player> player_;
+    std::vector<DevCard> devCards_;
     int nbPlayers_;
     int curPlayer_;
     bool pickStartAscending_;

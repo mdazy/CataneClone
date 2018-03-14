@@ -21,6 +21,7 @@ public:
     Player prevPlayer_;
     QLabel* playerName_;
     QLabel* resources_;
+    QLabel* devCards_;
     QLabel* tokens_;
     QPushButton* trade_;
     QPushButton* buildRoad_;

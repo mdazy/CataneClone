@@ -125,19 +125,6 @@ Numbering of nodes around hex x,y   Numbering of hexes around node x,y   Numberi
 Roads are represented by pairs of start and end nodes.
 */        
 
-// randomize contents a vector
-template<typename T>
-void randomize( vector<T>& v ) {
-	int size = v.size();
-	for( int i = 0; i < size * 2; i++ ) {
-		int a = rand() % size;
-		int b = ( a + rand() % ( size - 1 ) ) % size;
-		auto t = v[ a ];
-		v[ a ] = v[ b ];
-		v[ b ] = t;
-	}
-}
-
 Board::Board() {
 	// standard map is 7 by 7
 	hex_.resize( 7, vector<Hex>( 7 ) );

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <iostream>
+#include <vector>
 
 class Pos : public std::pair<int, int> {
 public:
@@ -16,3 +17,17 @@ public:
 
 std::ostream& operator <<( std::ostream& out, const Pos& p );
 std::istream& operator >>( std::istream& in, Pos& p );
+
+
+// randomize contents a vector
+template<typename T>
+void randomize( std::vector<T>& v ) {
+	int size = v.size();
+	for( int i = 0; i < size * 2; i++ ) {
+		int a = rand() % size;
+		int b = ( a + rand() % ( size - 1 ) ) % size;
+		auto t = v[ a ];
+		v[ a ] = v[ b ];
+		v[ b ] = t;
+	}
+}

@@ -16,8 +16,10 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
     playerName_ = new QLabel( QString::number( p->number_ + 1 ) );
     playerName_->setStyleSheet( "background-color:" + playerColor[ p->number_ ].name( QColor::HexRgb ) );
     vl->addWidget( playerName_ );
-    resources_ = new QLabel( "0 cards" );
+    resources_ = new QLabel( "0 resource cards" );
     vl->addWidget( resources_ );
+    devCards_ = new QLabel( "0 dev cards" );
+    vl->addWidget( devCards_ );
     tokens_ = new QLabel( "tokens" );
     vl->addWidget( tokens_ );
     // action buttons
@@ -45,7 +47,8 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
 
 
 void PlayerView::updateView() {
-    playerName_->setText( QString( player_->number_ == player_->game_->curPlayer_ ? "<b>" : "" ) + "Player " + QString::number( player_->number_ + 1 ) + QString( player_->number_ == player_->game_->curPlayer_ ? "</b>" : "" ) );    QString text;
+    playerName_->setText( QString( player_->number_ == player_->game_->curPlayer_ ? "<b>" : "" ) + "Player " + QString::number( player_->number_ + 1 ) + QString( player_->number_ == player_->game_->curPlayer_ ? "</b>" : "" ) );
+    QString text;
     int total = 0;
     int prevTotal = 0;
     for( int i = 0; i < player_->resources_.size(); i++ ) {
@@ -57,7 +60,10 @@ void PlayerView::updateView() {
         total += n;
         prevTotal += prevN;
     }
-    resources_->setText( ( prevTotal != total ? "<b>" : "" ) + QString::number( total ) + " cards: " + ( prevTotal != total ? "</b>" : "" ) + text );
+    resources_->setText( ( prevTotal != total ? "<b>" : "" ) + QString::number( total ) + " resource cards: " + ( prevTotal != total ? "</b>" : "" ) + text );
+    text = "";
+    // TODO: list dev cards
+    devCards_->setText( ( prevPlayer_.devCards_.size() != player_->devCards_.size() ? "<b>" : "" ) + QString::number( player_->devCards_.size() ) + " dev cards:" + ( prevPlayer_.devCards_.size() != player_->devCards_.size() ? "</b>" : "" ) + text );
     tokens_->setText( QString::number( player_->roads_ ) + " roads " + QString::number( player_->towns_ ) + " towns " + QString::number( player_->cities_ ) + " cities" );
     prevPlayer_ = *player_;
 }
@@ -72,8 +78,8 @@ void PlayerView::enableButtons( bool enabled ) {
     buildTown_->setToolTip( enabled && ! player_->game_->canBuildTown() ? "Cannot be built" : "" );
     buildCity_->setEnabled( enabled && player_->game_->canBuildCity() );
     buildCity_->setToolTip( enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : "" );
-    buildCard_->setEnabled( false /*enabled && player_->game_->canBuildCard()*/ );
-    buildCard_->setToolTip( "Not implemented" /*enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : ""*/ );
+    buildCard_->setEnabled( enabled && player_->game_->canBuildCard() );
+    buildCard_->setToolTip( enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : "" );
     card_->setEnabled( false );
     card_->setToolTip( "Not implemented" );
     pass_->setEnabled( enabled );

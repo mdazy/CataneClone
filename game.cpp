@@ -73,6 +73,13 @@ Game::Game( QObject* parent ) :
         player_.emplace_back( this );
         player_[ i ].number_ = i;
     }
+
+    devCards_.insert( devCards_.begin(), 14, Knight );
+    devCards_.insert( devCards_.begin(), 5, Point );
+    devCards_.insert( devCards_.begin(), 2, Roads );
+    devCards_.insert( devCards_.begin(), 2, Monopoly );
+    devCards_.insert( devCards_.begin(), 2, Invention );
+    randomize( devCards_ );
 }
 
 
@@ -375,6 +382,13 @@ void Game::buildCity( const Pos& np ) {
 
 
 void Game::buildCard() {
+    auto& p = curPlayer();
+    p.devCards_.push_back( devCards_.back() );
+    p.resources_[ Hex::Rock ]--;
+    p.resources_[ Hex::Wheat ]--;
+    p.resources_[ Hex::Sheep ]--;
+    devCards_.pop_back();
+    emit updatePlayer( curPlayer_ );
 }
 
 
