@@ -48,6 +48,7 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
 
 void PlayerView::updateView() {
     playerName_->setText( QString( player_->number_ == player_->game_->curPlayer_ ? "<b>" : "" ) + "Player " + QString::number( player_->number_ + 1 ) + QString( player_->number_ == player_->game_->curPlayer_ ? "</b>" : "" ) );
+    // update resources
     QString text;
     int total = 0;
     int prevTotal = 0;
@@ -60,10 +61,21 @@ void PlayerView::updateView() {
         total += n;
         prevTotal += prevN;
     }
+    // dev cards
     resources_->setText( ( prevTotal != total ? "<b>" : "" ) + QString::number( total ) + " resource cards: " + ( prevTotal != total ? "</b>" : "" ) + text );
+    total = 0;
+    prevTotal = 0;
     text = "";
-    // TODO: list dev cards
-    devCards_->setText( ( prevPlayer_.devCards_.size() != player_->devCards_.size() ? "<b>" : "" ) + QString::number( player_->devCards_.size() ) + " dev cards:" + ( prevPlayer_.devCards_.size() != player_->devCards_.size() ? "</b>" : "" ) + text );
+    for( int i = 0; i < player_->devCards_.size(); i++ ) {
+        int n = player_->devCards_[ i ];
+        int prevN = prevPlayer_.devCards_[ i ];
+        if( n > 0 ) {
+            text += ( prevN != n ? "<b>" : "" ) + QString::number( n ) + " " + cardName( DevCard( i ) ) + ( prevN != n ? "</b>" : "" ) + " ";
+        }
+        total += n;
+        prevTotal += prevN;
+    }
+    devCards_->setText( ( prevTotal != total ? "<b>" : "" )  + QString::number( total ) + " dev cards: " + ( prevTotal != total ? "</b>" : "" )  + text );
     tokens_->setText( QString::number( player_->roads_ ) + " roads " + QString::number( player_->towns_ ) + " towns " + QString::number( player_->cities_ ) + " cities" );
     prevPlayer_ = *player_;
 }

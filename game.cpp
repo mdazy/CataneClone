@@ -10,8 +10,34 @@ using namespace std;
 /**/
 
 
+QString cardName( DevCard card ) {
+    switch( card ) {
+        case Point : {
+            return "point";
+        }
+        case Knight : {
+            return "knight";
+        }
+        case Invention : {
+            return "invention";
+        }
+        case Roads : { 
+            return "roads";
+        }
+        case Monopoly : {
+            return "monopoly";
+        }
+    }
+    return "unknown";
+}
+
+
+/**/
+
+
 Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ), state_( Waiting ) {
     resources_.resize( Hex::Desert, 0 );
+    devCards_.resize( Invention + 1, 0 );
 }
 
 
@@ -43,6 +69,7 @@ ostream& operator <<( ostream& out, const Player& p ) {
         out << p.resources_[ i ] << " ";
     }
     out << p.towns_ << " " << p.cities_ << " " << p.roads_;
+    // TODO: restore state
     return out;
 }
 
@@ -55,7 +82,7 @@ istream& operator >>( istream& in, Player& p ) {
         in >> p.resources_[ i ];
     }
     in >> p.towns_ >> p.cities_ >> p.roads_;
-    // TODO
+    // TODO : save state
     p.state_ = Player::Waiting;
     return in;
 }
@@ -113,8 +140,7 @@ bool Game::canBuildRoad() {
 bool Game::canBuildCard() const {
     const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Rock ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
-    // TODO: check remaining dev cards
-    return hasCards;
+    return hasCards && devCards_.size() > 0;
 }
 
 
@@ -383,7 +409,7 @@ void Game::buildCity( const Pos& np ) {
 
 void Game::buildCard() {
     auto& p = curPlayer();
-    p.devCards_.push_back( devCards_.back() );
+    p.devCards_[ devCards_.back() ]++;
     p.resources_[ Hex::Rock ]--;
     p.resources_[ Hex::Wheat ]--;
     p.resources_[ Hex::Sheep ]--;

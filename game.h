@@ -11,7 +11,13 @@ class Game;
 
 /**/
 
+
 enum DevCard { Knight = 0, Point, Roads, Monopoly, Invention };
+
+QString cardName( DevCard card );
+
+
+/**/
 
 
 class Player {
