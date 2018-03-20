@@ -3,6 +3,7 @@
 #include <QtCore/QTimer>
 
 #include <fstream>
+#include <algorithm>
 
 using namespace std;
 
@@ -59,6 +60,11 @@ int Player::robCard() {
     }
     // should not reach here
     return -1;
+}
+
+
+int Player::nbResourceCards() const {
+    return accumulate( resources_.begin(), resources_.end(), 0 );
 }
 
 
@@ -419,6 +425,11 @@ void Game::buildCard() {
 
 
 void Game::rob() {
+    for( int i = 0; i < nbPlayers_; i++ ) {
+        if( player_[ i ].nbResourceCards() > 7 ) {
+            emit( pickDiscard( &player_ [ i ] ) );
+        }
+    }
     curPlayer().state_ = Player::PickRobTown;
     emit requestHex();
 }
@@ -453,6 +464,14 @@ void Game::rob( const Pos& np ) {
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( from, false );
     emit updatePlayer( curPlayer_ );
+}
+
+
+void Game::discard( Player* p, vector<int> selection ) {
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        p->resources_[ i ] -= selection[ i ];
+    }
+    emit updatePlayer( p->number_ );
 }
 
 

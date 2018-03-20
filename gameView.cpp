@@ -7,6 +7,7 @@
 #include "boardView.h"
 #include "playerView.h"
 #include "die.h"
+#include "resourceSelectors.h"
 
 #include <iostream>
 using namespace std;
@@ -28,6 +29,8 @@ GameView::GameView( Game* game, QWidget* parent ) :
     connect( game, SIGNAL( rollDice() ), this, SLOT( rollDice() ) );
 
     connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( diceRolled( int, int ) ) );
+
+    connect( game, SIGNAL( pickDiscard( Player* ) ), this, SLOT( discard( Player* ) ) );
 
     connect( game, SIGNAL( requestHex() ), this, SLOT( pickHex() ) );
     connect( boardView_, SIGNAL( hexSelected( Pos ) ), game_, SLOT( robAround( const Pos& ) ) );
@@ -203,4 +206,11 @@ void GameView::diceRolled( int die1, int die2 ) {
 void GameView::loadState() {
     game_->load();
     update();
+}
+
+
+void GameView::discard( Player* p ) {
+    auto d = new DiscardSelector( p, this );
+    connect( d, SIGNAL( selected( Player*, std::vector<int> ) ), game_, SLOT( discard( Player*, std::vector<int> ) ) );
+    d->exec();
 }

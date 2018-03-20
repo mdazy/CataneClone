@@ -26,6 +26,7 @@ public:
     Player( Game* game );
 
     int robCard();
+    int nbResourceCards() const;
 
 public:
     Game* game_;
@@ -75,6 +76,7 @@ public slots:
     void buildCard();
     void rob( const Pos& np );
     void robAround( const Pos& hp );
+    void discard( Player* p, std::vector<int> selection );
 
     void load();
     void save() const;
@@ -88,6 +90,7 @@ signals:
     void updatePlayer( int player = - 1, bool buttons = true );
     void rollDice();
     void diceRolled( int die1, int die2 );
+    void pickDiscard( Player* p );
 
 protected:
     void setupAllowedBuildNodes( bool start = false );

@@ -61,32 +61,34 @@ void PlayerView::updateView() {
     playerName_->setText( QString( player_->number_ == player_->game_->curPlayer_ ? "<b>" : "" ) + "Player " + QString::number( player_->number_ + 1 ) + QString( player_->number_ == player_->game_->curPlayer_ ? "</b>" : "" ) );
     // update resources
     QString text;
-    int total = 0;
-    int prevTotal = 0;
     for( int i = 0; i < player_->resources_.size(); i++ ) {
         int n = player_->resources_[ i ];
         int prevN = prevPlayer_.resources_[ i ];
+        bool diff = n != prevN;
         if( n > 0 ) {
-            text += ( prevN != n ? "<b>" : "" ) + QString::number( n ) + " " + Hex::typeName[ i ] + ( prevN != n ? "</b>" : "" ) + " ";
+            text += ( diff ? "<b>" : "" ) + QString::number( n ) + " " + Hex::typeName[ i ] + ( diff ? "</b>" : "" ) + " ";
         }
-        total += n;
-        prevTotal += prevN;
     }
     // dev cards
-    resources_->setText( ( prevTotal != total ? "<b>" : "" ) + QString::number( total ) + " resource cards: " + ( prevTotal != total ? "</b>" : "" ) + text );
+    int total = player_->nbResourceCards();
+    int prevTotal = prevPlayer_.nbResourceCards();
+    bool diff = total != prevTotal;
+    resources_->setText( ( diff ? "<b>" : "" ) + QString::number( total ) + " resource cards: " + ( diff ? "</b>" : "" ) + text );
     total = 0;
     prevTotal = 0;
     text = "";
     for( int i = 0; i < player_->devCards_.size(); i++ ) {
         int n = player_->devCards_[ i ];
         int prevN = prevPlayer_.devCards_[ i ];
+        bool diff = n != prevN;
         if( n > 0 ) {
-            text += ( prevN != n ? "<b>" : "" ) + QString::number( n ) + " " + cardName( DevCard( i ) ) + ( prevN != n ? "</b>" : "" ) + " ";
+            text += ( diff ? "<b>" : "" ) + QString::number( n ) + " " + cardName( DevCard( i ) ) + ( diff ? "</b>" : "" ) + " ";
         }
         total += n;
         prevTotal += prevN;
     }
-    devCards_->setText( ( prevTotal != total ? "<b>" : "" )  + QString::number( total ) + " dev cards: " + ( prevTotal != total ? "</b>" : "" )  + text );
+    diff = total != prevTotal;
+    devCards_->setText( ( diff ? "<b>" : "" )  + QString::number( total ) + " dev cards: " + ( diff ? "</b>" : "" )  + text );
     tokens_->setText( QString::number( player_->roads_ ) + " roads " + QString::number( player_->towns_ ) + " towns " + QString::number( player_->cities_ ) + " cities" );
     prevPlayer_ = *player_;
 }

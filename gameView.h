@@ -12,6 +12,7 @@ class Game;
 class BoardView;
 class PlayerView;
 class Die;
+class Player;
 
 class GameView : public QStackedWidget {
     Q_OBJECT;
@@ -26,6 +27,8 @@ public slots:
     void pickRoad( const Pos& from );
     void rollDice();
     void diceRolled( int die1, int die2 );
+
+    void discard( Player* p );
 
     void updatePlayer( int player = -1, bool buttons = true );
 
