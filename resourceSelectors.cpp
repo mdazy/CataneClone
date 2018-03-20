@@ -3,6 +3,7 @@
 #include "board.h"
 #include "game.h"
 
+#include <QtGui/QCloseEvent>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QGridLayout>
 #include <QtWidgets/QLabel>
@@ -71,7 +72,6 @@ vector<int> ResourceSelector::selection() const {
 
 
 DiscardSelector::DiscardSelector( Player* p, QWidget* parent ) : QDialog( parent, Qt::CustomizeWindowHint | Qt::WindowTitleHint ), p_( p ) {
-    // TODO: prevent close with Alt-F4
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
     nbCards_ = p->nbResourceCards() / 2;
@@ -84,10 +84,16 @@ DiscardSelector::DiscardSelector( Player* p, QWidget* parent ) : QDialog( parent
     l->addWidget( b );
     OKButton_ = b->button( QDialogButtonBox::Ok );
     connect( selector_, SIGNAL( selectionChanged() ), this, SLOT( updateOKButton() ) );
+    updateOKButton();
 }
 
 
 DiscardSelector::~DiscardSelector() {
+}
+
+
+void DiscardSelector::closeEvent( QCloseEvent* e ) {
+    e->ignore();
 }
 
 

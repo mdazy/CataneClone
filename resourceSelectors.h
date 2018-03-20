@@ -50,6 +50,7 @@ public:
     virtual ~DiscardSelector();
 
     void accept() override;
+    void closeEvent( QCloseEvent* ) override;
 
 signals:
     void selected( Player* p, std::vector<int> selection );
