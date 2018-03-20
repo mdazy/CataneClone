@@ -20,7 +20,7 @@ using namespace std;
 ResourceSelector::ResourceSelector( int nbResources, QWidget* parent ) : QWidget( parent ), nbResources_( nbResources ) {
     layout_ = new QGridLayout( this );
     for( int i = 0 ; i < Hex::Desert; i++ ) {
-        layout_->addWidget( new QLabel( Hex::typeName[ i ] ), i, 0 );
+        layout_->addWidget( new QLabel( Hex::typeName[ i ][ 0 ].toUpper() + Hex::typeName[ i ].mid( 1 ) ), i, 0 );
         spin_[ i ] = new QSpinBox();
         spin_[ i ]->setMinimum( 0 );
         layout_->addWidget( spin_[ i ], i, 1 );
