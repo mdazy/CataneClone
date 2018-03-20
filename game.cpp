@@ -471,7 +471,7 @@ void Game::discard( Player* p, vector<int> selection ) {
     for( int i = 0; i < Hex::Desert; i++ ) {
         p->resources_[ i ] -= selection[ i ];
     }
-    emit updatePlayer( p->number_ );
+    emit updatePlayer( p->number_, p->number_ == curPlayer_ );
 }
 
 
