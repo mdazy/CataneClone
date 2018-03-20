@@ -80,7 +80,6 @@ void GameView::pickNode() {
         }
     }
     connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, slot );
-    //updatePlayer();
     playerView_[ game_->curPlayer_ ]->enableButtons( false );
     boardView_->setSelectionMode( BoardView::Node );
     boardView_->update();

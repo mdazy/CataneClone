@@ -97,21 +97,21 @@ void PlayerView::updateView() {
 void PlayerView::enableButtons( bool enabled ) {
     trade_->setEnabled( false );
     trade_->setToolTip( "Not implemented" );
-    pass_->setEnabled( enabled );
+    pass_->setEnabled( enabled && player_->state_ == Player::Waiting );
     buildRoad_->setEnabled( enabled && player_->game_->canBuildRoad() );
-    buildRoad_->setToolTip( enabled && ! player_->game_->canBuildRoad() ? "Cannot be built" : "" );
+    buildRoad_->setToolTip( enabled && player_->game_->canBuildRoad() ? "" : "Cannot be built" );
     buildTown_->setEnabled( enabled && player_->game_->canBuildTown() );
-    buildTown_->setToolTip( enabled && ! player_->game_->canBuildTown() ? "Cannot be built" : "" );
+    buildTown_->setToolTip( enabled && player_->game_->canBuildTown() ? "" : "Cannot be built" );
     buildCity_->setEnabled( enabled && player_->game_->canBuildCity() );
-    buildCity_->setToolTip( enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : "" );
+    buildCity_->setToolTip( enabled && player_->game_->canBuildCity() ? "" : "Cannot be built" );
     buildCard_->setEnabled( enabled && player_->game_->canBuildCard() );
-    buildCard_->setToolTip( enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : "" );
-    playKnight_->setEnabled( false );
-    playKnight_->setToolTip( "Not implemented" );
-    playRoads_->setEnabled( false );
-    playRoads_->setToolTip( "Not implemented" );
-    playMonopoly_->setEnabled( false );
-    playMonopoly_->setToolTip( "Not implemented" );
-    playInvention_->setEnabled( false );
-    playInvention_->setToolTip( "Not implemented" );
+    buildCard_->setToolTip( enabled && player_->game_->canBuildCard() ? "" : "Cannot be built" );
+    playKnight_->setEnabled( enabled && player_->canPlayKnight() );
+    playKnight_->setToolTip( enabled && player_->canPlayKnight() ? "" : "Cannot play this card" );
+    playRoads_->setEnabled( enabled && player_->canPlayRoads() );
+    playRoads_->setToolTip( enabled && player_->canPlayRoads() ? "" : "Cannot play this card" );
+    playMonopoly_->setEnabled( enabled && player_->canPlayMonopoly() );
+    playMonopoly_->setToolTip( enabled && player_->canPlayMonopoly() ? "" : "Cannot play this card" );
+    playInvention_->setEnabled( enabled && player_->canPlayInvention() );
+    playInvention_->setToolTip( enabled && player_->canPlayInvention() ? "" : "Cannot play this card" );
 }

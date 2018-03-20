@@ -22,11 +22,16 @@ QString cardName( DevCard card );
 
 class Player {
 public:
-    enum State { Waiting, PickStartTown, PickStartRoad, PickBuildRoad, PickBuildTown, PickCity, PickRobTown };
+    enum State { Waiting, PickStartTown, PickStartRoad, PickBuildRoad, PickBuildTown, PickCity, PickRobTown, AboutToRoll };
     Player( Game* game );
 
     int robCard();
     int nbResourceCards() const;
+
+    bool canPlayKnight() const;
+    bool canPlayRoads() const;
+    bool canPlayInvention() const;
+    bool canPlayMonopoly() const;
 
 public:
     Game* game_;
@@ -37,6 +42,7 @@ public:
     int cities_;
     int roads_;
     State state_;
+    bool devCardPlayed_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Player& p );

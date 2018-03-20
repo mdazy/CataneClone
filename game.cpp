@@ -68,6 +68,26 @@ int Player::nbResourceCards() const {
 }
 
 
+bool Player::canPlayKnight() const {
+    return !devCardPlayed_ && devCards_[ Knight ] > 0;
+}
+
+
+bool Player::canPlayRoads() const {
+    return !devCardPlayed_ && state_ == Waiting && devCards_[ Roads ] > 0;
+}
+
+
+bool Player::canPlayInvention() const {
+    return !devCardPlayed_ && state_ == Waiting && devCards_[ Invention ] > 0;
+}
+
+
+bool Player::canPlayMonopoly() const {
+    return !devCardPlayed_ && state_ == Waiting && devCards_[ Monopoly ] > 0;
+}
+
+
 ostream& operator <<( ostream& out, const Player& p ) {
     out << "# Player" << endl;
     out << p.number_ << " ";
@@ -122,14 +142,14 @@ bool Game::canBuildTown() {
     setupAllowedBuildNodes();
     int nbNodes = board_.allowedNodes_.size();
     board_.allowedNodes_.clear();
-    return hasCards && p.towns_ > 0 && nbNodes > 0;
+    return hasCards && p.state_ == Player::Waiting && p.towns_ > 0 && nbNodes > 0;
 }
 
 
 bool Game::canBuildCity() const {
     const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Wheat ] > 1 && p.resources_[ Hex::Rock ] > 2;
-    return hasCards && p.towns_ < 5 && p.cities_ > 0;
+    return hasCards && p.state_ == Player::Waiting && p.towns_ < 5 && p.cities_ > 0;
 }
 
 
@@ -139,14 +159,14 @@ bool Game::canBuildRoad() {
     setupAllowedRoadStartNodes();
     int nbNodes = board_.allowedNodes_.size();
     board_.allowedNodes_.clear();
-    return hasCards && p.roads_ > 0 && nbNodes > 0;
+    return hasCards && p.state_ == Player::Waiting && p.roads_ > 0 && nbNodes > 0;
 }
 
 
 bool Game::canBuildCard() const {
     const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Rock ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
-    return hasCards && devCards_.size() > 0;
+    return hasCards && p.state_ == Player::Waiting && devCards_.size() > 0;
 }
 
 
@@ -195,7 +215,6 @@ void Game::startNodePicked( const Pos& np ) {
 void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     board_.road_.emplace_back( curPlayer_, from, to );
     curPlayer().roads_--;
-    curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
 
     if( pickStartAscending_ ) {
@@ -344,14 +363,20 @@ void Game::playTurn() {
     emit diceRolled( dice1, dice2 );
     if( number == 7 ) {
         rob();
+    } else {
+        curPlayer().state_ = Player::Waiting;
+        updatePlayer( curPlayer_ );
     }
 }
 
 
 void Game::nextPlayer() {
     curPlayer_ = ( curPlayer_ + 1 ) % nbPlayers_;
-    roadCost_ = 0;
+    curPlayer().state_ = Player::AboutToRoll;
+    curPlayer().devCardPlayed_ = false;
+    roadCost_ = 1;
     nbRoadsToBuild_ = 1;
+    updatePlayer( curPlayer_ );
     emit rollDice();
 }
 
@@ -382,6 +407,7 @@ void Game::buildRoad( const Pos& from, const Pos& to ) {
 
 
 void Game::buildRoads() {
+    curPlayer().devCardPlayed_ = true;
     curPlayer().devCards_[ Roads ]--;
     roadCost_ = 0;
     nbRoadsToBuild_ = min( curPlayer().roads_, 2 );
@@ -442,6 +468,7 @@ void Game::buildCard() {
 
 
 void Game::knight() {
+    curPlayer().devCardPlayed_ = true;
     // TODO: count largest army
     curPlayer().devCards_[ Knight ]--;
     moveRobber();
@@ -504,6 +531,7 @@ void Game::discard( Player* p, vector<int> selection ) {
 
 
 void Game::invention( vector<int> selection ) {
+    curPlayer().devCardPlayed_ = true;
     curPlayer().devCards_[ Invention ]--;
     for( int i = 0; i < Hex::Desert; i++ ) {
         curPlayer().resources_[ i ] += selection[ i ];
@@ -513,6 +541,7 @@ void Game::invention( vector<int> selection ) {
 
 
 void Game::monopoly( vector<int> selection ) {
+    curPlayer().devCardPlayed_ = true;
     curPlayer().devCards_[ Monopoly ]--;
     for( int i = 0; i < Hex::Desert; i++ ) {
         if( selection[ i ] > 0 ) {
