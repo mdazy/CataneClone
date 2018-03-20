@@ -17,7 +17,7 @@ using namespace std;
 /**/
 
 
-ResourceSelector::ResourceSelector( int nbResources, QWidget* parent ) : QWidget( parent ), nbResources_( nbResources ) {
+ResourceSelector::ResourceSelector( QWidget* parent ) : QWidget( parent ), nbResources_( 0 ) {
     layout_ = new QGridLayout( this );
     for( int i = 0 ; i < Hex::Desert; i++ ) {
         layout_->addWidget( new QLabel( Hex::typeName[ i ][ 0 ].toUpper() + Hex::typeName[ i ].mid( 1 ) ), i, 0 );
@@ -31,6 +31,11 @@ ResourceSelector::ResourceSelector( int nbResources, QWidget* parent ) : QWidget
 
 
 ResourceSelector::~ResourceSelector() {    
+}
+
+
+void ResourceSelector::setTotal( int total ) {
+    nbResources_ = total;
 }
 
 
@@ -55,6 +60,10 @@ void ResourceSelector::updateLimits() {
         for( int i = 0; i < Hex::Desert; i++ ) {
             spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
         }
+    } else if( nbResources_ > 0 ) {
+        for( int i = 0; i < Hex::Desert; i++ ) {
+            spin_[ i ]->setMaximum( spin_[ i ]->value() + nbResources_ - totalSelected );
+        }        
     }
 }
 
@@ -71,13 +80,12 @@ vector<int> ResourceSelector::selection() const {
 /**/
 
 
-DiscardSelector::DiscardSelector( Player* p, QWidget* parent ) : QDialog( parent, Qt::CustomizeWindowHint | Qt::WindowTitleHint ), p_( p ) {
+MaxedSelector::MaxedSelector( QWidget* parent ) : QDialog( parent, Qt::CustomizeWindowHint | Qt::WindowTitleHint ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
-    nbCards_ = p->nbResourceCards() / 2;
-    l->addWidget( new QLabel( QString( "Player %1, discard %2 resource cards" ).arg( p_->number_ + 1 ).arg( nbCards_ ) ) );
-    selector_ = new ResourceSelector( nbCards_ );
-    selector_->setMaxima( p->resources_ );
+    info_ = new QLabel();
+    l->addWidget( info_ );
+    selector_ = new ResourceSelector();
     l->addWidget( selector_ );
     auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
     connect( b, SIGNAL( accepted() ), this, SLOT( accept() ) );
@@ -88,28 +96,68 @@ DiscardSelector::DiscardSelector( Player* p, QWidget* parent ) : QDialog( parent
 }
 
 
-DiscardSelector::~DiscardSelector() {
+MaxedSelector::~MaxedSelector() {
 }
 
 
-void DiscardSelector::closeEvent( QCloseEvent* e ) {
+void MaxedSelector::closeEvent( QCloseEvent* e ) {
     e->ignore();
 }
 
 
-void DiscardSelector::updateOKButton() {
+void MaxedSelector::updateOKButton() {
     auto selection = selector_->selection();
     int total = accumulate( selection.begin(), selection.end(), 0 );
-    OKButton_->setEnabled( total == nbCards_ );
+    OKButton_->setEnabled( total == max_ );
 }
 
 
-void DiscardSelector::accept() {
+void MaxedSelector::accept() {
     auto selection = selector_->selection();
     int total = accumulate( selection.begin(), selection.end(), 0 );
-    if( total < nbCards_ ) {
+    if( total < max_ ) {
         return;
     }
-    emit selected( p_, selection );
+    doAccept();
     QDialog::accept();
+}
+
+
+/**/
+
+
+DiscardSelector::DiscardSelector( Player* p, QWidget* parent ) : MaxedSelector( parent ), p_( p ) {
+    max_ = p_->nbResourceCards() / 2;
+    selector_->setTotal( max_ );
+    selector_->setMaxima( p->resources_ );
+    info_->setText( QString( "Player %1, discard %2 resource cards" ).arg( p_->number_ + 1 ).arg( max_ ) );
+}
+
+
+DiscardSelector::~DiscardSelector() {
+}
+
+
+void DiscardSelector::doAccept() {
+    auto selection = selector_->selection();
+    emit selected( p_, selection );   
+}
+
+
+/**/
+
+
+NumberSelector::NumberSelector( int max, QWidget* parent ) : MaxedSelector( parent ) {
+    max_ = max;
+    selector_->setTotal( max_ );
+    info_->setText( QString( "Select %1 resource%2" ).arg( max_ ).arg( max > 1 ? "s" : "" ) );
+}
+
+
+NumberSelector::~NumberSelector() {
+}
+
+
+void NumberSelector::doAccept() {
+    emit selected( selector_->selection() );
 }

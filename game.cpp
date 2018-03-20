@@ -350,6 +350,8 @@ void Game::playTurn() {
 
 void Game::nextPlayer() {
     curPlayer_ = ( curPlayer_ + 1 ) % nbPlayers_;
+    roadCost_ = 0;
+    nbRoadsToBuild_ = 1;
     emit rollDice();
 }
 
@@ -362,13 +364,28 @@ void Game::buildRoad() {
 
 
 void Game::buildRoad( const Pos& from, const Pos& to ) {
+    // TODO: longest road
     auto& p = curPlayer();
-    p.resources_[ Hex::Brick ]--;
-    p.resources_[ Hex::Wood ]--;
+    p.resources_[ Hex::Brick ] -= roadCost_;
+    p.resources_[ Hex::Wood ] -= roadCost_;
     p.roads_--;
     board_.road_.emplace_back( curPlayer_, from, to );
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
+    nbRoadsToBuild_--;
+    if( nbRoadsToBuild_ > 0 ) {
+        buildRoad();
+    } else {
+        nbRoadsToBuild_ = 1;
+    }
+}
+
+
+void Game::buildRoads() {
+    curPlayer().devCards_[ Roads ]--;
+    roadCost_ = 0;
+    nbRoadsToBuild_ = min( curPlayer().roads_, 2 );
+    buildRoad();
 }
 
 
@@ -424,14 +441,25 @@ void Game::buildCard() {
 }
 
 
+void Game::knight() {
+    // TODO: count largest army
+    curPlayer().devCards_[ Knight ]--;
+    moveRobber();
+}
+
+
+void Game::moveRobber() {
+    curPlayer().state_ = Player::PickRobTown;
+    emit requestHex();
+}
+
 void Game::rob() {
     for( int i = 0; i < nbPlayers_; i++ ) {
         if( player_[ i ].nbResourceCards() > 7 ) {
             emit( pickDiscard( &player_ [ i ] ) );
         }
     }
-    curPlayer().state_ = Player::PickRobTown;
-    emit requestHex();
+    moveRobber();
 }
 
 
@@ -472,6 +500,33 @@ void Game::discard( Player* p, vector<int> selection ) {
         p->resources_[ i ] -= selection[ i ];
     }
     emit updatePlayer( p->number_, p->number_ == curPlayer_ );
+}
+
+
+void Game::invention( vector<int> selection ) {
+    curPlayer().devCards_[ Invention ]--;
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        curPlayer().resources_[ i ] += selection[ i ];
+    }
+    emit updatePlayer( curPlayer_ );    
+}
+
+
+void Game::monopoly( vector<int> selection ) {
+    curPlayer().devCards_[ Monopoly ]--;
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        if( selection[ i ] > 0 ) {
+            for( auto& p : player_ ) {
+                if( p.number_ != curPlayer_ ) {
+                    curPlayer().resources_[ i ] += p.resources_[ i ];
+                    p.resources_[ i ] = 0;
+                }
+            }
+            break;
+        }
+    }
+    emit updatePlayer( -1 , false );
+    emit updatePlayer( curPlayer_ );
 }
 
 

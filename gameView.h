@@ -27,6 +27,8 @@ public slots:
     void pickRoad( const Pos& from );
     void rollDice();
     void diceRolled( int die1, int die2 );
+    void invention();
+    void monopoly();
 
     void discard( Player* p );
 

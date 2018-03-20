@@ -165,6 +165,10 @@ void GameView::buildGameView() {
         connect( pv->buildTown_, SIGNAL( clicked() ), game_, SLOT( buildTown() ) );
         connect( pv->buildCity_, SIGNAL( clicked() ), game_, SLOT( buildCity() ) );
         connect( pv->buildCard_, SIGNAL( clicked() ), game_, SLOT( buildCard() ) );
+        connect( pv->playKnight_, SIGNAL( clicked() ), game_, SLOT( knight() ) );
+        connect( pv->playRoads_, SIGNAL( clicked() ), game_, SLOT( buildRoads() ) );
+        connect( pv->playInvention_, SIGNAL( clicked() ), this, SLOT( invention() ) );
+        connect( pv->playMonopoly_, SIGNAL( clicked() ), this, SLOT( monopoly() ) );
         connect( pv->pass_, SIGNAL( clicked() ), game_, SLOT( nextPlayer() ) );       
     }
     vl->addStretch();
@@ -212,5 +216,19 @@ void GameView::loadState() {
 void GameView::discard( Player* p ) {
     auto d = new DiscardSelector( p, this );
     connect( d, SIGNAL( selected( Player*, std::vector<int> ) ), game_, SLOT( discard( Player*, std::vector<int> ) ) );
+    d->exec();
+}
+
+
+void GameView::invention() {
+    auto d = new NumberSelector( 2, this );
+    connect( d, SIGNAL( selected( std::vector<int>) ), game_, SLOT( invention( std::vector<int> ) ) );
+    d->exec();
+}
+
+
+void GameView::monopoly() {
+    auto d = new NumberSelector( 1, this );
+    connect( d, SIGNAL( selected( std::vector<int>) ), game_, SLOT( monopoly( std::vector<int> ) ) );
     d->exec();
 }

@@ -69,14 +69,19 @@ public slots:
     void nextPlayer();
     void buildRoad();
     void buildRoad( const Pos& from, const Pos& to );
+    void buildRoads();
     void buildTown();
     void buildTown( const Pos& np );
     void buildCity();
     void buildCity( const Pos& np );
     void buildCard();
+    void knight();
+    void moveRobber();
     void rob( const Pos& np );
     void robAround( const Pos& hp );
     void discard( Player* p, std::vector<int> selection );
+    void invention( std::vector<int> selection );
+    void monopoly( std::vector<int> selection );
 
     void load();
     void save() const;
@@ -104,6 +109,8 @@ public:
     std::vector<DevCard> devCards_;
     int nbPlayers_;
     int curPlayer_;
+    int nbRoadsToBuild_;
+    int roadCost_;
     bool pickStartAscending_;
 };
 

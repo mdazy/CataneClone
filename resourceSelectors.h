@@ -7,6 +7,7 @@
 #include "board.h"
 
 class QGridLayout;
+class QLabel;
 class QPushButton;
 class QSpinBox;
 
@@ -19,9 +20,10 @@ class Player;
 class ResourceSelector : public QWidget {
     Q_OBJECT;
 public:
-    ResourceSelector( int nbResources, QWidget* parent = Q_NULLPTR );
+    ResourceSelector( QWidget* parent = Q_NULLPTR );
     virtual ~ResourceSelector();
 
+    void setTotal( int total );
     void setMaxima( const std::vector<int>& maxima );
 
     std::vector<int> selection() const;
@@ -43,24 +45,59 @@ protected:
 /**/
 
 
-class DiscardSelector : public QDialog {
+class MaxedSelector : public QDialog {
+    Q_OBJECT;
+public:
+    MaxedSelector( QWidget* parent = Q_NULLPTR );
+    virtual ~MaxedSelector();
+
+    void accept() override;
+    void closeEvent( QCloseEvent* ) override;
+
+protected slots:
+    void updateOKButton();
+    virtual void doAccept() = 0;
+
+protected:
+    int max_;
+    QLabel* info_;
+    ResourceSelector* selector_;
+    QPushButton* OKButton_;
+};
+
+
+/**/
+
+
+class DiscardSelector : public MaxedSelector {
     Q_OBJECT;
 public:
     DiscardSelector( Player* p, QWidget* parent = Q_NULLPTR );
     virtual ~DiscardSelector();
 
-    void accept() override;
-    void closeEvent( QCloseEvent* ) override;
-
 signals:
     void selected( Player* p, std::vector<int> selection );
 
-protected slots:
-    void updateOKButton();
+protected:
+    void doAccept() override;
 
 protected:
-    int nbCards_;
     Player* p_;
-    ResourceSelector* selector_;
-    QPushButton* OKButton_;
+};
+
+
+/**/
+
+
+class NumberSelector : public MaxedSelector {
+    Q_OBJECT;
+public:
+    NumberSelector( int max, QWidget* parent = Q_NULLPTR );
+    virtual ~NumberSelector();
+
+signals:
+    void selected( std::vector<int> selection );
+
+protected:
+    void doAccept() override;
 };
