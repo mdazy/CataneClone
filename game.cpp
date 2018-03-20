@@ -69,22 +69,22 @@ int Player::nbResourceCards() const {
 
 
 bool Player::canPlayKnight() const {
-    return !devCardPlayed_ && devCards_[ Knight ] > 0;
+    return !devCardPlayed_ && devCards_[ Knight ] > ( builtCard_ == Knight ? 1 : 0 );
 }
 
 
 bool Player::canPlayRoads() const {
-    return !devCardPlayed_ && state_ == Waiting && devCards_[ Roads ] > 0;
+    return !devCardPlayed_ && state_ == Waiting && devCards_[ Roads ] > ( builtCard_ == Roads ? 1 : 0 );
 }
 
 
 bool Player::canPlayInvention() const {
-    return !devCardPlayed_ && state_ == Waiting && devCards_[ Invention ] > 0;
+    return !devCardPlayed_ && state_ == Waiting && devCards_[ Invention ] > ( builtCard_ == Invention ? 1 : 0 );
 }
 
 
 bool Player::canPlayMonopoly() const {
-    return !devCardPlayed_ && state_ == Waiting && devCards_[ Monopoly ] > 0;
+    return !devCardPlayed_ && state_ == Waiting && devCards_[ Monopoly ] > ( builtCard_ == Monopoly ? 1 : 0 );
 }
 
 
@@ -227,7 +227,8 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
         if( curPlayer_ == 0 ) {
             board_.allowedNodes_.clear();
             // start game
-            emit rollDice();
+            curPlayer_--;
+            nextPlayer();
             return;
         }
         curPlayer_--;
@@ -372,8 +373,10 @@ void Game::playTurn() {
 
 void Game::nextPlayer() {
     curPlayer_ = ( curPlayer_ + 1 ) % nbPlayers_;
-    curPlayer().state_ = Player::AboutToRoll;
-    curPlayer().devCardPlayed_ = false;
+    auto& p = curPlayer();
+    p.state_ = Player::AboutToRoll;
+    p.devCardPlayed_ = false;
+    p.builtCard_ = -1;
     roadCost_ = 1;
     nbRoadsToBuild_ = 1;
     updatePlayer( curPlayer_ );
@@ -432,7 +435,7 @@ void Game::buildTown( const Pos& np ) {
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.type_ = Node::Town;
     n.player_ = curPlayer_;
-    curPlayer().state_ = Player::PickBuildRoad;
+    curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
 }
 
@@ -458,11 +461,12 @@ void Game::buildCity( const Pos& np ) {
 
 void Game::buildCard() {
     auto& p = curPlayer();
-    p.devCards_[ devCards_.back() ]++;
+    p.builtCard_ = devCards_.back();
+    devCards_.pop_back();
+    p.devCards_[ p.builtCard_ ]++;
     p.resources_[ Hex::Rock ]--;
     p.resources_[ Hex::Wheat ]--;
     p.resources_[ Hex::Sheep ]--;
-    devCards_.pop_back();
     emit updatePlayer( curPlayer_ );
 }
 

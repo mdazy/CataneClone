@@ -43,6 +43,7 @@ public:
     int roads_;
     State state_;
     bool devCardPlayed_;
+    int builtCard_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Player& p );
