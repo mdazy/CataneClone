@@ -25,10 +25,11 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
     // action buttons
     auto hl = new QHBoxLayout();
     vl->addLayout( hl );
+    roll_ = new QPushButton( "Roll" );
+    roll_->setEnabled( false );
+    hl->addWidget( roll_ );
     trade_ = new QPushButton( "Trade" );
     hl->addWidget( trade_ );
-    card_ = new QPushButton( "Play card" );
-    hl->addWidget( card_ );
     pass_ = new QPushButton( "Pass" );
     hl->addWidget( pass_ ); 
     // build buttons
@@ -42,7 +43,17 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
     hl->addWidget( buildCity_ );
     buildCard_ = new QPushButton( "Build dev card" );
     hl->addWidget( buildCard_ );
-    
+    // card buttons
+    hl = new QHBoxLayout();
+    vl->addLayout( hl );
+    playKnight_ = new QPushButton( "Knight" );
+    hl->addWidget( playKnight_ );
+    playRoads_ = new QPushButton( "Roads" );
+    hl->addWidget( playRoads_ );
+    playMonopoly_ = new QPushButton( "Monopoly" );
+    hl->addWidget( playMonopoly_ );
+    playInvention_ = new QPushButton( "Invention" );
+    hl->addWidget( playInvention_ );    
 }
 
 
@@ -84,6 +95,7 @@ void PlayerView::updateView() {
 void PlayerView::enableButtons( bool enabled ) {
     trade_->setEnabled( false );
     trade_->setToolTip( "Not implemented" );
+    pass_->setEnabled( enabled );
     buildRoad_->setEnabled( enabled && player_->game_->canBuildRoad() );
     buildRoad_->setToolTip( enabled && ! player_->game_->canBuildRoad() ? "Cannot be built" : "" );
     buildTown_->setEnabled( enabled && player_->game_->canBuildTown() );
@@ -92,7 +104,12 @@ void PlayerView::enableButtons( bool enabled ) {
     buildCity_->setToolTip( enabled && ! player_->game_->canBuildCity() ? "Cannot be built" : "" );
     buildCard_->setEnabled( enabled && player_->game_->canBuildCard() );
     buildCard_->setToolTip( enabled && ! player_->game_->canBuildCard() ? "Cannot be built" : "" );
-    card_->setEnabled( false );
-    card_->setToolTip( "Not implemented" );
-    pass_->setEnabled( enabled );
+    playKnight_->setEnabled( false );
+    playKnight_->setToolTip( "Not implemented" );
+    playRoads_->setEnabled( false );
+    playRoads_->setToolTip( "Not implemented" );
+    playMonopoly_->setEnabled( false );
+    playMonopoly_->setToolTip( "Not implemented" );
+    playInvention_->setEnabled( false );
+    playInvention_->setToolTip( "Not implemented" );
 }

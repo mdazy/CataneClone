@@ -52,6 +52,5 @@ protected:
     BoardView* boardView_;
     Die* die1_;
     Die* die2_;
-    QPushButton* roll_;
     std::vector<PlayerView*> playerView_;
 };

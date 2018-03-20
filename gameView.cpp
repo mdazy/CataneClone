@@ -26,7 +26,6 @@ GameView::GameView( Game* game, QWidget* parent ) :
     connect( game, SIGNAL( requestStartPositions() ), this, SLOT( pickStartPositions() ) );
 
     connect( game, SIGNAL( rollDice() ), this, SLOT( rollDice() ) );
-    connect( roll_, SIGNAL( clicked() ), game_, SLOT( playTurn() ) );
 
     connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( diceRolled( int, int ) ) );
 
@@ -152,15 +151,13 @@ void GameView::buildGameView() {
     die2_ = new Die();
     l->addWidget( die1_ );
     l->addWidget( die2_ );
-    roll_ = new QPushButton( "Roll" );
-    roll_->setEnabled( false );
-    l->addWidget( roll_ );
     // players
     for( int i = 0; i < 4; i++ ) {
         auto pv = new PlayerView( &game_->player_[ i ] );
         pv->enableButtons( false );
         vl->addWidget( pv );
         playerView_.push_back( pv );
+        connect( pv->roll_, SIGNAL( clicked() ), game_, SLOT( playTurn() ) );
         connect( pv->buildRoad_, SIGNAL( clicked() ), game_, SLOT( buildRoad() ) );
         connect( pv->buildTown_, SIGNAL( clicked() ), game_, SLOT( buildTown() ) );
         connect( pv->buildCity_, SIGNAL( clicked() ), game_, SLOT( buildCity() ) );
@@ -188,14 +185,14 @@ void GameView::updatePlayer( int player, bool buttons ) {
 
 void GameView::rollDice() {
     playing_ = true;
-    roll_->setEnabled( true );
     playerView_[ ( game_->curPlayer_ + game_->nbPlayers_ - 1 ) % game_->nbPlayers_ ]->enableButtons( false );
+    playerView_[ game_->curPlayer_ ]->roll_->setEnabled( true );
     updatePlayer();
 }
 
 
 void GameView::diceRolled( int die1, int die2 ) {
-    roll_->setEnabled( false );
+    playerView_[ game_->curPlayer_ ]->roll_->setEnabled( false );
     playerView_[ game_->curPlayer_ ]->enableButtons( true );
     die1_->setValue( die1 );
     die2_->setValue( die2 );

@@ -24,10 +24,14 @@ public:
     QLabel* devCards_;
     QLabel* tokens_;
     QPushButton* trade_;
+    QPushButton* pass_;
+    QPushButton* roll_;
     QPushButton* buildRoad_;
     QPushButton* buildTown_;
     QPushButton* buildCity_;
     QPushButton* buildCard_;
-    QPushButton* card_;
-    QPushButton* pass_;
+    QPushButton* playKnight_;
+    QPushButton* playRoads_;
+    QPushButton* playMonopoly_;
+    QPushButton* playInvention_;
 };
