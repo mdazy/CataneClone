@@ -454,7 +454,7 @@ void Game::buildCity( const Pos& np ) {
     p.towns_++;
     p.cities_--;
     board_.node_[ np.y() ][ np.x() ].type_ = Node::City;
-    curPlayer().state_ = Player::PickBuildRoad;
+    curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
 }
 
