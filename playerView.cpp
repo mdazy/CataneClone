@@ -58,9 +58,18 @@ PlayerView::PlayerView( Player* p, QWidget* parent ) : QWidget( parent ), player
 
 
 void PlayerView::updateView() {
-    playerName_->setText( QString( player_->number_ == player_->game_->curPlayer_ ? "<b>" : "" ) + "Player " + QString::number( player_->number_ + 1 ) + QString( player_->number_ == player_->game_->curPlayer_ ? "</b>" : "" ) );
+    QString text = QString::number( player_->number_ + 1 );
+    text += " (" + QString::number( player_->score() ) + " points)";
+    text += " " + QString::number( player_->armySize_ ) + " knights ";
+    if( player_->largestArmy_ ) {
+        text += " (largest army)";
+    }
+    if( player_->longestRoad_ ) {
+        text += " - longest road";
+    }
+    playerName_->setText( QString( player_->number_ == player_->game_->curPlayer_ ? "<b>" : "" ) + "Player " + text + QString( player_->number_ == player_->game_->curPlayer_ ? "</b>" : "" ) );
     // update resources
-    QString text;
+    text = "";
     for( int i = 0; i < player_->resources_.size(); i++ ) {
         int n = player_->resources_[ i ];
         int prevN = prevPlayer_.resources_[ i ];

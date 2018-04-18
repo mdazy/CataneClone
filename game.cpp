@@ -36,7 +36,8 @@ QString cardName( DevCard card ) {
 /**/
 
 
-Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ), state_( Waiting ) {
+Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ), state_( Waiting ),
+    armySize_( 0 ), longestRoad_( false ), largestArmy_( false ) {
     resources_.resize( Hex::Desert, 0 );
     devCards_.resize( Invention + 1, 0 );
 }
@@ -60,6 +61,11 @@ int Player::robCard() {
     }
     // should not reach here
     return -1;
+}
+
+
+int Player::score() const {
+    return ( 5 - towns_ ) + ( 4 - cities_) * 2 + ( longestRoad_ ? 2 : 0 ) + ( largestArmy_ ? 2 : 0 ) + devCards_[ Point ];
 }
 
 
@@ -120,7 +126,7 @@ istream& operator >>( istream& in, Player& p ) {
 Game::Game( QObject* parent ) :
     QObject( parent ),
     nbPlayers_( 0 ), curPlayer_( 0 ),
-    pickStartAscending_( true )
+    pickStartAscending_( true ), nextPlayerState_( Player::Waiting )
 {
     for( int i = 0; i < 4; i++ ) {
         player_.emplace_back( this );
@@ -473,13 +479,36 @@ void Game::buildCard() {
 
 void Game::knight() {
     curPlayer().devCardPlayed_ = true;
-    // TODO: count largest army
     curPlayer().devCards_[ Knight ]--;
+    curPlayer().armySize_++;
     moveRobber();
+    int largestArmy = 2;
+    int largestArmyPlayer = -1;
+    for( int i = 0; i < nbPlayers_; i++ ) {
+        if( player_[ i ].largestArmy_ ) {
+            largestArmy = player_[ i ].armySize_;
+            largestArmyPlayer = i;
+            break;
+        }
+    }
+    if( curPlayer().armySize_ > largestArmy ) {
+        if( largestArmyPlayer != -1 ) {
+            player_[ largestArmyPlayer ].largestArmy_ = false;
+            emit updatePlayer( largestArmyPlayer, false );
+        }
+        curPlayer().largestArmy_ = true;
+        emit updatePlayer( curPlayer_ );
+    }
 }
 
 
 void Game::moveRobber() {
+    nextPlayerState_ = curPlayer().state_;
+    cerr << "next player state is " << nextPlayerState_ << endl;
+    if( nextPlayerState_ != Player::AboutToRoll ) {
+        cerr << "fixed to " << nextPlayerState_ << endl;
+        nextPlayerState_ = Player::Waiting;
+    }
     curPlayer().state_ = Player::PickRobTown;
     emit requestHex();
 }
@@ -506,7 +535,7 @@ void Game::robAround( const Pos& hp ) {
     if( board_.allowedNodes_.size() > 0 ) {
         emit requestNode();
     } else {
-        curPlayer().state_ = Player::Waiting;
+        curPlayer().state_ = nextPlayerState_;
         emit updatePlayer( curPlayer_ );
     }
 }
@@ -520,7 +549,7 @@ void Game::rob( const Pos& np ) {
         }
     }
     board_.allowedNodes_.clear();
-    curPlayer().state_ = Player::Waiting;
+    curPlayer().state_ = nextPlayerState_;
     emit updatePlayer( from, false );
     emit updatePlayer( curPlayer_ );
 }

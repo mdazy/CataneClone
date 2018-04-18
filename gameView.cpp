@@ -127,6 +127,7 @@ void GameView::nbPlayersPicked() {
 
 void GameView::buildGameView() {
     gameView_ = new QWidget;
+    gameView_->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     addWidget( gameView_ );
     // layout for board + game state
     auto l = new QHBoxLayout( gameView_ );

@@ -27,6 +27,7 @@ public:
 
     int robCard();
     int nbResourceCards() const;
+    int score() const;
 
     bool canPlayKnight() const;
     bool canPlayRoads() const;
@@ -44,6 +45,9 @@ public:
     State state_;
     bool devCardPlayed_;
     int builtCard_;
+    int armySize_;
+    bool longestRoad_;
+    bool largestArmy_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Player& p );
@@ -109,6 +113,8 @@ protected:
     void setupAllowedRoadStartNodes();
     void setupAllowedCityNodes();
     void rob();
+    void updateLongestRoad();
+    void updateLargestArmy();
 
 public:
     Board board_;
@@ -119,6 +125,7 @@ public:
     int nbRoadsToBuild_;
     int roadCost_;
     bool pickStartAscending_;
+    Player::State nextPlayerState_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Game& g );
