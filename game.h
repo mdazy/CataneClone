@@ -107,6 +107,7 @@ signals:
     void rollDice();
     void diceRolled( int die1, int die2 );
     void pickDiscard( Player* p );
+    void gameOver( std::vector<Player> players );
 
 protected:
     void setupAllowedBuildNodes( bool start = false );
@@ -115,6 +116,7 @@ protected:
     void rob();
     void updateLongestRoad();
     void updateLargestArmy();
+    void checkEndGame();
 
 public:
     Board board_;

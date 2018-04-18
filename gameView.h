@@ -29,6 +29,7 @@ public slots:
     void diceRolled( int die1, int die2 );
     void invention();
     void monopoly();
+    void gameOver( const std::vector<Player>& players );
 
     void discard( Player* p );
 

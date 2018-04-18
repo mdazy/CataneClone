@@ -19,6 +19,7 @@ BoardView::BoardView( QWidget* parent ) :
     selectionMode_( None ), mouseX_( 0 ), mouseY_( 0 ),
     radius_( 0.0 ), innerRadius_( 0.0 ), nodeRadius_( 0.0 ), nodeDiag_( 0.0 ), centerShiftX_( 0.0 ), centerShiftY_( 0.0 )
 {
+    setSizePolicy( QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding );
     setMouseTracking( true );
 }
 

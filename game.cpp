@@ -443,6 +443,7 @@ void Game::buildTown( const Pos& np ) {
     n.player_ = curPlayer_;
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
+    checkEndGame();
 }
 
 
@@ -462,6 +463,7 @@ void Game::buildCity( const Pos& np ) {
     board_.node_[ np.y() ][ np.x() ].type_ = Node::City;
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
+    checkEndGame();
 }
 
 
@@ -474,6 +476,7 @@ void Game::buildCard() {
     p.resources_[ Hex::Wheat ]--;
     p.resources_[ Hex::Sheep ]--;
     emit updatePlayer( curPlayer_ );
+    checkEndGame();
 }
 
 
@@ -481,6 +484,7 @@ void Game::knight() {
     curPlayer().devCardPlayed_ = true;
     curPlayer().devCards_[ Knight ]--;
     curPlayer().armySize_++;
+    nextPlayerState_ = curPlayer().state_;
     moveRobber();
     int largestArmy = 2;
     int largestArmyPlayer = -1;
@@ -499,16 +503,11 @@ void Game::knight() {
         curPlayer().largestArmy_ = true;
         emit updatePlayer( curPlayer_ );
     }
+    checkEndGame();
 }
 
 
 void Game::moveRobber() {
-    nextPlayerState_ = curPlayer().state_;
-    cerr << "next player state is " << nextPlayerState_ << endl;
-    if( nextPlayerState_ != Player::AboutToRoll ) {
-        cerr << "fixed to " << nextPlayerState_ << endl;
-        nextPlayerState_ = Player::Waiting;
-    }
     curPlayer().state_ = Player::PickRobTown;
     emit requestHex();
 }
@@ -519,6 +518,7 @@ void Game::rob() {
             emit( pickDiscard( &player_ [ i ] ) );
         }
     }
+    nextPlayerState_ = Player::Waiting;
     moveRobber();
 }
 
@@ -605,6 +605,19 @@ void Game::save() const {
     if( file.good() ) {
         file << *this;
     }
+}
+
+
+void Game::checkEndGame() {
+    if( curPlayer().score() < 10 ) {
+        return;
+    }
+    vector<Player> players = player_;
+    sort(
+        players.begin(), players.end(),
+        []( const Player& p1, const Player& p2 ) { return p1.score() > p2.score(); }
+    );
+    emit gameOver( players );
 }
 
 

@@ -1,6 +1,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
+#include <QtCore/QCoreApplication>
 
 #include "gameView.h"
 #include "game.h"
@@ -34,6 +35,8 @@ GameView::GameView( Game* game, QWidget* parent ) :
 
     connect( game, SIGNAL( requestHex() ), this, SLOT( pickHex() ) );
     connect( boardView_, SIGNAL( hexSelected( Pos ) ), game_, SLOT( robAround( const Pos& ) ) );
+
+    connect( game, SIGNAL( gameOver( std::vector<Player> ) ), this, SLOT( gameOver( const std::vector<Player>& ) ) );
 }
 
 
@@ -231,4 +234,13 @@ void GameView::monopoly() {
     auto d = new NumberSelector( 1, this );
     connect( d, SIGNAL( selected( std::vector<int>) ), game_, SLOT( monopoly( std::vector<int> ) ) );
     d->exec();
+}
+
+
+void GameView::gameOver( const vector<Player>& players ) {
+    QMessageBox::information(
+        dynamic_cast<QWidget*>( parent() ), "Game over",
+        QString( "Game over, player " ) + QString::number( players.front().number_ + 1 ) + " wins."
+    );
+    qApp->exit();
 }
