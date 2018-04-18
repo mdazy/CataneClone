@@ -292,7 +292,8 @@ void Game::setupAllowedRoadStartNodes() {
                 continue;
             }
             // is there a construction from player on this node?
-            bool hasConstruction = board_.node_[ np.y() ][ np.x() ].type_ != Node::None && board_.node_[ np.y() ][ np.x() ].player_ == curPlayer_;
+            const auto& cur = board_.node_[ np.y() ][ np.x() ];
+            bool hasConstruction = cur.type_ != Node::None && cur.player_ == curPlayer_;
             // inspect neighbor nodes for owned, connected roads and free target nodes
             bool hasConnectedRoad = false;
             bool hasFreeNeighbor = false;
@@ -300,7 +301,8 @@ void Game::setupAllowedRoadStartNodes() {
                 if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() || !board_.landNode( nn ) ) {
                     continue;
                 }
-                hasFreeNeighbor |= board_.node_[ nn.y() ][ nn.x() ].type_ == Node::None && !board_.roadExists( np, nn );
+                const auto& neighbor = board_.node_[ nn.y() ][ nn.x() ];
+                hasFreeNeighbor |=  neighbor.type_ == Node::None && !board_.roadExists( np, nn );
                 hasConnectedRoad |= board_.roadExists( np, nn, curPlayer_ );
             }
             if( hasFreeNeighbor && ( hasConstruction || hasConnectedRoad ) ) {
@@ -317,7 +319,12 @@ void Game::setupAllowedRoadEndNodes( const Pos& from ) {
         if( !nn.valid() || nn.x() >= board_.nodeWidth() || nn.y() >= board_.nodeHeight() ) {
             continue;
         }
-        if( board_.landNode( nn ) && board_.node_[ nn.y() ][ nn.x() ].type_ == Node::None && !board_.roadExists( from, nn ) ) {
+        const auto& neighbor = board_.node_[ nn.y() ][ nn.x() ];
+        if(
+            board_.landNode( nn ) &&
+            ( neighbor.type_ == Node::None || neighbor.player_ == curPlayer_ ) &&
+            !board_.roadExists( from, nn )
+        ) {
             board_.allowedNodes_.push_back( nn );
         }
     }
