@@ -321,11 +321,7 @@ void Game::setupAllowedRoadEndNodes( const Pos& from ) {
             continue;
         }
         const auto& neighbor = board_.node_[ nn.y() ][ nn.x() ];
-        if(
-            board_.landNode( nn ) &&
-            ( neighbor.type_ == Node::None || neighbor.player_ == curPlayer_ ) &&
-            !board_.roadExists( from, nn )
-        ) {
+        if( board_.landNode( nn ) && !board_.roadExists( from, nn ) ) {
             board_.allowedNodes_.push_back( nn );
         }
     }
