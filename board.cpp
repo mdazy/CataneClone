@@ -313,6 +313,53 @@ bool Board::roadExists( const Pos& from, const Pos& to, int player ) const {
 }
 
 
+int Board::longestRoad( const Pos& from, int p, int visit ) const {
+	int length = 0;
+	for( const auto& to : nodesAroundNode( from ) ) {
+		auto roadIt = find( road_.begin(), road_.end(), Road( p, from, to ) );
+		if( roadIt == road_.end() ) {
+			// no road for this player
+			continue;
+		}
+		if( roadIt->visit_ == visit ) {
+			// road already visited
+			continue;
+		}
+		// mark road as visited
+		roadIt->visit_ = visit;
+		// inspect neighbors at end point
+		const auto& n = node_[ to.y() ][ to.x() ];
+		if( n.type_ != Node::None && n.player_ != p ) {
+			// road cut by opponent construction
+			length = max( length, 1 );
+		} else {
+			length = max( length, 1 + longestRoad( to, p, visit ) );
+		}
+		// unmark road
+		roadIt->visit_ = visit - 1;
+	}
+	return length;
+}
+
+
+int Board::longestRoadForPlayer( int p ) const {
+	static int visit = 0;
+
+	int length = 0;
+	for( const auto& r : road_ ) {
+		if( r.player_ != p ) {
+			continue;
+		}
+		visit++;
+		int l = longestRoad( r.from_, p, visit );
+		length = max( length, l );
+		l = longestRoad( r.to_, p, visit );
+		length = max( length, l );
+	}
+	return length;
+}
+
+
 ostream& operator <<( ostream& out, const Board& b ) {
 	out << "# Board" << endl;
 	out << b.hexWidth() << " " << b.hexHeight() << endl;

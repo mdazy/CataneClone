@@ -46,6 +46,7 @@ public:
     bool devCardPlayed_;
     int builtCard_;
     int armySize_;
+    int roadLength_;
     bool longestRoad_;
     bool largestArmy_;
 };
@@ -114,8 +115,9 @@ protected:
     void setupAllowedRoadStartNodes();
     void setupAllowedCityNodes();
     void rob();
-    void updateLongestRoad();
     void updateLargestArmy();
+    void updateLongestRoadForPlayer( int p );
+    void updateLongestRoad();
     void checkEndGame();
 
 public:

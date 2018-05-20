@@ -37,7 +37,7 @@ QString cardName( DevCard card ) {
 
 
 Player::Player( Game* game ) : game_( game ), towns_( 5 ), cities_( 4 ), roads_( 15 ), state_( Waiting ),
-    armySize_( 0 ), longestRoad_( false ), largestArmy_( false ) {
+    armySize_( 0 ), roadLength_( 0 ), longestRoad_( false ), largestArmy_( false ) {
     resources_.resize( Hex::Desert, 0 );
     devCards_.resize( Invention + 1, 0 );
 }
@@ -221,6 +221,7 @@ void Game::startNodePicked( const Pos& np ) {
 void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     board_.road_.emplace_back( curPlayer_, from, to );
     curPlayer().roads_--;
+    updateLongestRoad();
     emit updatePlayer( curPlayer_ );
 
     if( pickStartAscending_ ) {
@@ -405,7 +406,6 @@ void Game::buildRoad() {
 
 
 void Game::buildRoad( const Pos& from, const Pos& to ) {
-    // TODO: longest road
     auto& p = curPlayer();
     p.resources_[ Hex::Brick ] -= roadCost_;
     p.resources_[ Hex::Wood ] -= roadCost_;
@@ -419,6 +419,8 @@ void Game::buildRoad( const Pos& from, const Pos& to ) {
     } else {
         nbRoadsToBuild_ = 1;
     }
+    updateLongestRoad();
+    checkEndGame();
 }
 
 
@@ -450,6 +452,7 @@ void Game::buildTown( const Pos& np ) {
     n.player_ = curPlayer_;
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
+    updateLongestRoad();
     checkEndGame();
 }
 
@@ -470,6 +473,7 @@ void Game::buildCity( const Pos& np ) {
     board_.node_[ np.y() ][ np.x() ].type_ = Node::City;
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
+    updateLongestRoad();
     checkEndGame();
 }
 
@@ -493,6 +497,13 @@ void Game::knight() {
     curPlayer().armySize_++;
     nextPlayerState_ = curPlayer().state_;
     moveRobber();
+    updateLargestArmy();
+    checkEndGame();
+}
+
+
+void Game::updateLargestArmy() {
+    // get current leader and largest army size
     int largestArmy = 2;
     int largestArmyPlayer = -1;
     for( int i = 0; i < nbPlayers_; i++ ) {
@@ -502,6 +513,7 @@ void Game::knight() {
             break;
         }
     }
+    // check if the current player's army is larger
     if( curPlayer().armySize_ > largestArmy ) {
         if( largestArmyPlayer != -1 ) {
             player_[ largestArmyPlayer ].largestArmy_ = false;
@@ -510,7 +522,70 @@ void Game::knight() {
         curPlayer().largestArmy_ = true;
         emit updatePlayer( curPlayer_ );
     }
-    checkEndGame();
+}
+
+
+void Game::updateLongestRoad() {
+    //cerr << "updateLongestRoad" << endl;
+    // get current leader and longest road
+    int longestRoad = 4;
+    int longestRoadPlayer = -1;
+    for( int i = 0; i < nbPlayers_; i++ ) {
+        if( player_[ i ].longestRoad_ ) {
+            longestRoad = player_[ i ].roadLength_;
+            longestRoadPlayer = i;
+            break;
+        }
+    }
+    //cerr << "current leader is " << longestRoadPlayer << " with " << longestRoad << " roads" << endl;
+
+    for( int i = 0; i < nbPlayers_; i++ ) {
+        player_[ i ].roadLength_ = board_.longestRoadForPlayer( i );
+        emit( updatePlayer( i, false ) );
+    }
+
+    // the longest road can be cut by new towns or cities of opponents, check
+    // that the leader's longest road did not decrease
+    bool interrupted = false;
+    int firstP = longestRoadPlayer < 0 ? 0 : longestRoadPlayer;
+    if( longestRoadPlayer != -1 && player_[ longestRoadPlayer ].roadLength_ < longestRoad ) {
+        //cerr << "interrupted" << endl;
+        interrupted = true;
+        longestRoad = 4;
+        player_[ longestRoadPlayer ].longestRoad_ = false;
+        longestRoadPlayer = -1;
+    }
+
+    // update leader - always start with (possibly previous) leader so he retains
+    // priority in case of equality after his longest road was cut
+    int curP = firstP;
+    bool multiple = false;
+    do {
+        if( player_[ curP ].roadLength_ > longestRoad ) {
+            if( longestRoadPlayer != -1 ) {
+                player_[ longestRoadPlayer ].longestRoad_ = false;
+            }
+            longestRoad = player_[ curP ].roadLength_;
+            //cerr << "new leader " << curP << " with " << longestRoad << " roads" << endl;
+            longestRoadPlayer = curP;
+            player_[ longestRoadPlayer ].longestRoad_ = true;
+            multiple = false;
+        } else if( player_[ curP ].roadLength_ == longestRoad && longestRoadPlayer != -1 && interrupted ) {
+            // several players with the same longest road after leader was cut
+            //cerr << "multiple leaders with " << longestRoad << " roads after interruption" << endl;
+            multiple = true;
+        }
+        curP = ( curP + 1 ) % nbPlayers_;
+    } while( curP != firstP );
+    if( multiple ) {
+        // several players with the same longest road after leader was cut
+        // nobody gets the longest road
+        player_[ longestRoadPlayer ].longestRoad_ = false;
+    }
+
+    for( int i = 0; i < nbPlayers_; i++ ) {
+        emit( updatePlayer( i, false ) );
+    }
 }
 
 

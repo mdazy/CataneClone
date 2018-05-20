@@ -58,6 +58,8 @@ public:
 	int player_;
 	Pos from_;
 	Pos to_;
+	// internal for longest road computation
+	mutable int visit_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Road& h );
@@ -87,6 +89,11 @@ public:
 	bool landNode( const Pos& n ) const;
 
 	bool roadExists( const Pos& from, const Pos& to, int player = -1 ) const;
+
+	int longestRoadForPlayer( int p ) const;
+
+protected:
+	int longestRoad( const Pos& from, int p, int visit ) const;
 
 public:
 	std::vector<std::vector<Hex>> hex_;
