@@ -25,6 +25,7 @@ public:
 
     void setTotal( int total );
     void setMaxima( const std::vector<int>& maxima );
+    void setSteps( const std::vector<int>& steps );
 
     std::vector<int> selection() const;
 
