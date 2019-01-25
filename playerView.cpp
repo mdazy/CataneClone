@@ -105,17 +105,18 @@ void PlayerView::updateView() {
 
 
 void PlayerView::enableButtons( bool enabled ) {
-    trade_->setEnabled( false );
-    trade_->setToolTip( "Not implemented" );
+    const auto game = player_->game_;
+    trade_->setEnabled( enabled && game->canTrade() );
+    trade_->setToolTip( enabled && game->canTrade() ? "" : "Cannot trade now" );
     pass_->setEnabled( enabled && player_->state_ == Player::Waiting );
-    buildRoad_->setEnabled( enabled && player_->game_->canBuildRoad() );
-    buildRoad_->setToolTip( enabled && player_->game_->canBuildRoad() ? "" : "Cannot be built" );
-    buildTown_->setEnabled( enabled && player_->game_->canBuildTown() );
-    buildTown_->setToolTip( enabled && player_->game_->canBuildTown() ? "" : "Cannot be built" );
-    buildCity_->setEnabled( enabled && player_->game_->canBuildCity() );
-    buildCity_->setToolTip( enabled && player_->game_->canBuildCity() ? "" : "Cannot be built" );
-    buildCard_->setEnabled( enabled && player_->game_->canBuildCard() );
-    buildCard_->setToolTip( enabled && player_->game_->canBuildCard() ? "" : "Cannot be built" );
+    buildRoad_->setEnabled( enabled && game->canBuildRoad() );
+    buildRoad_->setToolTip( enabled && game->canBuildRoad() ? "" : "Cannot be built" );
+    buildTown_->setEnabled( enabled && game->canBuildTown() );
+    buildTown_->setToolTip( enabled && game->canBuildTown() ? "" : "Cannot be built" );
+    buildCity_->setEnabled( enabled && game->canBuildCity() );
+    buildCity_->setToolTip( enabled && game->canBuildCity() ? "" : "Cannot be built" );
+    buildCard_->setEnabled( enabled && game->canBuildCard() );
+    buildCard_->setToolTip( enabled && game->canBuildCard() ? "" : "Cannot be built" );
     playKnight_->setEnabled( enabled && player_->canPlayKnight() );
     playKnight_->setToolTip( enabled && player_->canPlayKnight() ? "" : "Cannot play this card" );
     playRoads_->setEnabled( enabled && player_->canPlayRoads() );
