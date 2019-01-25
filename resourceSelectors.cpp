@@ -170,7 +170,15 @@ TradeSelector::TradeSelector( Player* p, QWidget* parent ) : QDialog( parent ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
     setLayout( l );
-    l->addWidget( new QLabel( "Not implemented yet" ) );
+    auto h = new QHBoxLayout( this );
+    l->addLayout( h );
+    auto fromSel = new ResourceSelector( this );
+    h->addWidget( fromSel );
+    auto toSel = new ResourceSelector( this );
+    h->addWidget( toSel );
+    auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
+    connect( b, SIGNAL( accepted() ), this, SLOT( accept() ) );
+    l->addWidget( b );
 }
 
 
