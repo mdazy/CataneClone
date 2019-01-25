@@ -386,6 +386,7 @@ void Game::nextPlayer() {
     auto& p = curPlayer();
     p.state_ = Player::AboutToRoll;
     p.devCardPlayed_ = false;
+    p.built_ = false;
     p.builtCard_ = -1;
     roadCost_ = 1;
     nbRoadsToBuild_ = 1;
@@ -406,6 +407,7 @@ void Game::buildRoad( const Pos& from, const Pos& to ) {
     p.resources_[ Hex::Brick ] -= roadCost_;
     p.resources_[ Hex::Wood ] -= roadCost_;
     p.roads_--;
+    p.built_ = true;
     board_.road_.emplace_back( curPlayer_, from, to );
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
@@ -443,6 +445,7 @@ void Game::buildTown( const Pos& np ) {
     p.resources_[ Hex::Wood ]--;
     p.resources_[ Hex::Sheep ]--;
     p.towns_--;
+    p.built_ = true;
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.type_ = Node::Town;
     n.player_ = curPlayer_;
@@ -466,6 +469,7 @@ void Game::buildCity( const Pos& np ) {
     p.resources_[ Hex::Wheat ] -= 2;
     p.towns_++;
     p.cities_--;
+    p.built_ = true;
     board_.node_[ np.y() ][ np.x() ].type_ = Node::City;
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
@@ -477,6 +481,7 @@ void Game::buildCity( const Pos& np ) {
 void Game::buildCard() {
     auto& p = curPlayer();
     p.builtCard_ = devCards_.back();
+    p.built_ = true;
     devCards_.pop_back();
     p.devCards_[ p.builtCard_ ]++;
     p.resources_[ Hex::Rock ]--;
