@@ -17,11 +17,37 @@ using namespace std;
 /**/
 
 
+/*
+ * Custom spinbox that enables up and down only if stepping does not
+ * underflow the minimum value or overflow the maximum value.
+ */
+class MyQSpinBox : public QSpinBox {
+public:
+    MyQSpinBox( QWidget* parent = Q_NULLPTR ) : QSpinBox( parent ) {}
+    virtual ~MyQSpinBox() {}
+
+protected:
+    StepEnabled stepEnabled() const {
+        StepEnabled result = StepNone;
+        if( value() + singleStep() <= maximum() ) {
+            result |= StepUpEnabled;
+        }
+        if( value() - singleStep() >= minimum() ) {
+            result |= StepDownEnabled;
+        }
+        return result;
+    }
+};
+
+
+/**/
+
+
 ResourceSelector::ResourceSelector( QWidget* parent ) : QWidget( parent ), nbResources_( 0 ) {
     layout_ = new QGridLayout( this );
     for( int i = 0 ; i < Hex::Desert; i++ ) {
         layout_->addWidget( new QLabel( Hex::typeName[ i ][ 0 ].toUpper() + Hex::typeName[ i ].mid( 1 ) ), i, 0 );
-        spin_[ i ] = new QSpinBox();
+        spin_[ i ] = new MyQSpinBox();
         spin_[ i ]->setMinimum( 0 );
         layout_->addWidget( spin_[ i ], i, 1 );
         connect( spin_[ i ], SIGNAL( valueChanged( int ) ), this, SLOT( updateLimits() ) );
