@@ -101,3 +101,14 @@ signals:
 protected:
     void doAccept() override;
 };
+
+
+/**/
+
+
+class TradeSelector : public QDialog {
+    Q_OBJECT;
+public:
+    TradeSelector( Player* p, QWidget* parent = Q_NULLPTR );
+    virtual ~TradeSelector();
+};
