@@ -28,8 +28,8 @@
             "includePath": [
                 "/usr/include",
                 "/usr/local/include",
-                "${QTDIR}/include",
-                "${workspaceRoot}"
+                "${workspaceRoot}",
+                "/usr/include/x86_64-linux-gnu/qt5"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
