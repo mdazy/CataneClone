@@ -178,7 +178,7 @@ bool Game::canBuildCard() const {
 
 bool Game::canTrade() const {
     const auto& p =curPlayer();
-    return !p.built_;
+    return !p.built_ && p.state_ == Player::Waiting;
 }
 
 
