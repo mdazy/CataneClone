@@ -44,6 +44,7 @@ public:
     int roads_;
     State state_;
     bool devCardPlayed_;
+    bool built_;
     int builtCard_;
     int armySize_;
     int roadLength_;
