@@ -682,7 +682,7 @@ void Game::monopoly( vector<int> selection ) {
 
 
 void Game::startTrade() {
-    emit requestTrade();
+    emit requestTrade( &curPlayer() );
 }
 
 
