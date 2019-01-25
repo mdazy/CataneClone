@@ -176,6 +176,12 @@ bool Game::canBuildCard() const {
 }
 
 
+bool Game::canTrade() const {
+    const auto& p =curPlayer();
+    return !p.built_;
+}
+
+
 void Game::newGame() {
     emit requestNbPlayers();
 }
