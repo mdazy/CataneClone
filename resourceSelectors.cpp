@@ -58,7 +58,11 @@ void ResourceSelector::updateLimits() {
     }
     if( maxima_.size() > 0 ) {
         for( int i = 0; i < Hex::Desert; i++ ) {
-            spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
+            if( nbResources_ > 0 ) {
+                spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
+            } else {
+                spin_[ i ]->setMaximum( maxima_[ i ] );
+            }
         }
     } else if( nbResources_ > 0 ) {
         for( int i = 0; i < Hex::Desert; i++ ) {
@@ -169,10 +173,10 @@ void NumberSelector::doAccept() {
 TradeSelector::TradeSelector( Player* p, QWidget* parent ) : QDialog( parent ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
-    setLayout( l );
-    auto h = new QHBoxLayout( this );
+    auto h = new QHBoxLayout();
     l->addLayout( h );
     auto fromSel = new ResourceSelector( this );
+    fromSel->setMaxima( p->resources_ );
     h->addWidget( fromSel );
     auto toSel = new ResourceSelector( this );
     h->addWidget( toSel );
