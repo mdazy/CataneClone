@@ -96,6 +96,7 @@ public slots:
     void discard( Player* p, std::vector<int> selection );
     void invention( std::vector<int> selection );
     void monopoly( std::vector<int> selection );
+    void startTrade();
 
     void load();
     void save() const;
@@ -106,6 +107,7 @@ signals:
     void requestNode();
     void requestRoad( Pos from = Pos() );
     void requestHex();
+    void requestTrade();
     void updatePlayer( int player = - 1, bool buttons = true );
     void rollDice();
     void diceRolled( int die1, int die2 );

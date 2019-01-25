@@ -681,6 +681,11 @@ void Game::monopoly( vector<int> selection ) {
 }
 
 
+void Game::startTrade() {
+    emit requestTrade();
+}
+
+
 void Game::load() {
     ifstream file( "game.txt" );
     if( file.good() ) {
