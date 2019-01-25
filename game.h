@@ -34,6 +34,9 @@ public:
     bool canPlayInvention() const;
     bool canPlayMonopoly() const;
 
+    int costOf( Hex::Type resourceType ) const;
+    std::vector<int> cardCosts() const;
+
 public:
     Game* game_;
     int number_;
