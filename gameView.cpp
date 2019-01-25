@@ -19,6 +19,7 @@ GameView::GameView( Game* game, QWidget* parent ) :
     playersSelection_( 0 ), players3_( 0 ), players4_( 0 ),
     gameView_( 0 ), boardView_( 0 )
 {
+    layout()->setSizeConstraint( QLayout::SetMinimumSize );
     buildPlayersSelection();
     buildGameView();
 
