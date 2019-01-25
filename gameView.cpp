@@ -34,6 +34,8 @@ GameView::GameView( Game* game, QWidget* parent ) :
 
     connect( game, SIGNAL( pickDiscard( Player* ) ), this, SLOT( discard( Player* ) ) );
 
+    connect( game, SIGNAL( requestTrade( Player* ) ), this, SLOT( trade( Player* ) ) );
+
     connect( game, SIGNAL( requestHex() ), this, SLOT( pickHex() ) );
     connect( boardView_, SIGNAL( hexSelected( Pos ) ), game_, SLOT( robAround( const Pos& ) ) );
 
@@ -165,6 +167,7 @@ void GameView::buildGameView() {
         vl->addWidget( pv );
         playerView_.push_back( pv );
         connect( pv->roll_, SIGNAL( clicked() ), game_, SLOT( playTurn() ) );
+        connect( pv->trade_, SIGNAL( clicked() ), game_, SLOT( startTrade() ) );
         connect( pv->buildRoad_, SIGNAL( clicked() ), game_, SLOT( buildRoad() ) );
         connect( pv->buildTown_, SIGNAL( clicked() ), game_, SLOT( buildTown() ) );
         connect( pv->buildCity_, SIGNAL( clicked() ), game_, SLOT( buildCity() ) );
@@ -220,6 +223,12 @@ void GameView::loadState() {
 void GameView::discard( Player* p ) {
     auto d = new DiscardSelector( p, this );
     connect( d, SIGNAL( selected( Player*, std::vector<int> ) ), game_, SLOT( discard( Player*, std::vector<int> ) ) );
+    d->exec();
+}
+
+
+void GameView::trade( Player* p ) {
+    auto d = new TradeSelector( p, this );
     d->exec();
 }
 
