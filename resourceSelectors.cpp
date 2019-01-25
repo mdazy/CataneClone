@@ -51,6 +51,14 @@ void ResourceSelector::setMaxima( const std::vector<int>& maxima ) {
 }
 
 
+void ResourceSelector::setSteps( const std::vector<int>& steps ) {
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        spin_[ i ]->setSingleStep( steps[ i ] );
+        layout_->addWidget( new QLabel( QString( "(%1)" ).arg( steps[ i ] ) ), i, 3 ) ;
+    }
+}
+
+
 void ResourceSelector::updateLimits() {
     int totalSelected = 0;
     for( int i = 0; i < Hex::Desert; i++ ) {
@@ -177,6 +185,7 @@ TradeSelector::TradeSelector( Player* p, QWidget* parent ) : QDialog( parent ) {
     l->addLayout( h );
     auto fromSel = new ResourceSelector( this );
     fromSel->setMaxima( p->resources_ );
+    fromSel->setSteps( p->cardCosts() );
     h->addWidget( fromSel );
     auto toSel = new ResourceSelector( this );
     h->addWidget( toSel );
