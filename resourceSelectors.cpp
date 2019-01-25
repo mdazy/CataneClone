@@ -170,7 +170,7 @@ TradeSelector::TradeSelector( Player* p, QWidget* parent ) : QDialog( parent ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
     setLayout( l );
-    l->addWidget( new QLabel( "Not implemented yet" ) );
+    l->addWidget( new QLabel( "Hello" ) );
 }
 
 
