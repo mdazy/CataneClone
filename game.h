@@ -68,6 +68,7 @@ public:
     bool canBuildCity() const;
     bool canBuildRoad();
     bool canBuildCard() const;
+    bool canTrade() const;
 
     Player& curPlayer() { return player_[ curPlayer_ ]; }
     const Player& curPlayer() const { return player_[ curPlayer_ ]; }
