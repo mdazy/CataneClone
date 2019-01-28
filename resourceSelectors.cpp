@@ -3,6 +3,7 @@
 #include "board.h"
 #include "game.h"
 
+#include <QtGui/QValidator>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QGridLayout>
@@ -37,6 +38,26 @@ protected:
         }
         return result;
     }
+
+    void fixup(QString& input) const override {
+        int value = input.toInt();
+        value = min( value, maximum() );
+        value -= value % singleStep();
+        input = QString::number( value );
+    }
+
+    QValidator::State validate( QString& input, int& ) const override {
+        bool ok = false;
+        int value = input.toInt( &ok );
+        if( !ok ) {
+            return QValidator::Invalid;
+        }
+        if( value % singleStep() == 0 ) {
+            return QValidator::Acceptable;
+        }
+        return QValidator::Intermediate;
+    }
+
 };
 
 
