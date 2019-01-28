@@ -17,11 +17,37 @@ using namespace std;
 /**/
 
 
+/*
+ * Custom spinbox that enables up and down only if stepping does not
+ * underflow the minimum value or overflow the maximum value.
+ */
+class MyQSpinBox : public QSpinBox {
+public:
+    MyQSpinBox( QWidget* parent = Q_NULLPTR ) : QSpinBox( parent ) {}
+    virtual ~MyQSpinBox() {}
+
+protected:
+    StepEnabled stepEnabled() const {
+        StepEnabled result = StepNone;
+        if( value() + singleStep() <= maximum() ) {
+            result |= StepUpEnabled;
+        }
+        if( value() - singleStep() >= minimum() ) {
+            result |= StepDownEnabled;
+        }
+        return result;
+    }
+};
+
+
+/**/
+
+
 ResourceSelector::ResourceSelector( QWidget* parent ) : QWidget( parent ), nbResources_( 0 ) {
     layout_ = new QGridLayout( this );
     for( int i = 0 ; i < Hex::Desert; i++ ) {
         layout_->addWidget( new QLabel( Hex::typeName[ i ][ 0 ].toUpper() + Hex::typeName[ i ].mid( 1 ) ), i, 0 );
-        spin_[ i ] = new QSpinBox();
+        spin_[ i ] = new MyQSpinBox();
         spin_[ i ]->setMinimum( 0 );
         layout_->addWidget( spin_[ i ], i, 1 );
         connect( spin_[ i ], SIGNAL( valueChanged( int ) ), this, SLOT( updateLimits() ) );
@@ -51,6 +77,14 @@ void ResourceSelector::setMaxima( const std::vector<int>& maxima ) {
 }
 
 
+void ResourceSelector::setSteps( const std::vector<int>& steps ) {
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        spin_[ i ]->setSingleStep( steps[ i ] );
+        layout_->addWidget( new QLabel( QString( "(%1)" ).arg( steps[ i ] ) ), i, 3 ) ;
+    }
+}
+
+
 void ResourceSelector::updateLimits() {
     int totalSelected = 0;
     for( int i = 0; i < Hex::Desert; i++ ) {
@@ -58,7 +92,11 @@ void ResourceSelector::updateLimits() {
     }
     if( maxima_.size() > 0 ) {
         for( int i = 0; i < Hex::Desert; i++ ) {
-            spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
+            if( nbResources_ > 0 ) {
+                spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
+            } else {
+                spin_[ i ]->setMaximum( maxima_[ i ] );
+            }
         }
     } else if( nbResources_ > 0 ) {
         for( int i = 0; i < Hex::Desert; i++ ) {
@@ -169,8 +207,17 @@ void NumberSelector::doAccept() {
 TradeSelector::TradeSelector( Player* p, QWidget* parent ) : QDialog( parent ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
-    setLayout( l );
-    l->addWidget( new QLabel( "Not implemented yet" ) );
+    auto h = new QHBoxLayout();
+    l->addLayout( h );
+    auto fromSel = new ResourceSelector( this );
+    fromSel->setMaxima( p->resources_ );
+    fromSel->setSteps( p->cardCosts() );
+    h->addWidget( fromSel );
+    auto toSel = new ResourceSelector( this );
+    h->addWidget( toSel );
+    auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
+    connect( b, SIGNAL( accepted() ), this, SLOT( accept() ) );
+    l->addWidget( b );
 }
 
 

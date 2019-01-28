@@ -94,6 +94,33 @@ bool Player::canPlayMonopoly() const {
 }
 
 
+int Player::costOf( Hex::Type resourceType ) const {
+    int cost = 4;
+    for( const auto& row : game_->board_.node_ ) {
+        for( const auto& n : row ) {
+            if( n.player_ != number_ ) {
+                continue;
+            }
+            if( n.harborType_ == resourceType ) {
+                cost = min( cost , 2 );
+            } else if( n.harborType_ == Hex::Any ) {
+                cost = min( cost, 3 );
+            }
+        }
+    }
+    return cost;
+}
+
+
+std::vector<int> Player::cardCosts() const {
+    std::vector<int> costs;
+    for( int i = 0; i < resources_.size(); i++ ) {
+        costs.push_back( costOf( Hex::Type( i ) ) );
+    }
+    return costs;
+}
+
+
 ostream& operator <<( ostream& out, const Player& p ) {
     out << "# Player" << endl;
     out << p.number_ << " ";

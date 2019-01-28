@@ -3,7 +3,9 @@ DESTDIR = bin
 OBJECTS_DIR = obj
 MOC_DIR = moc
 
-win32:CONFIG += x86_64 debug
+CONFIG += debug
+
+win32:CONFIG += x86_64
 win32:CONFIG -= x86 release
 
 QT += widgets
