@@ -254,4 +254,5 @@ void TradeSelector::updateMax() {
 
 
 void TradeSelector::doAccept() {
+    emit selected( fromSel_->selection(), selector_->selection() );
 }

@@ -114,6 +114,9 @@ public:
     TradeSelector( Player* p, QWidget* parent = Q_NULLPTR );
     virtual ~TradeSelector();
 
+signals:
+    void selected( std::vector<int> sold, std::vector<int> bought );
+
 protected:
     void doAccept() override;
 

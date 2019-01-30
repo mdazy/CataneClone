@@ -229,6 +229,7 @@ void GameView::discard( Player* p ) {
 
 void GameView::trade( Player* p ) {
     auto d = new TradeSelector( p, this );
+    connect( d, SIGNAL( selected( std::vector<int>, std::vector<int> ) ), game_, SLOT( trade( const std::vector<int>&, const std::vector<int>& ) ) );
     d->exec();
 }
 
