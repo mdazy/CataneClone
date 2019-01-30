@@ -62,6 +62,7 @@ protected slots:
 protected:
     int max_;
     QLabel* info_;
+    QGridLayout* selectorLayout_;
     ResourceSelector* selector_;
     QPushButton* OKButton_;
 };
@@ -107,9 +108,15 @@ protected:
 /**/
 
 
-class TradeSelector : public QDialog {
+class TradeSelector : public MaxedSelector {
     Q_OBJECT;
 public:
     TradeSelector( Player* p, QWidget* parent = Q_NULLPTR );
     virtual ~TradeSelector();
+
+protected:
+    void doAccept() override;
+
+protected:
+    ResourceSelector* fromSel_;
 };
