@@ -206,17 +206,29 @@ void NumberSelector::doAccept() {
 /**/
 
 
-TradeSelector::TradeSelector( Player* p, QWidget* parent ) : MaxedSelector( parent ) {
+TradeSelector::TradeSelector( Player* p, QWidget* parent ) : MaxedSelector( parent ), p_( p ) {
     selectorLayout_->addWidget( new QLabel( "Select resources to sell"), 0, 0 );
     fromSel_ = new ResourceSelector( this );
     fromSel_->setMaxima( p->resources_ );
     fromSel_->setSteps( p->cardCosts() );
     selectorLayout_->addWidget( fromSel_, 1, 0 );
-    info_->setText( "Select resources to buy" );
+    updateMax();
+    connect( fromSel_, SIGNAL( selectionChanged() ), this, SLOT( updateMax() ) );
 }
 
 
 TradeSelector::~TradeSelector() {
+}
+
+
+void TradeSelector::updateMax() {
+    max_ = 0;
+    const auto& cards = fromSel_->selection();
+    for( int i = 0; i < p_->cardCosts().size(); i++  ) {
+        max_ += cards[ i ] / p_->cardCosts()[ i ];
+    }
+    info_->setText( QString( "Select %1 card%2 to buy" ).arg( max_ ).arg ( max_ > 1 ? "s" : "" ) );
+    updateOKButton();
 }
 
 

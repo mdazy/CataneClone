@@ -117,6 +117,10 @@ public:
 protected:
     void doAccept() override;
 
+private slots:
+    void updateMax();
+
 protected:
+    Player* p_;
     ResourceSelector* fromSel_;
 };
