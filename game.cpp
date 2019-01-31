@@ -713,6 +713,15 @@ void Game::startTrade() {
 }
 
 
+void Game::trade( const std::vector<int>& sold, const std::vector<int>& bought ) {
+    auto& p = player_[ curPlayer_ ];
+    for( int i = 0; i < p.resources_.size(); i++ ) {
+        p.resources_[ i ] += bought[ i ] - sold[ i ];
+    }
+    emit updatePlayer( curPlayer_ );
+}
+
+
 void Game::load() {
     ifstream file( "game.txt" );
     if( file.good() ) {

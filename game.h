@@ -100,6 +100,7 @@ public slots:
     void invention( std::vector<int> selection );
     void monopoly( std::vector<int> selection );
     void startTrade();
+    void trade( const std::vector<int>& sold, const std::vector<int>& bought );
 
     void load();
     void save() const;

@@ -142,10 +142,12 @@ vector<int> ResourceSelector::selection() const {
 MaxedSelector::MaxedSelector( QWidget* parent ) : QDialog( parent, Qt::CustomizeWindowHint | Qt::WindowTitleHint ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
+    selectorLayout_ = new QGridLayout;
+    l->addLayout( selectorLayout_ );
     info_ = new QLabel();
-    l->addWidget( info_ );
+    selectorLayout_->addWidget( info_, 0, 1 );
     selector_ = new ResourceSelector();
-    l->addWidget( selector_ );
+    selectorLayout_->addWidget( selector_, 1, 1 );
     auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
     connect( b, SIGNAL( accepted() ), this, SLOT( accept() ) );
     l->addWidget( b );
@@ -225,22 +227,32 @@ void NumberSelector::doAccept() {
 /**/
 
 
-TradeSelector::TradeSelector( Player* p, QWidget* parent ) : QDialog( parent ) {
-    setAttribute( Qt::WA_DeleteOnClose );
-    auto l = new QVBoxLayout( this );
-    auto h = new QHBoxLayout();
-    l->addLayout( h );
-    auto fromSel = new ResourceSelector( this );
-    fromSel->setMaxima( p->resources_ );
-    fromSel->setSteps( p->cardCosts() );
-    h->addWidget( fromSel );
-    auto toSel = new ResourceSelector( this );
-    h->addWidget( toSel );
-    auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
-    connect( b, SIGNAL( accepted() ), this, SLOT( accept() ) );
-    l->addWidget( b );
+TradeSelector::TradeSelector( Player* p, QWidget* parent ) : MaxedSelector( parent ), p_( p ) {
+    selectorLayout_->addWidget( new QLabel( "Select resources to sell"), 0, 0 );
+    fromSel_ = new ResourceSelector( this );
+    fromSel_->setMaxima( p->resources_ );
+    fromSel_->setSteps( p->cardCosts() );
+    selectorLayout_->addWidget( fromSel_, 1, 0 );
+    updateMax();
+    connect( fromSel_, SIGNAL( selectionChanged() ), this, SLOT( updateMax() ) );
 }
 
 
 TradeSelector::~TradeSelector() {
+}
+
+
+void TradeSelector::updateMax() {
+    max_ = 0;
+    const auto& cards = fromSel_->selection();
+    for( int i = 0; i < p_->cardCosts().size(); i++  ) {
+        max_ += cards[ i ] / p_->cardCosts()[ i ];
+    }
+    info_->setText( QString( "Select %1 card%2 to buy" ).arg( max_ ).arg ( max_ > 1 ? "s" : "" ) );
+    updateOKButton();
+}
+
+
+void TradeSelector::doAccept() {
+    emit selected( fromSel_->selection(), selector_->selection() );
 }
