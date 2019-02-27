@@ -4,6 +4,7 @@
 
 #include "gameView.h"
 #include "game.h"
+#include "messenger.h"
 
 #include <vector>
 #include <ctime>
@@ -18,6 +19,7 @@ int main( int argc, char** argv ) {
     srand( time( 0 ) );
 
     Game game;
+    Messenger messenger;
 
     auto view = new GameView( &game );
     view->setMinimumSize( 500, 500 );
