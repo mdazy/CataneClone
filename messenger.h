@@ -16,7 +16,8 @@ private slots:
     void disconnect();
 
 signals:
-    void message( const QString& text );
+    void gameCommand( const QString& cmd );
+    void chatMessage( const QString& text );
 
 private:
     void send( const QString& message ) const;

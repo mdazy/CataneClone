@@ -32,7 +32,13 @@ void Messenger::disconnect() {
 
 void Messenger::receiveText() {
     auto text = QString::fromLocal8Bit( socket_->readAll() );
-    emit message( text );
+    if( text.startsWith( "/gameCmd" ) ) {
+        emit gameCommand( text.right( 9 ) );
+    } else if( text.startsWith( "/gameInfo" ) ) {
+        emit chatMessage( text.right( 10 ) );
+    } else {
+        emit chatMessage( text );
+    }
 }
 
 
