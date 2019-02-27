@@ -34,6 +34,9 @@ public:
     bool canPlayInvention() const;
     bool canPlayMonopoly() const;
 
+    int costOf( Hex::Type resourceType ) const;
+    std::vector<int> cardCosts() const;
+
 public:
     Game* game_;
     int number_;
@@ -44,6 +47,7 @@ public:
     int roads_;
     State state_;
     bool devCardPlayed_;
+    bool built_;
     int builtCard_;
     int armySize_;
     int roadLength_;
@@ -67,6 +71,7 @@ public:
     bool canBuildCity() const;
     bool canBuildRoad();
     bool canBuildCard() const;
+    bool canTrade() const;
 
     Player& curPlayer() { return player_[ curPlayer_ ]; }
     const Player& curPlayer() const { return player_[ curPlayer_ ]; }
@@ -94,6 +99,8 @@ public slots:
     void discard( Player* p, std::vector<int> selection );
     void invention( std::vector<int> selection );
     void monopoly( std::vector<int> selection );
+    void startTrade();
+    void trade( const std::vector<int>& sold, const std::vector<int>& bought );
 
     void load();
     void save() const;
@@ -104,6 +111,7 @@ signals:
     void requestNode();
     void requestRoad( Pos from = Pos() );
     void requestHex();
+    void requestTrade( Player* p );
     void updatePlayer( int player = - 1, bool buttons = true );
     void rollDice();
     void diceRolled( int die1, int die2 );
