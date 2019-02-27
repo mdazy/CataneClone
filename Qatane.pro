@@ -8,7 +8,7 @@ CONFIG += debug
 win32:CONFIG += x86_64
 win32:CONFIG -= x86 release
 
-QT += widgets
+QT += widgets network
 
 SOURCES += main.cpp utils.cpp boardView.cpp board.cpp gameView.cpp game.cpp playerView.cpp die.cpp resourceSelectors.cpp
 
