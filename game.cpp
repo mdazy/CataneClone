@@ -123,10 +123,11 @@ istream& operator >>( istream& in, Player& p ) {
 /**/
 
 
-Game::Game( QObject* parent ) :
-    QObject( parent ),
+Game::Game( Messenger* messenger ) :
+    QObject( Q_NULLPTR ),
     nbPlayers_( 0 ), curPlayer_( 0 ),
-    pickStartAscending_( true ), nextPlayerState_( Player::Waiting )
+    pickStartAscending_( true ), nextPlayerState_( Player::Waiting ),
+    messenger_( messenger )
 {
     for( int i = 0; i < 4; i++ ) {
         player_.emplace_back( this );

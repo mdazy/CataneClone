@@ -13,11 +13,12 @@
 #include <iostream>
 using namespace std;
 
-GameView::GameView( Game* game, QWidget* parent ) :
-    QStackedWidget( parent ),
+GameView::GameView( Game* game, Messenger* messenger ) :
+    QStackedWidget( Q_NULLPTR ),
     game_( game ), playing_( false ),
     playersSelection_( 0 ), players3_( 0 ), players4_( 0 ),
-    gameView_( 0 ), boardView_( 0 )
+    gameView_( 0 ), boardView_( 0 ),
+    messenger_( messenger )
 {
     layout()->setSizeConstraint( QLayout::SetMinimumSize );
     buildPlayersSelection();

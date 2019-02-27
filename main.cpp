@@ -18,10 +18,10 @@ int main( int argc, char** argv ) {
 
     srand( time( 0 ) );
 
-    Game game;
     Messenger messenger;
+    Game game( &messenger );
 
-    auto view = new GameView( &game );
+    auto view = new GameView( &game, &messenger );
     view->setMinimumSize( 500, 500 );
     
     mainWindow.setCentralWidget( view );

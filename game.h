@@ -7,6 +7,7 @@
 #include "board.h"
 
 class Game;
+class Messenger;
 
 
 /**/
@@ -61,7 +62,7 @@ std::istream& operator >>( std::istream& in, Player& p );
 class Game : public QObject {
     Q_OBJECT;
 public:
-    Game( QObject* parent = Q_NULLPTR );
+    Game( Messenger* messenger );
 
     bool canBuildTown();
     bool canBuildCity() const;
@@ -130,6 +131,9 @@ public:
     int roadCost_;
     bool pickStartAscending_;
     Player::State nextPlayerState_;
+
+private:
+    Messenger* messenger_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Game& g );

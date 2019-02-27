@@ -14,10 +14,12 @@ class PlayerView;
 class Die;
 class Player;
 
+class Messenger;
+
 class GameView : public QStackedWidget {
     Q_OBJECT;
 public:
-    GameView( Game* game, QWidget* parent = Q_NULLPTR );
+    GameView( Game* game, Messenger* messenger );
 
 public slots:
     void pickNbPlayers();
@@ -59,4 +61,7 @@ protected:
     Die* die1_;
     Die* die2_;
     std::vector<PlayerView*> playerView_;
+
+private:
+    Messenger* messenger_;
 };
