@@ -3,6 +3,7 @@
 #include "board.h"
 #include "game.h"
 
+#include <QtGui/QValidator>
 #include <QtGui/QCloseEvent>
 #include <QtWidgets/QDialogButtonBox>
 #include <QtWidgets/QGridLayout>
@@ -17,11 +18,57 @@ using namespace std;
 /**/
 
 
+/*
+ * Custom spinbox that enables up and down only if stepping does not
+ * underflow the minimum value or overflow the maximum value.
+ */
+class MyQSpinBox : public QSpinBox {
+public:
+    MyQSpinBox( QWidget* parent = Q_NULLPTR ) : QSpinBox( parent ) {}
+    virtual ~MyQSpinBox() {}
+
+protected:
+    StepEnabled stepEnabled() const {
+        StepEnabled result = StepNone;
+        if( value() + singleStep() <= maximum() ) {
+            result |= StepUpEnabled;
+        }
+        if( value() - singleStep() >= minimum() ) {
+            result |= StepDownEnabled;
+        }
+        return result;
+    }
+
+    void fixup(QString& input) const override {
+        int value = input.toInt();
+        value = min( value, maximum() );
+        value -= value % singleStep();
+        input = QString::number( value );
+    }
+
+    QValidator::State validate( QString& input, int& ) const override {
+        bool ok = false;
+        int value = input.toInt( &ok );
+        if( !ok ) {
+            return QValidator::Invalid;
+        }
+        if( value % singleStep() == 0 ) {
+            return QValidator::Acceptable;
+        }
+        return QValidator::Intermediate;
+    }
+
+};
+
+
+/**/
+
+
 ResourceSelector::ResourceSelector( QWidget* parent ) : QWidget( parent ), nbResources_( 0 ) {
     layout_ = new QGridLayout( this );
     for( int i = 0 ; i < Hex::Desert; i++ ) {
         layout_->addWidget( new QLabel( Hex::typeName[ i ][ 0 ].toUpper() + Hex::typeName[ i ].mid( 1 ) ), i, 0 );
-        spin_[ i ] = new QSpinBox();
+        spin_[ i ] = new MyQSpinBox();
         spin_[ i ]->setMinimum( 0 );
         layout_->addWidget( spin_[ i ], i, 1 );
         connect( spin_[ i ], QOverload<int>::of(&QSpinBox::valueChanged), this, &ResourceSelector::updateLimits );
@@ -51,6 +98,14 @@ void ResourceSelector::setMaxima( const std::vector<int>& maxima ) {
 }
 
 
+void ResourceSelector::setSteps( const std::vector<int>& steps ) {
+    for( int i = 0; i < Hex::Desert; i++ ) {
+        spin_[ i ]->setSingleStep( steps[ i ] );
+        layout_->addWidget( new QLabel( QString( "(%1)" ).arg( steps[ i ] ) ), i, 3 ) ;
+    }
+}
+
+
 void ResourceSelector::updateLimits() {
     int totalSelected = 0;
     for( int i = 0; i < Hex::Desert; i++ ) {
@@ -58,7 +113,11 @@ void ResourceSelector::updateLimits() {
     }
     if( maxima_.size() > 0 ) {
         for( int i = 0; i < Hex::Desert; i++ ) {
-            spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
+            if( nbResources_ > 0 ) {
+                spin_[ i ]->setMaximum( min( maxima_[ i ], spin_[ i ]->value() + nbResources_ - totalSelected ) );
+            } else {
+                spin_[ i ]->setMaximum( maxima_[ i ] );
+            }
         }
     } else if( nbResources_ > 0 ) {
         for( int i = 0; i < Hex::Desert; i++ ) {
@@ -83,10 +142,12 @@ vector<int> ResourceSelector::selection() const {
 MaxedSelector::MaxedSelector( QWidget* parent ) : QDialog( parent, Qt::CustomizeWindowHint | Qt::WindowTitleHint ) {
     setAttribute( Qt::WA_DeleteOnClose );
     auto l = new QVBoxLayout( this );
+    selectorLayout_ = new QGridLayout;
+    l->addLayout( selectorLayout_ );
     info_ = new QLabel();
-    l->addWidget( info_ );
+    selectorLayout_->addWidget( info_, 0, 1 );
     selector_ = new ResourceSelector();
-    l->addWidget( selector_ );
+    selectorLayout_->addWidget( selector_, 1, 1 );
     auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
     connect( b, &QDialogButtonBox::accepted, this, &MaxedSelector::accept );
     l->addWidget( b );
@@ -160,4 +221,38 @@ NumberSelector::~NumberSelector() {
 
 void NumberSelector::doAccept() {
     emit selected( selector_->selection() );
+}
+
+
+/**/
+
+
+TradeSelector::TradeSelector( Player* p, QWidget* parent ) : MaxedSelector( parent ), p_( p ) {
+    selectorLayout_->addWidget( new QLabel( "Select resources to sell"), 0, 0 );
+    fromSel_ = new ResourceSelector( this );
+    fromSel_->setMaxima( p->resources_ );
+    fromSel_->setSteps( p->cardCosts() );
+    selectorLayout_->addWidget( fromSel_, 1, 0 );
+    updateMax();
+    connect( fromSel_, SIGNAL( selectionChanged() ), this, SLOT( updateMax() ) );
+}
+
+
+TradeSelector::~TradeSelector() {
+}
+
+
+void TradeSelector::updateMax() {
+    max_ = 0;
+    const auto& cards = fromSel_->selection();
+    for( int i = 0; i < p_->cardCosts().size(); i++  ) {
+        max_ += cards[ i ] / p_->cardCosts()[ i ];
+    }
+    info_->setText( QString( "Select %1 card%2 to buy" ).arg( max_ ).arg ( max_ > 1 ? "s" : "" ) );
+    updateOKButton();
+}
+
+
+void TradeSelector::doAccept() {
+    emit selected( fromSel_->selection(), selector_->selection() );
 }

@@ -94,6 +94,33 @@ bool Player::canPlayMonopoly() const {
 }
 
 
+int Player::costOf( Hex::Type resourceType ) const {
+    int cost = 4;
+    for( const auto& row : game_->board_.node_ ) {
+        for( const auto& n : row ) {
+            if( n.player_ != number_ ) {
+                continue;
+            }
+            if( n.harborType_ == resourceType ) {
+                cost = min( cost , 2 );
+            } else if( n.harborType_ == Hex::Any ) {
+                cost = min( cost, 3 );
+            }
+        }
+    }
+    return cost;
+}
+
+
+std::vector<int> Player::cardCosts() const {
+    std::vector<int> costs;
+    for( int i = 0; i < resources_.size(); i++ ) {
+        costs.push_back( costOf( Hex::Type( i ) ) );
+    }
+    return costs;
+}
+
+
 ostream& operator <<( ostream& out, const Player& p ) {
     out << "# Player" << endl;
     out << p.number_ << " ";
@@ -174,6 +201,12 @@ bool Game::canBuildCard() const {
     const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Rock ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
     return hasCards && p.state_ == Player::Waiting && devCards_.size() > 0;
+}
+
+
+bool Game::canTrade() const {
+    const auto& p =curPlayer();
+    return !p.built_ && p.state_ == Player::Waiting;
 }
 
 
@@ -387,6 +420,7 @@ void Game::nextPlayer() {
     auto& p = curPlayer();
     p.state_ = Player::AboutToRoll;
     p.devCardPlayed_ = false;
+    p.built_ = false;
     p.builtCard_ = -1;
     roadCost_ = 1;
     nbRoadsToBuild_ = 1;
@@ -407,6 +441,7 @@ void Game::buildRoad( const Pos& from, const Pos& to ) {
     p.resources_[ Hex::Brick ] -= roadCost_;
     p.resources_[ Hex::Wood ] -= roadCost_;
     p.roads_--;
+    p.built_ = true;
     board_.road_.emplace_back( curPlayer_, from, to );
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
@@ -444,6 +479,7 @@ void Game::buildTown( const Pos& np ) {
     p.resources_[ Hex::Wood ]--;
     p.resources_[ Hex::Sheep ]--;
     p.towns_--;
+    p.built_ = true;
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.type_ = Node::Town;
     n.player_ = curPlayer_;
@@ -467,6 +503,7 @@ void Game::buildCity( const Pos& np ) {
     p.resources_[ Hex::Wheat ] -= 2;
     p.towns_++;
     p.cities_--;
+    p.built_ = true;
     board_.node_[ np.y() ][ np.x() ].type_ = Node::City;
     curPlayer().state_ = Player::Waiting;
     emit updatePlayer( curPlayer_ );
@@ -478,6 +515,7 @@ void Game::buildCity( const Pos& np ) {
 void Game::buildCard() {
     auto& p = curPlayer();
     p.builtCard_ = devCards_.back();
+    p.built_ = true;
     devCards_.pop_back();
     p.devCards_[ p.builtCard_ ]++;
     p.resources_[ Hex::Rock ]--;
@@ -667,6 +705,20 @@ void Game::monopoly( vector<int> selection ) {
         }
     }
     emit updatePlayer( -1 , false );
+    emit updatePlayer( curPlayer_ );
+}
+
+
+void Game::startTrade() {
+    emit requestTrade( &curPlayer() );
+}
+
+
+void Game::trade( const std::vector<int>& sold, const std::vector<int>& bought ) {
+    auto& p = player_[ curPlayer_ ];
+    for( int i = 0; i < p.resources_.size(); i++ ) {
+        p.resources_[ i ] += bought[ i ] - sold[ i ];
+    }
     emit updatePlayer( curPlayer_ );
 }
 

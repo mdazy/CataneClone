@@ -35,6 +35,8 @@ public slots:
 
     void discard( Player* p );
 
+    void trade( Player* p );
+
     void updatePlayer( int player = -1, bool buttons = true );
 
 signals:
