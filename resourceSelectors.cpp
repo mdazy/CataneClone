@@ -24,8 +24,8 @@ ResourceSelector::ResourceSelector( QWidget* parent ) : QWidget( parent ), nbRes
         spin_[ i ] = new QSpinBox();
         spin_[ i ]->setMinimum( 0 );
         layout_->addWidget( spin_[ i ], i, 1 );
-        connect( spin_[ i ], SIGNAL( valueChanged( int ) ), this, SLOT( updateLimits() ) );
-        connect( spin_[ i ], SIGNAL( valueChanged( int ) ), this, SIGNAL( selectionChanged() ) );
+        connect( spin_[ i ], QOverload<int>::of(&QSpinBox::valueChanged), this, &ResourceSelector::updateLimits );
+        connect( spin_[ i ], QOverload<int>::of(&QSpinBox::valueChanged), this, &ResourceSelector::selectionChanged );
     }
 }
 
@@ -88,10 +88,10 @@ MaxedSelector::MaxedSelector( QWidget* parent ) : QDialog( parent, Qt::Customize
     selector_ = new ResourceSelector();
     l->addWidget( selector_ );
     auto b = new QDialogButtonBox( QDialogButtonBox::Ok );
-    connect( b, SIGNAL( accepted() ), this, SLOT( accept() ) );
+    connect( b, &QDialogButtonBox::accepted, this, &MaxedSelector::accept );
     l->addWidget( b );
     OKButton_ = b->button( QDialogButtonBox::Ok );
-    connect( selector_, SIGNAL( selectionChanged() ), this, SLOT( updateOKButton() ) );
+    connect( selector_, &ResourceSelector::selectionChanged, this, &MaxedSelector::updateOKButton );
     updateOKButton();
 }
 

@@ -7,10 +7,10 @@
 Messenger::Messenger() : QObject() {
     auto serverName = QHostInfo::localHostName();
     socket_ = new QTcpSocket( this );
-    connect( socket_, SIGNAL( connected() ), this, SLOT( initializeConnection() ) );
-    connect( socket_, SIGNAL( error( QAbstractSocket::SocketError ) ), this, SLOT( disconnect() ) );
-    connect( socket_, SIGNAL( disconnected() ), this, SLOT( disconnect() ) );
-    connect( socket_, SIGNAL( readyRead() ), this, SLOT( receiveText() ) );
+    connect( socket_, &QTcpSocket::connected, this, &Messenger::initializeConnection );
+    connect( socket_, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Messenger::disconnectFromServer );
+    connect( socket_, &QTcpSocket::disconnected, this, &Messenger::disconnectFromServer );
+    connect( socket_, &QTcpSocket::readyRead, this, &Messenger::receiveText );
     socket_->connectToHost( serverName, 12345 );
 }
 
@@ -25,7 +25,7 @@ void Messenger::initializeConnection() {
 }
 
 
-void Messenger::disconnect() {
+void Messenger::disconnectFromServer() {
     // well, duh
 }
 

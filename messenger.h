@@ -16,7 +16,7 @@ public:
 private slots:
     void initializeConnection();
     void receiveText();
-    void disconnect();
+    void disconnectFromServer();
 
 signals:
     void gameCommand( const QString& cmd );

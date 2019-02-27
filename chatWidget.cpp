@@ -22,9 +22,9 @@ ChatWidget::ChatWidget( Messenger* messenger ) : QWidget( Q_NULLPTR ), messenger
     inputField_ = new QLineEdit();
     inputField_->setObjectName( "input field" );
     vl->addWidget( inputField_ );
-    connect( inputField_, SIGNAL( returnPressed() ), this, SLOT( sendText() ) );
+    connect( inputField_, &QLineEdit::returnPressed, this, &ChatWidget::sendText );
 
-    connect( messenger_, SIGNAL( chatMessage( const QString& ) ), this, SLOT( logText( const QString& ) ) );
+    connect( messenger_, &Messenger::chatMessage, this, &ChatWidget::logText );
 }
 
 
