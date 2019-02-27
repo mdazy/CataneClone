@@ -9,6 +9,7 @@
 #include "playerView.h"
 #include "die.h"
 #include "resourceSelectors.h"
+#include "chatWidget.h"
 
 #include <iostream>
 using namespace std;
@@ -143,6 +144,8 @@ void GameView::buildGameView() {
     // layout for game state
     auto vl = new QVBoxLayout();
     l->addLayout( vl );
+    // chat widget
+    l->addWidget( new ChatWidget( messenger_ ) );
     // load/save game state
     l = new QHBoxLayout();
     vl->addLayout( l );
