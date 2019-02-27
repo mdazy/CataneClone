@@ -15,6 +15,12 @@ private slots:
     void receiveText();
     void disconnect();
 
+signals:
+    void message( const QString& text );
+
+private:
+    void send( const QString& message ) const;
+
 private:
     QTcpSocket* socket_;
 };

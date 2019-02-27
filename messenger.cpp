@@ -3,6 +3,7 @@
 #include <QtNetwork/QHostInfo>
 #include <QtNetwork/QTcpSocket>
 
+
 Messenger::Messenger() : QObject() {
     auto serverName = QHostInfo::localHostName();
     socket_ = new QTcpSocket( this );
@@ -19,12 +20,23 @@ Messenger::~Messenger() {
 
 
 void Messenger::initializeConnection() {
+    // nickname and chat server version hardcoded for now
+    send( "/1.2/UnspecifiedNickname" );
 }
 
 
 void Messenger::disconnect() {
+    // well, duh
 }
 
 
 void Messenger::receiveText() {
+    auto text = QString::fromLocal8Bit( socket_->readAll() );
+    emit message( text );
+}
+
+
+void Messenger::send( const QString& text ) const {
+    socket_->write( text.toLocal8Bit() );
+    socket_->flush();
 }
