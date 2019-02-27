@@ -10,6 +10,9 @@ public:
     Messenger();
     virtual ~Messenger();
 
+public:
+    void sendChatMessage( const QString& text ) const;
+
 private slots:
     void initializeConnection();
     void receiveText();

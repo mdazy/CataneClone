@@ -42,6 +42,11 @@ void Messenger::receiveText() {
 }
 
 
+void Messenger::sendChatMessage( const QString& text ) const {
+    send( text );
+}
+
+
 void Messenger::send( const QString& text ) const {
     socket_->write( text.toLocal8Bit() );
     socket_->flush();
