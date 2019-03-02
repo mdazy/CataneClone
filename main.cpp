@@ -7,6 +7,7 @@
 
 #include "gameView.h"
 #include "game.h"
+#include "chatServer.h"
 #include "messenger.h"
 
 #include <vector>
@@ -49,11 +50,16 @@ int main( int argc, char** argv ) {
 
     cerr << ( server ? "server" : "client" ) << " on port " << port << endl;
 
+    // setup chat server
+    if( server ) {
+        new ChatServer( port, &app );
+    }
+
     QMainWindow mainWindow;
 
     srand( time( 0 ) );
 
-    Messenger messenger;
+    Messenger messenger( port, &app );
     Game game( &messenger );
 
     auto view = new GameView( &game, &messenger );
