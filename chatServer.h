@@ -7,7 +7,7 @@
 class ChatServer : public QTcpServer {
 Q_OBJECT
 public:
-    ChatServer( int port = 12345, QObject* parent = Q_NULLPTR );
+    ChatServer( int port, QObject* parent = Q_NULLPTR );
 
 public slots:
     void inspectConnection();
