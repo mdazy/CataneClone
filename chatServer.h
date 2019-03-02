@@ -1,0 +1,23 @@
+#pragma once
+
+#include <QtNetwork/QTcpServer>
+
+#include <vector>
+
+class ChatServer : public QTcpServer {
+Q_OBJECT
+public:
+    ChatServer( int port = 12345, QObject* parent = Q_NULLPTR );
+
+public slots:
+    void inspectConnection();
+    void dispatch();
+    void disconnectClient();
+
+protected:
+    void sendToClients( const QString& msg, const QTcpSocket* from = Q_NULLPTR ) const;
+    void reject( QTcpSocket* client, const QString& reason ) const;
+
+protected:
+    QMap<QTcpSocket*, QString> clientSockets_;
+};
