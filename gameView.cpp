@@ -1,6 +1,7 @@
 #include <QtWidgets/QHBoxLayout>
 #include <QtWidgets/QMessageBox>
 #include <QtWidgets/QPushButton>
+#include <QtWidgets/QStackedLayout>
 #include <QtCore/QCoreApplication>
 
 #include "gameView.h"
@@ -15,15 +16,19 @@
 using namespace std;
 
 GameView::GameView( Game* game, Messenger* messenger ) :
-    QStackedWidget( Q_NULLPTR ),
+    QWidget( Q_NULLPTR ),
     game_( game ), playing_( false ),
-    playersSelection_( 0 ), players3_( 0 ), players4_( 0 ),
-    gameView_( 0 ), boardView_( 0 ),
+    boardView_( 0 ), players3_( 0 ), players4_( 0 ),
     messenger_( messenger )
 {
-    layout()->setSizeConstraint( QLayout::SetMinimumSize );
-    buildPlayersSelection();
-    buildGameView();
+    auto hl = new QHBoxLayout( this );
+
+    stack_ = new QStackedLayout;
+    hl->addLayout( stack_, 3 );
+    hl->addWidget( new ChatWidget( messenger ), 1 );
+
+    stack_->addWidget( buildPlayersSelection() );
+    stack_->addWidget( buildGameView() );
 
     connect( game, SIGNAL( requestNbPlayers() ), this, SLOT( pickNbPlayers() ) );
     connect( this, SIGNAL( nbPlayersPicked( int ) ), game, SLOT( startWithPlayers( int ) ) );
@@ -46,12 +51,12 @@ GameView::GameView( Game* game, Messenger* messenger ) :
 
 
 void GameView::pickNbPlayers() {
-    setCurrentWidget( playersSelection_ );
+    stack_->setCurrentIndex( 0 );
 }
 
 
 void GameView::pickStartPositions() {
-    setCurrentWidget( gameView_ );
+    stack_->setCurrentIndex( 1 );
     connect( game_, SIGNAL( requestNode() ), this, SLOT( pickNode() ) );
     connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickRoad( const Pos& ) ) );
     connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
@@ -110,10 +115,10 @@ void GameView::pickRoad( const Pos& from ) {
 }
 
 
-void GameView::buildPlayersSelection() {
-    playersSelection_ = new QWidget;
-    addWidget( playersSelection_ );
-    auto l = new QHBoxLayout( playersSelection_ );
+QWidget* GameView::buildPlayersSelection() {
+    auto playersSelection = new QWidget;
+
+    auto l = new QHBoxLayout( playersSelection );
     players3_ = new QPushButton( "3 players" );
     l->addWidget( players3_ );
     players4_ = new QPushButton( "4 players" );
@@ -121,6 +126,8 @@ void GameView::buildPlayersSelection() {
 
     connect( players3_, SIGNAL( clicked() ), this, SLOT( nbPlayersPicked() ) );
     connect( players4_, SIGNAL( clicked() ), this, SLOT( nbPlayersPicked() ) );
+
+    return playersSelection;
 }
 
 
@@ -133,12 +140,11 @@ void GameView::nbPlayersPicked() {
 }
 
 
-void GameView::buildGameView() {
-    gameView_ = new QWidget;
-    gameView_->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
-    addWidget( gameView_ );
+QWidget* GameView::buildGameView() {
+    auto* gameView = new QWidget;
+    gameView->setSizePolicy( QSizePolicy::Minimum, QSizePolicy::Minimum );
     // layout for board + game state
-    auto l = new QHBoxLayout( gameView_ );
+    auto l = new QHBoxLayout( gameView );
     boardView_ = new BoardView;
     boardView_->setMinimumSize( 500, 500 );
     boardView_->board_ = &game_->board_;
@@ -146,8 +152,6 @@ void GameView::buildGameView() {
     // layout for game state
     auto vl = new QVBoxLayout();
     l->addLayout( vl );
-    // chat widget
-    l->addWidget( new ChatWidget( messenger_ ) );
     // load/save game state
     l = new QHBoxLayout();
     vl->addLayout( l );
@@ -184,6 +188,8 @@ void GameView::buildGameView() {
     }
     vl->addStretch();
     connect( game_, SIGNAL( updatePlayer( int, bool ) ), this, SLOT( updatePlayer( int, bool ) ) );
+
+    return gameView;
 }
 
 

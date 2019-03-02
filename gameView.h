@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QtWidgets/QMessageBox>
-#include <QtWidgets/QStackedWidget>
+#include <QtWidgets/QWidget>
 
 #include "board.h"
 #include "utils.h"
 
 class QPushButton;
+class QStackedLayout;
 
 class Game;
 class BoardView;
@@ -16,7 +16,7 @@ class Player;
 
 class Messenger;
 
-class GameView : public QStackedWidget {
+class GameView : public QWidget {
     Q_OBJECT;
 public:
     GameView( Game* game, Messenger* messenger );
@@ -47,18 +47,18 @@ protected slots:
     void loadState();
 
 protected:
-    void buildPlayersSelection();
-    void buildGameView();
+    QWidget* buildPlayersSelection();
+    QWidget* buildGameView();
 
 protected:
     Game* game_;
     bool playing_;
 
-    QWidget* playersSelection_;
+    QStackedLayout* stack_;
+ 
     QPushButton* players3_;
     QPushButton* players4_;
 
-    QWidget* gameView_;
     BoardView* boardView_;
     Die* die1_;
     Die* die2_;
