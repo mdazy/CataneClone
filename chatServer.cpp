@@ -43,7 +43,7 @@ ChatServer::ChatServer( int port, QObject* parent ) : QTcpServer( parent ) {
         // TODO: how to diagnose failure
         cerr << "NOT LISTENING" << endl;
     } else {
-        connect( this, SIGNAL( newConnection() ), this, SLOT( inspectConnection() ) );
+        connect( this, &ChatServer::newConnection, this, &ChatServer::inspectConnection );
     }
 }
 
@@ -55,8 +55,8 @@ void ChatServer::inspectConnection() {
     while( hasPendingConnections() ) {
         auto socket = nextPendingConnection();
         cerr << "new connection from " << socket << endl;
-        connect( socket, SIGNAL( readyRead() ), this, SLOT( dispatch() ) );
-        connect( socket, SIGNAL( disconnected() ), this, SLOT( disconnectClient() ) );
+        connect( socket, &QTcpSocket::readyRead, this, &ChatServer::dispatch );
+        connect( socket, &QTcpSocket::disconnected, this, &ChatServer::disconnectClient );
     }
 }
 

@@ -234,7 +234,7 @@ TradeSelector::TradeSelector( Player* p, QWidget* parent ) : MaxedSelector( pare
     fromSel_->setSteps( p->cardCosts() );
     selectorLayout_->addWidget( fromSel_, 1, 0 );
     updateMax();
-    connect( fromSel_, SIGNAL( selectionChanged() ), this, SLOT( updateMax() ) );
+    connect( fromSel_, &ResourceSelector::selectionChanged, this, &TradeSelector::updateMax );
 }
 
 

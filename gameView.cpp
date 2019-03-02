@@ -30,23 +30,23 @@ GameView::GameView( Game* game, Messenger* messenger ) :
     stack_->addWidget( buildPlayersSelection() );
     stack_->addWidget( buildGameView() );
 
-    connect( game, SIGNAL( requestNbPlayers() ), this, SLOT( pickNbPlayers() ) );
-    connect( this, SIGNAL( nbPlayersPicked( int ) ), game, SLOT( startWithPlayers( int ) ) );
+    connect( game, &Game::requestNbPlayers, this, &GameView::pickNbPlayers );
+    connect( this, QOverload<int>::of( &GameView::nbPlayersPicked ), game, &Game::startWithPlayers );
 
-    connect( game, SIGNAL( requestStartPositions() ), this, SLOT( pickStartPositions() ) );
+    connect( game, &Game::requestStartPositions, this, &GameView::pickStartPositions );
 
-    connect( game, SIGNAL( rollDice() ), this, SLOT( rollDice() ) );
+    connect( game, &Game::rollDice, this, &GameView::rollDice );
 
-    connect( game, SIGNAL( diceRolled( int, int ) ), this, SLOT( diceRolled( int, int ) ) );
+    connect( game, &Game::diceRolled, this, &GameView::diceRolled );
 
-    connect( game, SIGNAL( pickDiscard( Player* ) ), this, SLOT( discard( Player* ) ) );
+    connect( game, &Game::pickDiscard, this, &GameView::discard );
 
-    connect( game, SIGNAL( requestTrade( Player* ) ), this, SLOT( trade( Player* ) ) );
+    connect( game, &Game::requestTrade, this, &GameView::trade );
 
-    connect( game, SIGNAL( requestHex() ), this, SLOT( pickHex() ) );
-    connect( boardView_, SIGNAL( hexSelected( Pos ) ), game_, SLOT( robAround( const Pos& ) ) );
+    connect( game, &Game::requestHex, this, &GameView::pickHex );
+    connect( boardView_, &BoardView::hexSelected, game, &Game::robAround );
 
-    connect( game, SIGNAL( gameOver( std::vector<Player> ) ), this, SLOT( gameOver( const std::vector<Player>& ) ) );
+    connect( game, &Game::gameOver, this, &GameView::gameOver );
 }
 
 
@@ -57,9 +57,9 @@ void GameView::pickNbPlayers() {
 
 void GameView::pickStartPositions() {
     stack_->setCurrentIndex( 1 );
-    connect( game_, SIGNAL( requestNode() ), this, SLOT( pickNode() ) );
-    connect( game_, SIGNAL( requestRoad( Pos ) ), this, SLOT( pickRoad( const Pos& ) ) );
-    connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
+    connect( game_, &Game::requestNode, this, &GameView::pickNode) ;
+    connect( game_, &Game::requestRoad, this, &GameView::pickRoad );
+    connect( boardView_, &BoardView::roadSelected, game_, &Game::startRoadPicked );
     pickNode();
 }
 
@@ -73,26 +73,26 @@ void GameView::pickHex() {
 
 void GameView::pickNode() {
     QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
-    auto slot = SLOT( dummy() );
+    void (Game::*slot)(const Pos&) = 0;
     switch( game_->curPlayer().state_ ) {
         case Player::PickStartTown: {
-            slot = SLOT( startNodePicked( const Pos& ) );
+            slot = &Game::startNodePicked;
             break;
         }
         case Player::PickBuildTown: {
-            slot = SLOT( buildTown( const Pos& ) );
+            slot = QOverload<const Pos&>::of( &Game::buildTown );
             break;
         }
         case Player::PickCity: {
-            slot = SLOT( buildCity( const Pos& ) );
+            slot = &Game::buildCity;
             break;
         }
         case Player::PickRobTown: {
-            slot = SLOT( rob( const Pos& ) );
+            slot = &Game::rob;
             break;
         }
     }
-    connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, slot );
+    connect( boardView_, &BoardView::nodeSelected, game_, slot );
     playerView_[ game_->curPlayer_ ]->enableButtons( false );
     boardView_->setSelectionMode( BoardView::Node );
     boardView_->update();
@@ -103,10 +103,10 @@ void GameView::pickRoad( const Pos& from ) {
     QObject::disconnect( boardView_, &BoardView::roadSelected, 0, 0 );
     QObject::disconnect( boardView_, &BoardView::nodeSelected, 0, 0 );
     if( game_->curPlayer().state_ == Player::PickBuildRoad ) {
-        connect( boardView_, SIGNAL( nodeSelected( Pos ) ), game_, SLOT( setupAllowedRoadEndNodes( const Pos& ) ) );
-        connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( buildRoad( const Pos&, const Pos& ) ) );
+        connect( boardView_, &BoardView::nodeSelected, game_, &Game::setupAllowedRoadEndNodes );
+        connect( boardView_, &BoardView::roadSelected, game_, QOverload<const Pos&, const Pos&>::of( &Game::buildRoad ) );
     } else if( game_->curPlayer().state_ == Player::PickStartRoad ) {
-        connect( boardView_, SIGNAL( roadSelected( Pos, Pos ) ), game_, SLOT( startRoadPicked( const Pos&, const Pos& ) ) );
+        connect( boardView_, &BoardView::roadSelected, game_, &Game::startRoadPicked );
     }
     playerView_[ game_->curPlayer_ ]->enableButtons( false );
     boardView_->setSelectionMode( BoardView::Road );
@@ -124,8 +124,8 @@ QWidget* GameView::buildPlayersSelection() {
     players4_ = new QPushButton( "4 players" );
     l->addWidget( players4_ );
 
-    connect( players3_, SIGNAL( clicked() ), this, SLOT( nbPlayersPicked() ) );
-    connect( players4_, SIGNAL( clicked() ), this, SLOT( nbPlayersPicked() ) );
+    connect( players3_, &QPushButton::clicked, this, QOverload<>::of( &GameView::nbPlayersPicked ) );
+    connect( players4_, &QPushButton::clicked, this, QOverload<>::of( &GameView::nbPlayersPicked ) );
 
     return playersSelection;
 }
@@ -157,10 +157,10 @@ QWidget* GameView::buildGameView() {
     vl->addLayout( l );
     auto p = new QPushButton( "Save state" );
     l->addWidget( p );
-    connect( p, SIGNAL( clicked() ), game_, SLOT( save() ) );
+    connect( p, &QPushButton::clicked, game_, &Game::save );
     p = new QPushButton( "Load state" );
     l->addWidget( p );
-    connect( p, SIGNAL( clicked() ), this, SLOT( loadState() ) );
+    connect( p, &QPushButton::clicked, this, &GameView::loadState );
     // layout for dice
     l = new QHBoxLayout();
     vl->addLayout( l );
@@ -174,20 +174,20 @@ QWidget* GameView::buildGameView() {
         pv->enableButtons( false );
         vl->addWidget( pv );
         playerView_.push_back( pv );
-        connect( pv->roll_, SIGNAL( clicked() ), game_, SLOT( playTurn() ) );
-        connect( pv->trade_, SIGNAL( clicked() ), game_, SLOT( startTrade() ) );
-        connect( pv->buildRoad_, SIGNAL( clicked() ), game_, SLOT( buildRoad() ) );
-        connect( pv->buildTown_, SIGNAL( clicked() ), game_, SLOT( buildTown() ) );
-        connect( pv->buildCity_, SIGNAL( clicked() ), game_, SLOT( buildCity() ) );
-        connect( pv->buildCard_, SIGNAL( clicked() ), game_, SLOT( buildCard() ) );
-        connect( pv->playKnight_, SIGNAL( clicked() ), game_, SLOT( knight() ) );
-        connect( pv->playRoads_, SIGNAL( clicked() ), game_, SLOT( buildRoads() ) );
-        connect( pv->playInvention_, SIGNAL( clicked() ), this, SLOT( invention() ) );
-        connect( pv->playMonopoly_, SIGNAL( clicked() ), this, SLOT( monopoly() ) );
-        connect( pv->pass_, SIGNAL( clicked() ), game_, SLOT( nextPlayer() ) );       
+        connect( pv->roll_, &QPushButton::clicked, game_, &Game::playTurn );
+        connect( pv->trade_, &QPushButton::clicked, game_, &Game::startTrade );
+        connect( pv->buildRoad_, &QPushButton::clicked, game_, QOverload<>::of( &Game::buildRoad ) );
+        connect( pv->buildTown_, &QPushButton::clicked, game_, QOverload<>::of( &Game::buildTown ) );
+        connect( pv->buildCity_, &QPushButton::clicked, game_, QOverload<>::of( &Game::buildCity ) );
+        connect( pv->buildCard_, &QPushButton::clicked, game_, &Game::buildCard );
+        connect( pv->playKnight_, &QPushButton::clicked, game_, &Game::knight );
+        connect( pv->playRoads_, &QPushButton::clicked, game_, &Game::buildRoads );
+        connect( pv->playInvention_, &QPushButton::clicked, this, &GameView::invention );
+        connect( pv->playMonopoly_, &QPushButton::clicked, this, &GameView::monopoly );
+        connect( pv->pass_, &QPushButton::clicked, game_, &Game::nextPlayer );       
     }
     vl->addStretch();
-    connect( game_, SIGNAL( updatePlayer( int, bool ) ), this, SLOT( updatePlayer( int, bool ) ) );
+    connect( game_, &Game::updatePlayer, this, &GameView::updatePlayer );
 
     return gameView;
 }
@@ -232,28 +232,28 @@ void GameView::loadState() {
 
 void GameView::discard( Player* p ) {
     auto d = new DiscardSelector( p, this );
-    connect( d, SIGNAL( selected( Player*, std::vector<int> ) ), game_, SLOT( discard( Player*, std::vector<int> ) ) );
+    connect( d, &DiscardSelector::selected, game_, &Game::discard );
     d->exec();
 }
 
 
 void GameView::trade( Player* p ) {
     auto d = new TradeSelector( p, this );
-    connect( d, SIGNAL( selected( std::vector<int>, std::vector<int> ) ), game_, SLOT( trade( const std::vector<int>&, const std::vector<int>& ) ) );
+    connect( d, &TradeSelector::selected, game_,&Game::trade );
     d->exec();
 }
 
 
 void GameView::invention() {
     auto d = new NumberSelector( 2, this );
-    connect( d, SIGNAL( selected( std::vector<int>) ), game_, SLOT( invention( std::vector<int> ) ) );
+    connect( d, &NumberSelector::selected, game_, &Game::invention );
     d->exec();
 }
 
 
 void GameView::monopoly() {
     auto d = new NumberSelector( 1, this );
-    connect( d, SIGNAL( selected( std::vector<int>) ), game_, SLOT( monopoly( std::vector<int> ) ) );
+    connect( d, &NumberSelector::selected, game_, &Game::monopoly );
     d->exec();
 }
 
