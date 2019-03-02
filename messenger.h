@@ -7,7 +7,7 @@ class QTcpSocket;
 class Messenger : public QObject {
     Q_OBJECT;
 public:
-    Messenger();
+    Messenger( int port, QObject* parent = Q_NULLPTR );
     virtual ~Messenger();
 
 public:

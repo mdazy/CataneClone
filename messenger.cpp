@@ -4,14 +4,14 @@
 #include <QtNetwork/QTcpSocket>
 
 
-Messenger::Messenger() : QObject() {
+Messenger::Messenger( int port, QObject* parent ) : QObject( parent ) {
     auto serverName = QHostInfo::localHostName();
     socket_ = new QTcpSocket( this );
     connect( socket_, &QTcpSocket::connected, this, &Messenger::initializeConnection );
     connect( socket_, QOverload<QAbstractSocket::SocketError>::of(&QAbstractSocket::error), this, &Messenger::disconnectFromServer );
     connect( socket_, &QTcpSocket::disconnected, this, &Messenger::disconnectFromServer );
     connect( socket_, &QTcpSocket::readyRead, this, &Messenger::receiveText );
-    socket_->connectToHost( serverName, 12345 );
+    socket_->connectToHost( serverName, port );
 }
 
 
