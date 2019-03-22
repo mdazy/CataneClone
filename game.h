@@ -113,6 +113,7 @@ signals:
     void requestRoad( Pos from = Pos() );
     void requestHex();
     void requestTrade( Player* p );
+    void updateBoard();
     void updatePlayer( int player = - 1, bool buttons = true );
     void rollDice();
     void diceRolled( int die1, int die2 );

@@ -252,8 +252,11 @@ void Game::startWithPlayers( int nbPlayers ) {
     curPlayer().state_ = Player::PickStartTown;
     setupAllowedBuildNodes( true );
     emit updatePlayer();
-    // TODO: separate board update from request
-    emit requestStartPositions();
+    if( server_ ) {
+        emit requestStartPositions();
+    } else {
+        emit updateBoard();
+    }
 }
 
 
@@ -282,9 +285,12 @@ void Game::startNodePicked( const Pos& np ) {
     }
     // setup allowed nodes around selected town
     player_[ curPlayer_].state_ = Player::PickStartRoad;
-    setupAllowedRoadEndNodes( np );
-    // TODO: separate board update from request
-    emit requestRoad( np );
+    if( server_ ) {
+        setupAllowedRoadEndNodes( np );
+        emit requestRoad( np );
+    } else {
+        emit updateBoard();
+    }
 }
 
 
@@ -318,9 +324,12 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
         curPlayer_--;
     }
     curPlayer().state_ = Player::PickStartTown;
-    setupAllowedBuildNodes( true );
-    // TODO: separate board update from request
-    emit requestNode();
+    if( server_ ) {
+        setupAllowedBuildNodes( true );
+        emit requestNode();
+    } else {
+        emit updateBoard();
+    }
 }
 
 
@@ -338,7 +347,7 @@ void Game::setupAllowedBuildNodes( bool start ) {
                 // already built
                 continue;
             }
-            // look for neighbord and owned roads leading to this node
+            // look for neighbors and owned roads leading to this node
             bool hasNeighbor = false;
             bool hasRoad = false;
             for( const auto& nn : Board::nodesAroundNode( np ) ) {
