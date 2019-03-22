@@ -230,6 +230,15 @@ void Game::handleCommand( const QString& cmd ) {
         QTimer::singleShot( 0, this, [ this, parts ](){ startWithPlayers( parts[ 1 ].toInt() ); } );
     } else if( parts[ 0 ] == "startNode" ) {
         QTimer::singleShot( 0, this, [ this, parts ](){ startNodePicked( Pos(parts[ 1 ].toInt(), parts[ 2 ].toInt() ) ); } );
+    } else if( parts[ 0 ] == "startRoad" ) {
+        QTimer::singleShot( 0, this,
+            [ this, parts ](){
+                startRoadPicked(
+                    Pos(parts[ 1 ].toInt(), parts[ 2 ].toInt() ),
+                    Pos(parts[ 3 ].toInt(), parts[ 4 ].toInt() )
+                );
+            } 
+        );
     }
 }
 
@@ -243,7 +252,7 @@ void Game::startWithPlayers( int nbPlayers ) {
     curPlayer().state_ = Player::PickStartTown;
     setupAllowedBuildNodes( true );
     emit updatePlayer();
-    // TODO: update board only when not server, currentmy bundled with requestStartPositions()
+    // TODO: separate board update from request
     emit requestStartPositions();
 }
 
@@ -273,14 +282,20 @@ void Game::startNodePicked( const Pos& np ) {
     }
     // setup allowed nodes around selected town
     player_[ curPlayer_].state_ = Player::PickStartRoad;
-    if( server_ ) {
-        setupAllowedRoadEndNodes( np );
-        emit requestRoad( np );
-    }
+    setupAllowedRoadEndNodes( np );
+    // TODO: separate board update from request
+    emit requestRoad( np );
 }
 
 
 void Game::startRoadPicked( const Pos& from, const Pos& to ) {
+    if( server_ ) {
+        messenger_->sendGameCommand(
+            QString( "startRoad/%1/%2/%3/%4" )
+                .arg( from.x() ).arg( from.y() )
+                .arg( to.x() ).arg( to.y() )
+        );
+    }
     board_.road_.emplace_back( curPlayer_, from, to );
     curPlayer().roads_--;
     updateLongestRoad();
@@ -304,6 +319,7 @@ void Game::startRoadPicked( const Pos& from, const Pos& to ) {
     }
     curPlayer().state_ = Player::PickStartTown;
     setupAllowedBuildNodes( true );
+    // TODO: separate board update from request
     emit requestNode();
 }
 
