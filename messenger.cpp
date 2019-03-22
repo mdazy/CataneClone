@@ -36,9 +36,9 @@ void Messenger::disconnectFromServer() {
 void Messenger::receiveText() {
     auto text = QString::fromLocal8Bit( socket_->readAll() );
     if( text.startsWith( CMD ) ) {
-        emit gameCommand( text.right( CMD.length() ) );
+        emit gameCommand( text.mid( CMD.length() ) );
     } else if( text.startsWith( INFO ) ) {
-        emit chatMessage( text.right( INFO.length() ) );
+        emit chatMessage( text.mid( INFO.length() ) );
     } else {
         emit chatMessage( text );
     }
