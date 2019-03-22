@@ -107,7 +107,7 @@ void ChatServer::dispatch() {
         return;
     }
 
-    if( !text.startsWith( clientSockets_[ from ] + ": " ) ) {
+    if( !text.startsWith( clientSockets_[ from ] + ": " ) && !text.startsWith( "/") ) {
         // new nick, update and notify
         cerr << "new nick for existing connection" << endl;
         QString oldNick = clientSockets_[ from ];
