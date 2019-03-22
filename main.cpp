@@ -60,7 +60,7 @@ int main( int argc, char** argv ) {
     srand( time( 0 ) );
 
     Messenger messenger( port, &app );
-    Game game( &messenger );
+    Game game( &messenger, server );
 
     auto view = new GameView( &game, &messenger );
     view->setMinimumSize( 500, 500 );

@@ -150,11 +150,11 @@ istream& operator >>( istream& in, Player& p ) {
 /**/
 
 
-Game::Game( Messenger* messenger ) :
+Game::Game( Messenger* messenger, bool server ) :
     QObject( Q_NULLPTR ),
     nbPlayers_( 0 ), curPlayer_( 0 ),
     pickStartAscending_( true ), nextPlayerState_( Player::Waiting ),
-    messenger_( messenger )
+    messenger_( messenger ), server_( server )
 {
     for( int i = 0; i < 4; i++ ) {
         player_.emplace_back( this );

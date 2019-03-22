@@ -66,7 +66,7 @@ std::istream& operator >>( std::istream& in, Player& p );
 class Game : public QObject {
     Q_OBJECT;
 public:
-    Game( Messenger* messenger );
+    Game( Messenger* messenger , bool server );
 
     bool canBuildTown();
     bool canBuildCity() const;
@@ -142,6 +142,7 @@ public:
 
 private:
     Messenger* messenger_;
+    bool server_;
 };
 
 std::ostream& operator <<( std::ostream& out, const Game& g );
