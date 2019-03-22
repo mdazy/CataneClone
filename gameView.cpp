@@ -187,6 +187,7 @@ QWidget* GameView::buildGameView() {
         connect( pv->pass_, &QPushButton::clicked, game_, &Game::nextPlayer );       
     }
     vl->addStretch();
+    connect( game_, &Game::updateBoard, this, &GameView::updateBoard );
     connect( game_, &Game::updatePlayer, this, &GameView::updatePlayer );
 
     return gameView;
@@ -204,6 +205,14 @@ void GameView::updatePlayer( int player, bool buttons ) {
             playerView_[ i ]->updateView();
         }
     }
+}
+
+
+void GameView::updateBoard() {
+    if( stack_->currentIndex() != 1 ) {
+        stack_->setCurrentIndex( 1 );
+    }
+    boardView_->update();
 }
 
 
