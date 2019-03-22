@@ -5,6 +5,8 @@
 #include <fstream>
 #include <algorithm>
 
+#include "messenger.h"
+
 using namespace std;
 
 
@@ -161,6 +163,11 @@ Game::Game( Messenger* messenger, bool server ) :
         player_[ i ].number_ = i;
     }
 
+    if( !server_ ) {
+        connect( messenger_, &Messenger::gameCommand, this, &Game::handleCommand );
+    }
+
+    // TODO: get cards from server
     devCards_.insert( devCards_.begin(), 14, Knight );
     devCards_.insert( devCards_.begin(), 5, Point );
     devCards_.insert( devCards_.begin(), 2, Roads );
@@ -169,6 +176,13 @@ Game::Game( Messenger* messenger, bool server ) :
     randomize( devCards_ );
 }
 
+
+void Game::handleCommand( const QString& cmd ) {
+    QStringList parts = cmd.split( "/" );
+    if( parts[0] == "nbPlayers" ) {
+        QTimer::singleShot( 0, this, [this, parts](){startWithPlayers(parts[1].toInt());});
+    }
+}
 
 bool Game::canBuildTown() {
     const auto& p = curPlayer();
@@ -211,11 +225,16 @@ bool Game::canTrade() const {
 
 
 void Game::newGame() {
-    emit requestNbPlayers();
+    if( server_ ) {
+        emit requestNbPlayers();
+    }
 }
 
 
 void Game::startWithPlayers( int nbPlayers ) {
+    if( server_ ) {
+        messenger_->sendGameCommand( QString( "nbPlayers/%1" ).arg( nbPlayers ) );
+    }
     nbPlayers_ = nbPlayers;
     curPlayer_ = 0;
     curPlayer().state_ = Player::PickStartTown;

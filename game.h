@@ -129,6 +129,9 @@ protected:
     void updateLongestRoad();
     void checkEndGame();
 
+protected slots:
+    void handleCommand( const QString& cmd );
+
 public:
     Board board_;
     std::vector<Player> player_;
