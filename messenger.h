@@ -12,6 +12,7 @@ public:
 
 public:
     void sendChatMessage( const QString& text ) const;
+    void sendGameCommand( const QString& text ) const;
 
 private slots:
     void initializeConnection();
@@ -19,8 +20,8 @@ private slots:
     void disconnectFromServer();
 
 signals:
-    void gameCommand( const QString& cmd );
     void chatMessage( const QString& text );
+    void gameCommand( const QString& cmd );
 
 private:
     void send( const QString& message ) const;

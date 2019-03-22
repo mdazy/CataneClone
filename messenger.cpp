@@ -3,6 +3,9 @@
 #include <QtNetwork/QHostInfo>
 #include <QtNetwork/QTcpSocket>
 
+const QString CMD = "/gameCmd/";
+const QString INFO = "/gameInfo/";
+
 
 Messenger::Messenger( int port, QObject* parent ) : QObject( parent ) {
     auto serverName = QHostInfo::localHostName();
@@ -32,10 +35,10 @@ void Messenger::disconnectFromServer() {
 
 void Messenger::receiveText() {
     auto text = QString::fromLocal8Bit( socket_->readAll() );
-    if( text.startsWith( "/gameCmd" ) ) {
-        emit gameCommand( text.right( 9 ) );
-    } else if( text.startsWith( "/gameInfo" ) ) {
-        emit chatMessage( text.right( 10 ) );
+    if( text.startsWith( CMD ) ) {
+        emit gameCommand( text.right( CMD.length() ) );
+    } else if( text.startsWith( INFO ) ) {
+        emit chatMessage( text.right( INFO.length() ) );
     } else {
         emit chatMessage( text );
     }
@@ -46,6 +49,9 @@ void Messenger::sendChatMessage( const QString& text ) const {
     send( text );
 }
 
+void Messenger::sendGameCommand( const QString& cmd ) const {
+    send( CMD + cmd );
+}
 
 void Messenger::send( const QString& text ) const {
     socket_->write( text.toLocal8Bit() );
