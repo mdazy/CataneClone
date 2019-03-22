@@ -131,11 +131,15 @@ QWidget* GameView::buildPlayersSelection() {
 }
 
 
-void GameView::nbPlayersPicked() {
-    int nbPlayers = sender() == players3_ ? 3 : 4;
+void GameView::setNbPlayers( int nbPlayers ) {
     for( int i = nbPlayers; i < 4; i++ ) {
         playerView_[ i ]->hide();
     }
+}
+
+void GameView::nbPlayersPicked() {
+    int nbPlayers = sender() == players3_ ? 3 : 4;
+    setNbPlayers( nbPlayers );
     emit nbPlayersPicked( nbPlayers );
 }
 
@@ -210,6 +214,7 @@ void GameView::updatePlayer( int player, bool buttons ) {
 
 void GameView::updateBoard() {
     if( stack_->currentIndex() != 1 ) {
+        setNbPlayers( game_->nbPlayers_ );
         stack_->setCurrentIndex( 1 );
     }
     boardView_->update();

@@ -44,6 +44,7 @@ signals:
     void nbPlayersPicked( int nbPlayers );
 
 protected slots:
+    void setNbPlayers( int nbPlayers );
     void nbPlayersPicked();
     void loadState();
 
