@@ -176,14 +176,6 @@ Game::Game( Messenger* messenger, bool server ) :
     randomize( devCards_ );
 }
 
-
-void Game::handleCommand( const QString& cmd ) {
-    QStringList parts = cmd.split( "/" );
-    if( parts[0] == "nbPlayers" ) {
-        QTimer::singleShot( 0, this, [this, parts](){startWithPlayers(parts[1].toInt());});
-    }
-}
-
 bool Game::canBuildTown() {
     const auto& p = curPlayer();
     bool hasCards = p.resources_[ Hex::Wood ] > 0 && p.resources_[ Hex::Brick ] > 0 && p.resources_[ Hex::Wheat ] > 0 && p.resources_[ Hex::Sheep ] > 0;
@@ -231,6 +223,17 @@ void Game::newGame() {
 }
 
 
+void Game::handleCommand( const QString& cmd ) {
+    QStringList parts = cmd.split( "/" );
+    if( parts[ 0 ] == "nbPlayers" ) {
+        // TODO: get board from server
+        QTimer::singleShot( 0, this, [ this, parts ](){ startWithPlayers( parts[ 1 ].toInt() ); } );
+    } else if( parts[ 0 ] == "startNode" ) {
+        QTimer::singleShot( 0, this, [ this, parts ](){ startNodePicked( Pos(parts[ 1 ].toInt(), parts[ 2 ].toInt() ) ); } );
+    }
+}
+
+
 void Game::startWithPlayers( int nbPlayers ) {
     if( server_ ) {
         messenger_->sendGameCommand( QString( "nbPlayers/%1" ).arg( nbPlayers ) );
@@ -240,11 +243,15 @@ void Game::startWithPlayers( int nbPlayers ) {
     curPlayer().state_ = Player::PickStartTown;
     setupAllowedBuildNodes( true );
     emit updatePlayer();
+    // TODO: update board only when not server, currentmy bundled with requestStartPositions()
     emit requestStartPositions();
 }
 
 
 void Game::startNodePicked( const Pos& np ) {
+    if( server_ ) {
+        messenger_->sendGameCommand( QString( "startNode/%1/%2" ).arg( np.x() ).arg( np.y() ) );
+    }
     auto& n = board_.node_[ np.y() ][ np.x() ];
     n.player_ = curPlayer_;
     n.type_ = Node::Town;
@@ -266,8 +273,10 @@ void Game::startNodePicked( const Pos& np ) {
     }
     // setup allowed nodes around selected town
     player_[ curPlayer_].state_ = Player::PickStartRoad;
-    setupAllowedRoadEndNodes( np );
-    emit requestRoad( np );
+    if( server_ ) {
+        setupAllowedRoadEndNodes( np );
+        emit requestRoad( np );
+    }
 }
 
 
