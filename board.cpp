@@ -360,6 +360,50 @@ int Board::longestRoadForPlayer( int p ) const {
 }
 
 
+QString Board::toString() const {
+	QString result;
+	result = QString( "hexes/%1/%2" ).arg( hexWidth() ).arg( hexHeight() );
+	for( int hx = 0; hx < hexWidth(); hx++ ) {
+		for( int hy = 0; hy < hexHeight(); hy++ ) {
+			result += QString( "/%1" ).arg( hex_[ hy ][ hx ].type_ );
+		}
+	}
+	result += QString( "/nodes/%1/%2" ).arg( nodeWidth() ).arg( nodeHeight() );
+	for( int nx = 0; nx < nodeWidth(); nx++ ) {
+		for( int ny = 0; ny < nodeHeight(); ny++ ) {
+			const auto& n = node_[ ny ][ nx ];
+			result += QString( "/%1/%2" ).arg( n.type_ ).arg( n.harborType_ );
+		}
+	}
+	return result;
+}
+
+void Board::initFromStrings( const QStringList& parts ) {
+	int index = 0;
+	index++; // hexes
+	int hw = parts[ index++ ].toInt();
+	int hh = parts[ index++ ].toInt();
+	hex_.resize( hh, vector<Hex>( hw ) );
+	for( int hx = 0; hx < hexWidth(); hx++ ) {
+		for( int hy = 0; hy < hexHeight(); hy++ ) {
+			hex_[ hy ][ hx ].type_ = Hex::Type( parts[ index++ ].toInt() );
+		}
+	}
+
+	index++; // nodes
+	int nw = parts[ index++ ].toInt();
+	int nh = parts[ index++ ].toInt();
+	node_.resize( nh, vector<Node>( nw ) );
+	for( int nx = 0; nx < nodeWidth(); nx++ ) {
+		for( int ny = 0; ny < nodeHeight(); ny++ ) {
+			auto& n = node_[ ny ][ nx ];
+			n.type_ = Node::Type( parts[ index++ ].toInt() );
+			n.harborType_ = Hex::Type( parts[ index++ ].toInt() );
+		}
+	}
+}
+
+
 ostream& operator <<( ostream& out, const Board& b ) {
 	out << "# Board" << endl;
 	out << b.hexWidth() << " " << b.hexHeight() << endl;

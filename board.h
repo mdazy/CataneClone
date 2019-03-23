@@ -92,6 +92,9 @@ public:
 
 	int longestRoadForPlayer( int p ) const;
 
+	QString toString() const;
+	void initFromStrings( const QStringList& parts );
+
 protected:
 	int longestRoad( const Pos& from, int p, int visit ) const;
 
