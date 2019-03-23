@@ -225,8 +225,10 @@ void Game::newGame() {
 
 void Game::handleCommand( const QString& cmd ) {
     QStringList parts = cmd.split( "/" );
-    if( parts[ 0 ] == "nbPlayers" ) {
-        // TODO: get board from server
+    if( parts[ 0 ] == "board" ) {
+        parts.removeFirst();
+        board_.initFromStrings( parts );
+    } else if( parts[ 0 ] == "nbPlayers" ) {
         QTimer::singleShot( 0, this, [ this, parts ](){ startWithPlayers( parts[ 1 ].toInt() ); } );
     } else if( parts[ 0 ] == "startNode" ) {
         QTimer::singleShot( 0, this, [ this, parts ](){ startNodePicked( Pos(parts[ 1 ].toInt(), parts[ 2 ].toInt() ) ); } );
@@ -245,6 +247,7 @@ void Game::handleCommand( const QString& cmd ) {
 
 void Game::startWithPlayers( int nbPlayers ) {
     if( server_ ) {
+        messenger_->sendGameCommand( "board/" + board_.toString() );
         messenger_->sendGameCommand( QString( "nbPlayers/%1" ).arg( nbPlayers ) );
     }
     nbPlayers_ = nbPlayers;
