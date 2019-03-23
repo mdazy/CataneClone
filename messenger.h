@@ -28,4 +28,5 @@ private:
 
 private:
     QTcpSocket* socket_;
+    QString buffer_;
 };

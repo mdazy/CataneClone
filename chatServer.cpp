@@ -54,7 +54,6 @@ ChatServer::ChatServer( int port, QObject* parent ) : QTcpServer( parent ) {
 void ChatServer::inspectConnection() {
     while( hasPendingConnections() ) {
         auto socket = nextPendingConnection();
-        cerr << "new connection from " << socket << endl;
         connect( socket, &QTcpSocket::readyRead, this, &ChatServer::dispatch );
         connect( socket, &QTcpSocket::disconnected, this, &ChatServer::disconnectClient );
     }
@@ -69,7 +68,7 @@ void ChatServer::sendToClients( const QString& msg, const QTcpSocket* from ) con
         if( *s == from ) {
             continue;
         }
-        ( *s )->write( msg.toLocal8Bit() );
+        ( *s )->write( ( QString( "%1/").arg( msg.length() ) + msg) .toLocal8Bit() );
         ( *s )->flush();
     }
 }
@@ -88,36 +87,42 @@ void ChatServer::sendToClients( const QString& msg, const QTcpSocket* from ) con
  */
 void ChatServer::dispatch() {
     auto from = static_cast<QTcpSocket*>( sender() );
-    QString text = QString::fromLocal8Bit( from->readAll() );
+    buffer_ += QString::fromLocal8Bit( from->readAll() );
 
-    cerr << "Received " << text.toStdString() << " from " << from << endl;
+    int slashPos = buffer_.indexOf( "/" );
+    int len = buffer_.left( slashPos ).toInt();
+    // if buffer contains the expected length, process
+    while( !buffer_.isEmpty() && len > 0 && buffer_.length() >= len + slashPos + 1 ) {
+        // skip the sequence length and get the actual text
+        auto text = buffer_.mid( slashPos + 1, len );
 
-    if( clientSockets_.constFind( from ) == clientSockets_.constEnd() ) {
-        QStringList initText = text.split( "/", QString::SkipEmptyParts );
-        if( initText.size() != 2 ) {
-            reject( from, "Invalid initialization data." );
-            return;
-        } else if( initText[ 0 ] != version ) {
-            reject( from, "Your client is for an obsolete version, upgrade it." );
+        if( clientSockets_.constFind( from ) == clientSockets_.constEnd() ) {
+            QStringList initText = text.split( "/", QString::SkipEmptyParts );
+            if( initText.size() != 2 ) {
+                reject( from, "Invalid initialization data." );
+                return;
+            } else if( initText[ 0 ] != version ) {
+                reject( from, "Your client is for an obsolete version, upgrade it." );
+            } else {
+                clientSockets_.insert( from, initText[ 1 ] );
+                sendToClients( "/<b><font color=\"#442222\">" + initText[ 1 ] + " connected.</font></b>", from );
+            }
         } else {
-            cerr << "New connection of " << initText[ 1 ].toStdString() << " from " << from << endl;
-            clientSockets_.insert( from, initText[ 1 ] );
-            sendToClients( "/<b><font color=\"#442222\">" + initText[ 1 ] + " connected.</font></b>", from );
+                if( !text.startsWith( clientSockets_[ from ] + ": " ) && !text.startsWith( "/") ) {
+                // new nick, update and notify
+                QString oldNick = clientSockets_[ from ];
+                clientSockets_[ from ] = text;
+                text = "/<b><font color=\"#442222\">" + oldNick + " has changed his nick to " + text + ".</font></b>";
+            } else {
+                // regular text
+            }
+            sendToClients( text, from );
         }
-        return;
-    }
 
-    if( !text.startsWith( clientSockets_[ from ] + ": " ) && !text.startsWith( "/") ) {
-        // new nick, update and notify
-        cerr << "new nick for existing connection" << endl;
-        QString oldNick = clientSockets_[ from ];
-        clientSockets_[ from ] = text;
-        text = "/<b><font color=\"#442222\">" + oldNick + " has changed his nick to " + text + ".</font></b>";
-    } else {
-        // regular text
+        buffer_ = buffer_.mid( slashPos + 1 + len );
+        slashPos = buffer_.indexOf( "/" );
+        len = buffer_.left( slashPos ).toInt();
     }
-
-    sendToClients( text, from );
 }
 
 

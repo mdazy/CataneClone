@@ -20,4 +20,5 @@ protected:
 
 protected:
     QMap<QTcpSocket*, QString> clientSockets_;
+    QString buffer_;
 };
