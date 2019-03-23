@@ -362,12 +362,15 @@ int Board::longestRoadForPlayer( int p ) const {
 
 QString Board::toString() const {
 	QString result;
+
 	result = QString( "hexes/%1/%2" ).arg( hexWidth() ).arg( hexHeight() );
 	for( int hx = 0; hx < hexWidth(); hx++ ) {
 		for( int hy = 0; hy < hexHeight(); hy++ ) {
-			result += QString( "/%1" ).arg( hex_[ hy ][ hx ].type_ );
+			const auto& h = hex_[ hy ][ hx ];
+			result += QString( "/%1/%2" ).arg( h.type_ ).arg( h.number_ );
 		}
 	}
+
 	result += QString( "/nodes/%1/%2" ).arg( nodeWidth() ).arg( nodeHeight() );
 	for( int nx = 0; nx < nodeWidth(); nx++ ) {
 		for( int ny = 0; ny < nodeHeight(); ny++ ) {
@@ -375,6 +378,9 @@ QString Board::toString() const {
 			result += QString( "/%1/%2" ).arg( n.type_ ).arg( n.harborType_ );
 		}
 	}
+
+	result += QString( "/robber/%1/%2" ).arg( robber_.x() ).arg( robber_.y() );
+
 	return result;
 }
 
@@ -386,7 +392,9 @@ void Board::initFromStrings( const QStringList& parts ) {
 	hex_.resize( hh, vector<Hex>( hw ) );
 	for( int hx = 0; hx < hexWidth(); hx++ ) {
 		for( int hy = 0; hy < hexHeight(); hy++ ) {
-			hex_[ hy ][ hx ].type_ = Hex::Type( parts[ index++ ].toInt() );
+			auto& h = hex_[ hy ][ hx ];
+			h.type_ = Hex::Type( parts[ index++ ].toInt() );
+			h.number_ = Hex::Type( parts[ index++ ].toInt() );
 		}
 	}
 
@@ -401,6 +409,10 @@ void Board::initFromStrings( const QStringList& parts ) {
 			n.harborType_ = Hex::Type( parts[ index++ ].toInt() );
 		}
 	}
+
+	index++; // robber
+	robber_ = { parts[ index ].toInt(), parts[ index + 1 ].toInt() };
+	index += 2;
 }
 
 
